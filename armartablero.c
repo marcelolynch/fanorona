@@ -1,40 +1,50 @@
 #include <stdio.h>
+#include "fanorona.h"
 #include "getnum.h"
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 
-typedef struct	{	char ocupante; /* 'B' blanco o 'N' negro o 'o' */
-					char tipo;  /* 'D' debil o 'F' fuerte */
-					
-				}tCasilla;
-				
-typedef tCasilla ** tablero;
+#define MIN_DIM 3
+#define MAX_DIM 19
 
+#define ES_IMPAR(a) ((a) % 2 == 1)
+#define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
 
 void PedirDimensiones(int *filas, int *columnas)
-{	int cantfils, cantcols, impar;
+{	tFlag hayError;
+	int cantfils, cantcols, impar;
+	char str[2];
 	char c;
-	do	{	impar=1;
-			printf("Por favor ingrese dimensiones validas para tablero con el que desea Jugar\n");
-			cantfils= getint("Cantidad de Filas (impar entre 3 y 19) : ");
-			cantcols= getint("Cantidad de Columnas (impar entre 3 y 19):  ");
+
+	do {
+		hayError = 0;
+		printf("Por favor, ingrese las dimensiones del tablero con el que desea jugar:\n");
+
+		do {
+			if (hayError)
+				printf("No ingresó dimensiones correctas. Ingrese nuevamente:\n");
+			cantfils= getint("Cantidad de Filas (impar entre %d y %d): ", MIN_DIM, MAX_DIM); 
+			cantcols= getint("Cantidad de Columnas (impar entre %d y %d): ", MIN_DIM, MAX_DIM);
 			putchar('\n');
-			if( cantfils %2 == 1 && cantcols % 2==1 && cantfils<=cantcols)
-				{	if (cantfils >=3 && cantfils <=19 && cantcols >0 && cantcols <=19 )
-					{	printf("Las dimensiones del tablero seran : %d x %d\n\n", cantfils,cantcols);
-						do{	printf("¿Desea cambiarlas? \nIngrese S si lo desea o N para jugar con esas dimensiones\n");
-						c=toupper(getchar());
-				
-						} while( c!= 'S' && c!= 'N');
-					}
-				}
-			else impar=0;
-		}
-		while (cantfils <3 || cantfils >19 || cantcols <3 || cantcols >19 || impar== 0 || c== 'S' || cantfils>cantcols );
-	
-			
-	
+			hayError = 1;
+		} while ( !ES_IMPAR(cantfils) || !ES_IMPAR(cantcols) || !ES_DIM_VALIDA(cantfils, cantcols) || cantfils > cantcols);
+		/* OJO si se ingresan mal las filas pide columnas igual. */
+
+		hayError = 0;
+
+		printf("Las dimensiones del tablero serán: %d x %d\n\n", cantfils,cantcols);
+		printf("¿Desea continuar?\nIngrese S si es así o N para ingresar nuevas dimensiones.\n");
+
+		do {
+			if (hayError)
+				printf("Ingrese unicamente S o N seguido de un ENTER\n");
+			getlinea(str, 2);
+			c = toupper(str[0]);	
+		} while( c!= 'S' && c!= 'N');	
+
+	} while (c == 'N'); /* se desean ingresar nuevas dimensiones */
+
 	*filas=cantfils;
 	*columnas=cantcols;
 	return;
@@ -44,18 +54,16 @@ tCasilla** GenerarTablero( int fils, int cols)
 {	int i, j, hubocentro=0, ultima=1;
 	tCasilla **tablero;
 
-	tablero=malloc( fils *sizeof(tCasilla));
-	
-	if (tablero== NULL)		
-			return NULL;		/*FALTA LA FUNCION FREE */
+	tablero=malloc( fils *sizeof(int));
+
+	if (tablero== NULL)
+		return NULL;		/*FALTA LA FUNCION FREE */
 		
-	
-	
 	for( i=0; i< fils; i++)
 	{	tablero[i]= malloc(cols*sizeof(tCasilla));
 		
 		if( tablero[i] ==NULL)	
-			return NULL;									/*FALTA LA FUNCION FREE */
+			return NULL;				/*FALTA LA FUNCION FREE */
 		
 		
 		for( j=0; j<cols; j++)
@@ -69,25 +77,25 @@ tCasilla** GenerarTablero( int fils, int cols)
 				
 				if ( i< fils/2)
 					tablero[i][j].ocupante = 'N';
-				else if ( i > (fils)/2)
-					tablero[i][j]. ocupante= 'B';
-				else if ( i == (fils)/2)
-					{	if (j==0)
-							tablero[i][j]. ocupante= 'N';
-						else if ( j== cols/2)
-							{	tablero[i][j].ocupante= '0';
-								ultima= !(ultima);
-							}
-						else if( ultima==0)
-								tablero[i][j].ocupante= 'B';
-						else if (ultima==1)
-								tablero[i][j].ocupante= 'N';
-						
-						ultima=!(ultima);
+				else if ( i > fils/2)
+					tablero[i][j].ocupante= 'B';
+				else if ( i == fils/2)
+				{
+					if (j==0)
+						tablero[i][j].ocupante= 'N';
+					else if ( j== cols/2)
+					{	
+						tablero[i][j].ocupante= '0';
+						ultima= !(ultima);
 					}
+					else if( ultima==0)
+						tablero[i][j].ocupante= 'B';
+					else if (ultima==1)
+						tablero[i][j].ocupante= 'N';
+					ultima=!(ultima);
+				}
 				
-			}
-		
+			}		
 	}
 	return tablero;
 }
