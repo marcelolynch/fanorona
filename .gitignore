@@ -30,3 +30,8 @@
 
 # Debug files
 *.dSYM/
+
+#Temp files
+*.swp
+.~
+thumbs.db
