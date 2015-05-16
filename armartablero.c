@@ -54,38 +54,34 @@ void PedirDimensiones(int *filas, int *columnas)
 
 void rellenarTablero(tTablero tablero, int fils, int cols){
 	int i,j;
-	int ultima=1;
+	int postCentral=0;
 	for(i=0; i<fils ; i++){
 	for(j=0; j<cols; j++)
 		{	
-		if( i== 0 || i== fils-1 || j==0 || j==cols-1)
-			tablero[i][j].tipo= 'D';
-		else if ( (i%2== 0 && j%2==0) || (i%2==1 && j%2==1))
-			tablero[i][j].tipo= 'F';
-		else tablero[i][j].tipo= 'D';
+		if (i%2 == j%2)
+			tablero[i][j].tipo= FUERTE;
+		else
+			 tablero[i][j].tipo= DEBIL;
+
+		
+		if (i < fils/2)
+			tablero[i][j].ocupante = NEGRO;
+		else if (i > fils/2)
+			tablero[i][j].ocupante= BLANCO;
 	
-		
-		if ( i < fils/2)
-			tablero[i][j].ocupante = 'N';
-		else if ( i > fils/2)
-			tablero[i][j].ocupante= 'B';
-		else if ( i == fils/2)
-		{
-			if (j==0)
-				tablero[i][j].ocupante= 'N';
-			else if ( j== cols/2)
-			{	
-				tablero[i][j].ocupante= 'o';
-				ultima= !(ultima);
-			}
-			else if( ultima==0)
-				tablero[i][j].ocupante= 'B';
-			else if (ultima==1)
-				tablero[i][j].ocupante= 'N';
-			ultima=!(ultima);
+		else if (i == fils/2 && j != cols/2) /*Fila central (menos casilla central) */
+		{	
+			if (j%2==0)
+				tablero[i][j].ocupante = postCentral ? BLANCO:NEGRO;
+			else
+				tablero[i][j].ocupante = postCentral ? NEGRO:BLANCO;
+			
 		}
-		
-	}		
+		else{	/*Casilla central*/
+			tablero[i][j].ocupante= VACIO;
+			postCentral=1;
+		}	
+	}	
 	}
 	
 	return;
@@ -117,7 +113,7 @@ tTablero GenerarTablero( int fils, int cols)
 		
 		if(tablero[i] ==NULL){
 			liberarTablero(tablero, i);
-			return NULL;				/*FALTA LA FUNCION FREE */
+			return NULL;
 		}
 	}
 
@@ -130,13 +126,13 @@ tTablero GenerarTablero( int fils, int cols)
 
 
 
-void ImprimirTablero ( tCasilla ** tablero, int fils, int cols)
+void ImprimirTablero ( tTablero tablero, int fils, int cols)
 {	int i, j;
 
 		for(i=0; i<fils; i++)
 		{	putchar('\n');
 			for(j=0; j<cols; j++)
-				{	if (tablero[i][j].tipo== 'D')
+				{	if (tablero[i][j].tipo==DEBIL)
 						printf("%c   ", tolower(tablero[i][j].ocupante));
 					else 
 						printf("%c   ", tablero[i][j].ocupante);
