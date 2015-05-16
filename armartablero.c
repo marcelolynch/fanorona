@@ -13,8 +13,9 @@
 
 int getlinea(char str[], int dim);
 
-void PedirDimensiones(int *filas, int *columnas)
-{	tFlag hayError;
+void PedirDimensiones(int *filas, int *columnas){
+	/*FUNCION DEL FRONT END*/
+	tFlag hayError;
 	int cantfils, cantcols, impar;
 	char str[2];
 	char c;
@@ -52,6 +53,8 @@ void PedirDimensiones(int *filas, int *columnas)
 	return;
 }
 
+/* LAS FUNCIONES QUE SIGUEN SON DEL BACK END */
+
 void rellenarTablero(tTablero tablero, int fils, int cols){
 	int i,j;
 	int postCentral=0;
@@ -72,14 +75,14 @@ void rellenarTablero(tTablero tablero, int fils, int cols){
 		else if (i == fils/2 && j != cols/2) /*Fila central (menos casilla central) */
 		{	
 			if (j%2==0)
-				tablero[i][j].ocupante = postCentral ? BLANCO:NEGRO;
+				tablero[i][j].ocupante = postCentral ? BLANCO:NEGRO; /*No hay simetria con respecto a la central; se invierte la paridad luego de la misma*/
 			else
 				tablero[i][j].ocupante = postCentral ? NEGRO:BLANCO;
 			
 		}
 		else{	/*Casilla central*/
 			tablero[i][j].ocupante= VACIO;
-			postCentral=1;
+			postCentral=1; /*Relevante para las otras piezas*/
 		}	
 	}	
 	}
@@ -123,19 +126,20 @@ tTablero GenerarTablero( int fils, int cols)
 
 }
 
+/* FIN BACK END*/
 
-
-
+/*LAS FUNCIONES QUE SIGUEN SON DE FRONT END*/
 void ImprimirTablero ( tTablero tablero, int fils, int cols)
 {	int i, j;
+	static char idColor[]={'B', 'N', 'O'} /*BLANCO, NEGRO, VACIO*/
 
-		for(i=0; i<fils; i++)
+	for(i=0; i<fils; i++)
 		{	putchar('\n');
 			for(j=0; j<cols; j++)
 				{	if (tablero[i][j].tipo==DEBIL)
-						printf("%c   ", tolower(tablero[i][j].ocupante));
+						printf("%c   ", tolower( idColor[ tablero[i][j].ocupante ] ); /*BLANCO=0, NEGRO=1, VACIO=2*/
 					else 
-						printf("%c   ", tablero[i][j].ocupante);
+						printf("%c   ", idColor[ tablero[i][j].ocupante ]);
 				}
 		}
 		putchar('\n');
