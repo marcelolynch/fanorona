@@ -1,3 +1,7 @@
+#ifndef __fanorona_header
+
+#define __fanorona_header
+
 typedef struct {
 	char tipo; /* debil o fuerte */
 	char ocupante; /* blanco, negro o vacio*/
@@ -19,3 +23,5 @@ typedef tCasilla ** tTablero;
 
 enum tJugada {ERROR = -1, QUIT, SAVE, UNDO, MOV};
 enum tCaptura {NINGUNO=0, WITHDRAWAL, APPROACH};
+
+#endif
