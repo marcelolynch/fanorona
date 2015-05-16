@@ -131,13 +131,13 @@ tTablero GenerarTablero( int fils, int cols)
 /*LAS FUNCIONES QUE SIGUEN SON DE FRONT END*/
 void ImprimirTablero ( tTablero tablero, int fils, int cols)
 {	int i, j;
-	static char idColor[]={'B', 'N', 'O'} /*BLANCO, NEGRO, VACIO*/
+	static char idColor[]={'B', 'N', 'O'}; /*BLANCO, NEGRO, VACIO*/
 
 	for(i=0; i<fils; i++)
 		{	putchar('\n');
 			for(j=0; j<cols; j++)
 				{	if (tablero[i][j].tipo==DEBIL)
-						printf("%c   ", tolower( idColor[ tablero[i][j].ocupante ] ); /*BLANCO=0, NEGRO=1, VACIO=2*/
+						printf("%c   ", tolower( idColor[ tablero[i][j].ocupante ] )); /*BLANCO=0, NEGRO=1, VACIO=2*/
 					else 
 						printf("%c   ", idColor[ tablero[i][j].ocupante ]);
 				}
