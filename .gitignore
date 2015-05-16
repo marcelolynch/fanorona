@@ -33,6 +33,7 @@
 
 #Temp files
 *.swp
+*.swo
 *.swc
 .~
 thumbs.db
