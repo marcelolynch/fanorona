@@ -113,21 +113,24 @@ static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *
 static tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	int c, i;
 	const char *p;
-	tFlag estado = OK;
+	tFlag esValido = OK;
 
 	if (str[0] != 'M' || str[1] != ' ')
 		return ERROR;
+
 	p = &str[2]; /* direccion del supuesto primer corchete '[' */
 
 	p = leerCoord(p, &(mov->coordOrig));
-	p = leerCoord(p, &(mov->coordDest));
+
+	if (p != NULL)
+		p = leerCoord(p, &(mov->coordDest));
 
 	if (p != NULL && *p == '\0') /* se ingresó un movimiento sin aclaración de captura */
 		mov->tipoMov = NINGUNO;
 	else if (p != NULL)
-		estado = leerCaptura(p, mov);
+		esValido = leerCaptura(p, mov);
 
-	if (p != NULL && estado == OK)
+	if (p != NULL && esValido == OK)
 		return MOV;
 
 	return ERROR;
@@ -144,13 +147,16 @@ static tFlag leerCaptura (const char str[], tMovimiento *mov) {
 /* devuelve la dirección siguiente al último carácter leído o NULL */
 static const char *leerCoord (const char str[], tCoordenada *coord) {
 	int num=0;
+	const char *p = str;
 	int i, c, filAux;
 	tFlag estado=OK, esPrimerComa=1, seEscribioNum=0;
 
-	if (str == NULL || str[0] != '[')
+	if (p[0] != '[') {
 		estado = ERROR;
+		p = NULL;
+	}
 
-	for (i=1; estado != ERROR && (c=str[i])!=']' && c!='\0'; i++) {
+	for (i=1; estado != ERROR && (c=p[i])!=']' && c!='\0'; i++) {
 		if (isdigit(c)) {
 			num = num * 10 + c - '0';
 			seEscribioNum = 1;
@@ -161,17 +167,19 @@ static const char *leerCoord (const char str[], tCoordenada *coord) {
 			esPrimerComa = 0;
 			seEscribioNum = 0;
 			}
-		else
+		else {
 			estado = ERROR;
+			p = NULL;
+		}
 	}
 	if (estado != ERROR && (c == '\0' || esPrimerComa || !seEscribioNum))
-		estado = ERROR;
+		p = NULL;
 
-	if (estado != ERROR) { 
+	else if (estado != ERROR) { 
 		coord->fil = filAux;
 		coord->col = num;
-		return &str[++i]; /* direccion del carácter siguiente al ']' */
+		p = &p[++i]; /* direccion del carácter siguiente al ']' */
 	}
 
-	return NULL; /* es ERROR */
+	return p;
 }
