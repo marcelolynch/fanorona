@@ -52,9 +52,7 @@ void PedirDimensiones(int *filas, int *columnas)
 	return;
 }
 
-
-
-void rellenarTablero(tCasilla ** tablero, int fils, int cols){
+void rellenarTablero(tTablero tablero, int fils, int cols){
 	int i,j;
 	int ultima=1;
 	for(i=0; i<fils ; i++){
@@ -93,21 +91,34 @@ void rellenarTablero(tCasilla ** tablero, int fils, int cols){
 	return;
 }
 
-tCasilla** GenerarTablero( int fils, int cols)
+void liberarTablero(tTablero tablero, int n){
+	
+	int i;
+	for(i=0; i<n ; i++)
+		free(tablero[i]);
+	
+	free(tablero);
+			  
+}
+
+tTablero GenerarTablero( int fils, int cols)
 {	int i;
+	
 	tCasilla **tablero;
 
-	tablero=malloc( fils *sizeof(int));
+	tablero=malloc(fils *sizeof(*tablero));
 
-	if (tablero== NULL)
-		return NULL;		/*FALTA LA FUNCION FREE */
+	if (tablero == NULL)
+		return NULL;
 		
 	for(i=0; i< fils; i++)
-	{	tablero[i]= malloc(cols*sizeof(tCasilla));
+	{	
+		tablero[i]= malloc(cols*sizeof(tCasilla));
 		
-		if( tablero[i] ==NULL)	
+		if(tablero[i] ==NULL){
+			liberarTablero(tablero, i);
 			return NULL;				/*FALTA LA FUNCION FREE */
-		
+		}
 	}
 
 	rellenarTablero(tablero, fils, cols);
