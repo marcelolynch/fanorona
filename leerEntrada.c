@@ -65,7 +65,6 @@ void imprimirMov (tMovimiento *mov) {
 
 /*FIN FUNCIONES DE TESTEO */
 
-
 int getlinea(char str[], int dim) {
 	int c, i;
 
@@ -91,7 +90,7 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 
 
 static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *nombre) {
-	char jugada = ERROR;
+	tFlag jugada = ERROR;
 
 	if (dim == MIN_STR) {
 		if (strcmp(str, "quit") == 0)
@@ -119,7 +118,7 @@ static tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	if (str[0] != 'M' || str[1] != ' ')
 		return ERROR;
 	p = &str[2]; /* direccion del supuesto primer corchete '[' */
-	
+
 	p = leerCoord(p, &(mov->coordOrig));
 	p = leerCoord(p, &(mov->coordDest));
 
