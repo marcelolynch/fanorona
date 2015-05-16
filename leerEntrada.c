@@ -1,3 +1,8 @@
+
+/*		FUNCIONES DEL FRONT END 
+**	Piden jugada al usuario y validan el formato
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -10,7 +15,7 @@
 #define MIN_MOV 12
 #define MAX_MOV 19
 
-#define MAX_NOMBRE (MAX_STR-6) /* menos 6 pues "save " ocupa 5 y el '\0' en total da 6 */
+#define MAX_NOMBRE (MAX_STR-6) /*Maxima logitud para <filename>: se resta 6 pues "save " ocupa 5 y el '\0' en total da 6 */
 #define OK 1
 
 tFlag pedirJugada(tMovimiento *mov, char *nombre); 
@@ -21,6 +26,9 @@ static tFlag leerCaptura (const char str[], tMovimiento *mov);
 static const char *leerCoord (const char str[], tCoordenada *coord);
 
 void imprimirMov (tMovimiento *mov); /* TEMP */
+
+
+/* MAIN / FUNCIONES PARA TESTEO */
 
 int main(void) {
 	char str[MAX_NOMBRE];
@@ -41,6 +49,8 @@ int main(void) {
 	return 0;
 }
 
+
+
 void imprimirMov (tMovimiento *mov) {
 	printf("Origen: [%d, %d]\nDestino: [%d, %d]\n", mov->coordOrig.fil, mov->coordOrig.col, mov->coordDest.fil, mov->coordOrig.col);
 	printf("Tipo Captura: ");
@@ -48,10 +58,13 @@ void imprimirMov (tMovimiento *mov) {
 	case NINGUNO: printf("no especificó captura\n"); break;
 	case APPROACH: printf("acercamiento\n"); break;
 	case WITHDRAWAL: printf("alejamiento\n"); break;
-	default: printf("TOMAS HICISTE ALGO MAL\n"); break;
+	default: printf("TOMAS HICISTE ALGO MAL\n"); break; /* LOL --Chelo */
 	}
 	return;
 }
+
+/*FIN FUNCIONES DE TESTEO */
+
 
 int getlinea(char str[], int dim) {
 	int c, i;
