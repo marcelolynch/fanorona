@@ -11,6 +11,8 @@
 #define ES_IMPAR(a) ((a) % 2 == 1)
 #define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
 
+int getlinea(char str[], int dim);
+
 void PedirDimensiones(int *filas, int *columnas)
 {	tFlag hayError;
 	int cantfils, cantcols, impar;
@@ -50,8 +52,49 @@ void PedirDimensiones(int *filas, int *columnas)
 	return;
 }
 
+
+
+void rellenarTablero(tCasilla ** tablero, int fils, int cols){
+	int i,j;
+	int ultima=1;
+	for(i=0; i<fils ; i++){
+	for(j=0; j<cols; j++)
+		{	
+		if( i== 0 || i== fils-1 || j==0 || j==cols-1)
+			tablero[i][j].tipo= 'D';
+		else if ( (i%2== 0 && j%2==0) || (i%2==1 && j%2==1))
+			tablero[i][j].tipo= 'F';
+		else tablero[i][j].tipo= 'D';
+	
+		
+		if ( i < fils/2)
+			tablero[i][j].ocupante = 'N';
+		else if ( i > fils/2)
+			tablero[i][j].ocupante= 'B';
+		else if ( i == fils/2)
+		{
+			if (j==0)
+				tablero[i][j].ocupante= 'N';
+			else if ( j== cols/2)
+			{	
+				tablero[i][j].ocupante= 'o';
+				ultima= !(ultima);
+			}
+			else if( ultima==0)
+				tablero[i][j].ocupante= 'B';
+			else if (ultima==1)
+				tablero[i][j].ocupante= 'N';
+			ultima=!(ultima);
+		}
+		
+	}		
+	}
+	
+	return;
+}
+
 tCasilla** GenerarTablero( int fils, int cols)
-{	int i, j, hubocentro=0, ultima=1;
+{	int i;
 	tCasilla **tablero;
 
 	tablero=malloc( fils *sizeof(int));
@@ -59,46 +102,22 @@ tCasilla** GenerarTablero( int fils, int cols)
 	if (tablero== NULL)
 		return NULL;		/*FALTA LA FUNCION FREE */
 		
-	for( i=0; i< fils; i++)
+	for(i=0; i< fils; i++)
 	{	tablero[i]= malloc(cols*sizeof(tCasilla));
 		
 		if( tablero[i] ==NULL)	
 			return NULL;				/*FALTA LA FUNCION FREE */
 		
-		
-		for( j=0; j<cols; j++)
-			{	
-				if( i== 0 || i== fils-1 || j==0 || j==cols-1)
-					tablero[i][j].tipo= 'D';
-				else if ( (i%2== 0 && j%2==0) || (i%2==1 && j%2==1))
-					tablero[i][j].tipo= 'F';
-				else tablero[i][j].tipo= 'D';
-			
-				
-				if ( i< fils/2)
-					tablero[i][j].ocupante = 'N';
-				else if ( i > fils/2)
-					tablero[i][j].ocupante= 'B';
-				else if ( i == fils/2)
-				{
-					if (j==0)
-						tablero[i][j].ocupante= 'N';
-					else if ( j== cols/2)
-					{	
-						tablero[i][j].ocupante= '0';
-						ultima= !(ultima);
-					}
-					else if( ultima==0)
-						tablero[i][j].ocupante= 'B';
-					else if (ultima==1)
-						tablero[i][j].ocupante= 'N';
-					ultima=!(ultima);
-				}
-				
-			}		
 	}
+
+	rellenarTablero(tablero, fils, cols);
+	
 	return tablero;
+
 }
+
+
+
 
 void ImprimirTablero ( tCasilla ** tablero, int fils, int cols)
 {	int i, j;
