@@ -28,6 +28,7 @@ static tFlag leerCaptura (const char str[], tMovimiento *mov);
 static const char *leerCoord (const char str[], tCoordenada *coord);
 static const char *salteaEspacios (const char str[]); /* devuelve la dirección del primer carácter distitno de un isspace o NULL */
 void imprimirMov (tMovimiento *mov); /* TEMP */
+void imprimirError(tFlag error); /* TEMP: mover a un .h luego */
 
 
 /* MAIN / FUNCIONES PARA TESTEO */
@@ -83,17 +84,22 @@ int getlinea(char str[], int dim) {
 tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 	int n;
 	char str[MAX_STR];
+	tFlag jugada=OK;
 
 	printf("Ingrese una jugada:\n");  /* TEMP */
 	
-	n = getlinea(str, MAX_STR);
+	do {
+		n = getlinea(str, MAX_STR);
+		jugada = validarFormato (str, n, mov, nombre);
+		imprimirError(jugada);
+	} while (jugada < 0); /* hay algún tipo de error en el formato */
 
-	return validarFormato (str, n, mov, nombre);
+	return jugada;
 }
 
 
 static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *nombre) {
-	tFlag jugada = ERROR;
+	tFlag jugada = ERR_FMT;
 
 	if (dim == MIN_STR) {
 		if (strcmp(str, "quit") == 0)
@@ -109,10 +115,10 @@ static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *
 			jugada = SAVE;
 		}
 		else
-			jugada = ERROR; /* se ingresaron solo espacios como nombre */
+			jugada = ERR_FMT_SAVE; /* se ingresaron solo espacios como nombre */
 	}
 
-	else if (dim >= MIN_MOV && dim <= MAX_MOV)
+	else if (dim <= MAX_MOV)
 		jugada = validarMovFormato (str, mov);
 
 	return jugada;
@@ -132,7 +138,7 @@ static tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	tFlag esValido = OK;
 
 	if (str[0] != 'M' || str[1] != ' ')
-		return ERROR;
+		return ERR_FMT;
 
 	p = &str[2]; /* direccion del supuesto primer corchete '[' */
 
@@ -149,7 +155,9 @@ static tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	if (p != NULL && esValido == OK)
 		return MOV;
 
-	return ERROR;
+	if (p == NULL)
+		return ERR_FMT_MOV1;
+	return ERR_FMT_MOV2; /* se introdujo mal el tipo de captura unicamente */
 }
 
 static tFlag leerCaptura (const char str[], tMovimiento *mov) {
@@ -160,7 +168,7 @@ static tFlag leerCaptura (const char str[], tMovimiento *mov) {
 	return OK;
 }
 
-/* devuelve la dirección siguiente al último carácter leído o NULL */
+/* devuelve la dirección siguiente al último carácter leído o NULL en caso de error */
 static const char *leerCoord (const char str[], tCoordenada *coord) {
 	int num=0;
 	const char *p = str;
