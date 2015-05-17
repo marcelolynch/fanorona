@@ -7,7 +7,7 @@ tCaptura hayComida (char jugador, tTablero tablero, tCoordenada origen, tCoorden
 	char co=origen.col;
 	char fd=destino.fila;
 	char cd=destino.col;
-	char enemigo = -jugador;
+	char enemigo = !jugador;
 
 	signed char dirFil, dirCol;
 	tFlag hayAppr=0, hayWithdr=0;
