@@ -3,6 +3,8 @@
 **	Piden jugada al usuario y validan el formato
 */
 
+/* cosas pendientes: case-sensitivity */
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -15,7 +17,7 @@
 #define MIN_MOV 12
 #define MAX_MOV 19
 
-#define MAX_NOMBRE (MAX_STR-6) /*Maxima logitud para <filename>: se resta 6 pues "save " ocupa 5 y el '\0' en total da 6 */
+#define MAX_NOMBRE (MAX_STR-LONG_SAVE-1) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -1 por el '\0' */
 #define OK 1
 
 tFlag pedirJugada(tMovimiento *mov, char *nombre); 
@@ -24,7 +26,7 @@ static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *
 static tFlag validarMovFormato (const char str[], tMovimiento *mov);
 static tFlag leerCaptura (const char str[], tMovimiento *mov);
 static const char *leerCoord (const char str[], tCoordenada *coord);
-
+static const char *salteaEspacios (const char str[]); /* devuelve la dirección del primer carácter distitno de un isspace o NULL */
 void imprimirMov (tMovimiento *mov); /* TEMP */
 
 
@@ -101,14 +103,27 @@ static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *
 	}
 
 	else if (dim > LONG_SAVE && dim < MAX_STR && strncmp(str, "save ", LONG_SAVE) == 0) {
-		strcpy(nombre, str+LONG_SAVE); /* OJO puede ingresar solo espacios como nombre o espacios en el nombre? */
-		jugada = SAVE;
+		const char *nuevoNombre = salteaEspacios(str+LONG_SAVE);
+		if (nuevoNombre != NULL) {
+			strcpy(nombre, nuevoNombre);
+			jugada = SAVE;
+		}
+		else
+			jugada = ERROR; /* se ingresaron solo espacios como nombre */
 	}
 
 	else if (dim >= MIN_MOV && dim <= MAX_MOV)
 		jugada = validarMovFormato (str, mov);
 
 	return jugada;
+}
+
+static const char *salteaEspacios (const char str[]) {
+	while (isspace(*str))
+		str++;
+	if (*str == '\0')
+		return NULL;
+	return str;
 }
 
 static tFlag validarMovFormato (const char str[], tMovimiento *mov) {

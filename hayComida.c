@@ -2,7 +2,7 @@
 
 #include <fanorona.h>
 
-tFlag hayComida (char jugador, tTablero tablero, tCoordenada origen, tCoordenada destino) { /* las coordenada podrian ser punteros */
+tCaptura hayComida (char jugador, tTablero tablero, tCoordenada origen, tCoordenada destino) { /* las coordenada podrian ser punteros */
 	char fo = origen.fila;
 	char co=origen.col;
 	char fd=destino.fila;

@@ -22,7 +22,7 @@ typedef char tFlag;
 typedef tCasilla ** tTablero;
 
 enum tJugada {ERROR = -1, QUIT, SAVE, UNDO, MOV};
-enum tCaptura {NINGUNO=0, WITHDRAWAL, APPROACH}; 
+enum tCaptura {NINGUNO=0, WITHDRAWAL, APPROACH, AMBOS}; 
 enum tDireccion {N=0, S, E, O, NE, NO, SE, SO};
 
 #define BLANCO 0

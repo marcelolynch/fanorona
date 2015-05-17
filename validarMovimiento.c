@@ -53,11 +53,12 @@ int tJugada validarMovimiento(char jugador, tTablero tablero,tMovimiento movimie
 	enum tDireccion direccionMov;
 	int i;
 	
-	static * tCasilla casillasVisitadas[MAXMOVS]; /* creo q es mejor que sea tCoordenada y vamos guardando las coordOrigen --Tomás*/
+	static * tCasilla casillasVisitadas[MAXMOVS]; 
 
-	for(i=0; casillasVisitadas[i]!=NULL ;i++)		/*En casillasVisitadas se guardara la direccion de las casillas visitadas. Cada ves que cambia el jugador, hay que limpiarlo */
-		casillasVisitadas[i]=NULL;
-		
+	if (limpiar) {
+		for(i=0; casillasVisitadas[i]!=NULL ;i++)	/*En casillasVisitadas se guardara la direccion de las casillas visitadas. Cada ves que cambia el jugador, hay que limpiarlo */
+			casillasVisitadas[i]=NULL;
+	}
 
 	if(jugador != tablero[fo][co].ocupante)
 		return INCORRECTO; /* No puede mover la ficha porque no es suya */
@@ -66,7 +67,7 @@ int tJugada validarMovimiento(char jugador, tTablero tablero,tMovimiento movimie
 		return INCORRECTO; /* No puede mover porque la casilla no esta vacia */
 
 	for(i=0; casillasVisitadas[i] != NULL ;i++)
-		if(&tablero[fd][cd] == casillasTocadas[i]) /* podríamos poner movimiento.coordDest == casillasTocadas[i] --Tomás */
+		if(&tablero[fd][cd] == casillasTocadas[i])
 			return INCORRECTO;	/*No puede moverse ahi porque ya estuvo antes en este turno */
 
 	direccionMov=direccionDestino(movimiento.coordOrig, movimiento.coordDest);
