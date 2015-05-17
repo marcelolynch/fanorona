@@ -13,7 +13,7 @@
 
 int getlinea(char str[], int dim);
 
-void PedirDimensiones(int *filas, int *columnas){
+void PedirDimensiones(tTablero * tablero){
 	/*FUNCION DEL FRONT END*/
 	tFlag hayError;
 	int cantfils, cantcols, impar;
@@ -48,40 +48,40 @@ void PedirDimensiones(int *filas, int *columnas){
 
 	} while (c == 'N'); /* se desean ingresar nuevas dimensiones */
 
-	*filas=cantfils;
-	*columnas=cantcols;
+	tablero->filas=cantfils;
+	tablero->cols=cantcols;
 	return;
 }
 
 /* LAS FUNCIONES QUE SIGUEN SON DEL BACK END */
 
-void rellenarTablero(tTablero tablero, int fils, int cols){
+void rellenarTablero(tTablero * tablero){
 	int i,j;
 	int postCentral=0;
-	for(i=0; i<fils ; i++){
-	for(j=0; j<cols; j++)
+	for(i=0; i<tablero->filas ; i++){
+	for(j=0; j<tablero->cols; j++)
 		{	
 		if (i%2 == j%2)
-			tablero[i][j].tipo= FUERTE;
+			tablero->matriz[i][j].tipo= FUERTE;
 		else
-			 tablero[i][j].tipo= DEBIL;
+			 tablero->matriz[i][j].tipo= DEBIL;
 
 		
-		if (i < fils/2)
-			tablero[i][j].ocupante = NEGRO;
-		else if (i > fils/2)
-			tablero[i][j].ocupante= BLANCO;
+		if (i < tablero->filas/2)
+			tablero->matriz[i][j].ocupante = NEGRO;
+		else if (i > tablero->filas/2)
+			tablero->matriz[i][j].ocupante= BLANCO;
 	
-		else if (i == fils/2 && j != cols/2) /*Fila central (menos casilla central) */
+		else if (i == tablero->filas/2 && j != tablero->cols/2) /*Fila central (menos casilla central) */
 		{	
 			if (j%2==0)
-				tablero[i][j].ocupante = postCentral ? BLANCO:NEGRO; /*No hay simetria con respecto a la central; se invierte la paridad luego de la misma*/
+				tablero->matriz[i][j].ocupante = postCentral ? BLANCO:NEGRO; /*No hay simetria con respecto a la central; se invierte la paridad luego de la misma*/
 			else
-				tablero[i][j].ocupante = postCentral ? NEGRO:BLANCO;
+				tablero->matriz[i][j].ocupante = postCentral ? NEGRO:BLANCO;
 			
 		}
 		else{	/*Casilla central*/
-			tablero[i][j].ocupante= VACIO;
+			tablero->matriz[i][j].ocupante= VACIO;
 			postCentral=1; /*Relevante para las otras piezas*/
 		}	
 	}	
@@ -90,37 +90,39 @@ void rellenarTablero(tTablero tablero, int fils, int cols){
 	return;
 }
 
-void liberarTablero(tTablero tablero, int n){
+void liberarTablero(tTablero * tablero, int n){
 	
 	int i;
 	for(i=0; i<n ; i++)
-		free(tablero[i]);
+		free(tablero->matriz[i]);
 	
-	free(tablero);
+	free(tablero->matriz);
 			  
 }
 
-tTablero GenerarTablero( int fils, int cols)
+tTablero GenerarTablero(int fils, int cols)
 {	int i;
 	
-	tCasilla **tablero;
+	tTablero tablero;
+	
+	tablero.filas=fils;
+	tablero.cols=cols;
+	tablero.matriz=malloc(fils *sizeof(*tablero.matriz));
 
-	tablero=malloc(fils *sizeof(*tablero));
-
-	if (tablero == NULL)
-		return NULL;
+	if (tablero.matriz == NULL)
+		return tablero;
 		
 	for(i=0; i< fils; i++)
 	{	
-		tablero[i]= malloc(cols*sizeof(tCasilla));
+		tablero.matriz[i]= malloc(cols*sizeof(tCasilla));
 		
-		if(tablero[i] ==NULL){
-			liberarTablero(tablero, i);
-			return NULL;
+		if(tablero.matriz[i] ==NULL){
+			liberarTablero(&tablero, i);
+			return tablero;
 		}
 	}
 
-	rellenarTablero(tablero, fils, cols);
+	rellenarTablero(&tablero);
 	
 	return tablero;
 
@@ -129,17 +131,17 @@ tTablero GenerarTablero( int fils, int cols)
 /* FIN BACK END*/
 
 /*LAS FUNCIONES QUE SIGUEN SON DE FRONT END*/
-void ImprimirTablero ( tTablero tablero, int fils, int cols)
+void ImprimirTablero ( tTablero * tablero )
 {	int i, j;
 	static char idColor[]={'B', 'N', 'O'}; /*BLANCO, NEGRO, VACIO*/
 
-	for(i=0; i<fils; i++)
+	for(i=0; i<tablero->filas; i++)
 		{	putchar('\n');
-			for(j=0; j<cols; j++)
-				{	if (tablero[i][j].tipo==DEBIL)
-						printf("%c   ", tolower( idColor[ tablero[i][j].ocupante ] )); /*BLANCO=0, NEGRO=1, VACIO=2*/
+			for(j=0; j<tablero->cols; j++)
+				{	if (tablero->matriz[i][j].tipo==DEBIL)
+						printf("%c   ", tolower( idColor[ tablero->matriz[i][j].ocupante ] )); /*BLANCO=0, NEGRO=1, VACIO=2*/
 					else 
-						printf("%c   ", idColor[ tablero[i][j].ocupante ]);
+						printf("%c   ", idColor[ tablero->matriz[i][j].ocupante ]);
 				}
 		}
 		putchar('\n');
@@ -149,17 +151,17 @@ void ImprimirTablero ( tTablero tablero, int fils, int cols)
 
 /*main para probarlas */
 int main (void)
-{	int fils, cols,c;
-	tCasilla ** tablero;
+{	int c;
+	tTablero tablero;
 	int i,j;
 	
-	PedirDimensiones(&fils,&cols);
+	PedirDimensiones(&tablero);
 	
 	printf("Las dimensiones son : %d x %d \n", fils,cols);
 	
-	tablero= GenerarTablero (fils,cols);
-	if (tablero != NULL)
-		ImprimirTablero(tablero,fils,cols);
+	tablero= GenerarTablero(tablero.filas,tablero.cols);
+	if (tablero.matriz != NULL)
+		ImprimirTablero(&tablero);
 	
 	
 	return 0;

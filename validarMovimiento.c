@@ -37,7 +37,7 @@ static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino)
 
 }
 
-int tJugada validarMovimiento(char jugador, tTablero tablero,tMovimiento movimiento ,enum tDireccion * direccionPrevia, tFlag limpiar){
+int tJugada validarMovimiento(char jugador, tTablero tablero, int fils, int cols, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar){
 /*TODAVIA NO TERMINE DE ESCRIBIR ESTO. CREO QUE FALTAN COSAS*/ /* me parece que falta ver si se va de los limites del tablero 
 							       ** también creo que debería devolver qué tipo de captura es, así
 							       ** en caso de que sea ambiguo, ya preguntas si se trata de A o W*/	
@@ -60,6 +60,7 @@ int tJugada validarMovimiento(char jugador, tTablero tablero,tMovimiento movimie
 			casillasVisitadas[i]=NULL;
 	}
 
+	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >
 	if(jugador != tablero[fo][co].ocupante)
 		return INCORRECTO; /* No puede mover la ficha porque no es suya */
 

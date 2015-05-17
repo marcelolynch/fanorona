@@ -19,7 +19,13 @@ typedef struct {
 } tMovimiento;
 
 typedef signed char tFlag;
-typedef tCasilla ** tTablero;
+
+typedef struct{
+	tCasilla ** matriz;
+	int filas;
+	int cols;
+}tTablero;
+
 
 /* pensaba que podiamos poner los errores que se nos viniesen ocurriendo, 
 ** empieza en -120 porque así comparamos si es menor a 0, ya es error.
