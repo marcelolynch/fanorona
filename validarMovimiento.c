@@ -38,7 +38,9 @@ static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino)
 }
 
 int tJugada validarMovimiento(char jugador, tTablero tablero,tMovimiento movimiento ,enum tDireccion * direccionPrevia, tFlag limpiar){
-/*TODAVIA NO TERMINE DE ESCRIBIR ESTO. CREO QUE FALTAN COSAS*/	
+/*TODAVIA NO TERMINE DE ESCRIBIR ESTO. CREO QUE FALTAN COSAS*/ /* me parece que falta ver si se va de los limites del tablero 
+							       ** también creo que debería devolver qué tipo de captura es, así
+							       ** en caso de que sea ambiguo, ya preguntas si se trata de A o W*/	
 /*HAY MUCHOS CASOS DE ERROR, ENTONCES HAY MUCHOS RETURNS. CORREGIR? */ /* habría que preguntar, para mi no hay que corregir --Tomás */
 
 	int jugada;
