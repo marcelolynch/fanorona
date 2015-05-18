@@ -15,7 +15,7 @@ void imprimirError(tFlag error) {
 		printf("Error: no se introdujo un nombre válido; debe contener al menos un carácter distinto de espacio.\n"); 
 		break;
 	case ERR_FMT_MOV1: 
-		printf("Error: no se introdujo un movimiento con el formato adecuado o los números ingresados son mayores de lo necesario.\n");
+		printf("Error: no se introdujo un movimiento con el formato adecuado o algúna coordenada es mayor de lo permitido.\n");
 		printf("El formato debe ser: M [Fo,Co][Fd,Cd][a/w] siendo la especificación de captura opcional en casos donde ésta no sea ambigua.\n");
 		break;
 	case ERR_FMT_MOV2: 

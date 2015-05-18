@@ -5,20 +5,20 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#define MIN_DIM 3
-#define MAX_DIM 19
-
 #define ES_IMPAR(a) ((a) % 2 == 1)
 #define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
 
 int getlinea(char str[], int dim);
+
 int guardarPartida(tTablero * tablero, int modo, const char * nombre);
+tTablero cargarPartida(int * modo, const char * nombre);
+tFlag leerSN(void);
+
+
 void PedirDimensiones(tTablero * tablero){
 	/*FUNCION DEL FRONT END*/
-	tFlag hayError;
+	tFlag hayError, decision;
 	int cantfils, cantcols, impar;
-	char str[2];
-	char c;
 
 	do {
 		hayError = 0;
@@ -34,19 +34,11 @@ void PedirDimensiones(tTablero * tablero){
 		} while ( !ES_IMPAR(cantfils) || !ES_IMPAR(cantcols) || !ES_DIM_VALIDA(cantfils, cantcols) || cantfils > cantcols);
 		/* OJO si se ingresan mal las filas pide columnas igual. */
 
-		hayError = 0;
-
 		printf("Las dimensiones del tablero serán: %d x %d\n\n", cantfils,cantcols);
 		printf("¿Desea continuar?\nIngrese S si es así o N para ingresar nuevas dimensiones.\n");
 
-		do {
-			if (hayError)
-				printf("Ingrese unicamente S o N seguido de un ENTER\n");
-			getlinea(str, 2);
-			c = toupper(str[0]);	
-		} while( c!= 'S' && c!= 'N');	
-
-	} while (c == 'N'); /* se desean ingresar nuevas dimensiones */
+		decision = leerSN();
+	} while (decision == NO); /* se desean ingresar nuevas dimensiones */
 
 	tablero->filas=cantfils;
 	tablero->cols=cantcols;
@@ -89,6 +81,21 @@ void rellenarTablero(tTablero * tablero){
 	
 	return;
 }
+
+void asignarFortaleza(tTablero * tablero){
+	int i,j;
+	int postCentral=0;
+	for(i=0;i<tablero->filas ; i++)
+	for(j=0;i<tablero->cols ; j++){
+              if (i%2 == j%2)
+                        tablero->matriz[i][j].tipo= FUERTE;
+                else
+                         tablero->matriz[i][j].tipo= DEBIL;
+
+
+
+                }
+
 
 void liberarTablero(tTablero * tablero, int n){
 	
@@ -155,14 +162,19 @@ int main (void)
 	tTablero tablero;
 	int i,j;
 		
-	PedirDimensiones(&tablero);
+//	PedirDimensiones(&tablero);
 	
+/*
 	printf("Las dimensiones son : %d x %d \n", tablero.filas,tablero.cols);
+
+	printf("Las dimensiones son : %d x %d \n", tablero.filas, tablero.cols);
+*/
 	
-	tablero= GenerarTablero(tablero.filas,tablero.cols);
+/*	tablero= GenerarTablero(tablero.filas,tablero.cols);*/
+
+	tablero=cargarPartida(&i,"saved.bin"); 	
 	if (tablero.matriz != NULL)
 		ImprimirTablero(&tablero);
 	
-	guardarPartida(&tablero,0,"saved.bin"); 	
 	return 0;
 }
