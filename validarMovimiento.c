@@ -149,7 +149,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	}
 
 	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >= tablero->filas || fd >= tablero->filas || co >= tablero->cols || cd >= tablero->cols)
-		return ERR_FUERA_DE_RANGO; /*Fuera de limites del tablero*/
+		return ERR_MOV_DE_RANGO; /*Fuera de limites del tablero*/
 
 	if(jugador != tablero->matriz[fo][co].ocupante)
 		return ERR_MOV_ORIG; /* No puede mover la ficha porque no es suya */
