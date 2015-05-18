@@ -11,11 +11,12 @@
 #include "fanorona.h"
 
 #define BORRA_BUFFER while (getchar() != '\n')
-#define MAX_STR 26
+#define MAX_STR 31
 #define LONG_SAVE 5 /* longitud del str "save " */
 #define MIN_STR 4
-#define MIN_MOV 12
-#define MAX_MOV 19
+#define MIN_MOV 12 /* no está en uso. borrar o revisar */
+#define MAX_MOV 19 /* no está en uso. borrar o revisar */
+#define MAX_DIM 19
 
 #define MAX_NOMBRE (MAX_STR-LONG_SAVE-1) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -1 por el '\0' */
 #define OK 1
@@ -86,12 +87,12 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 	char str[MAX_STR];
 	tFlag jugada=OK;
 
-	printf("Ingrese una jugada:\n");  /* TEMP */
-	
+	printf("Ingrese una jugada:\n");
+
 	do {
 		n = getlinea(str, MAX_STR);
 		jugada = validarFormato (str, n, mov, nombre);
-		imprimirError(jugada);
+		imprimirError(jugada); /* solo imprime en casos de error */
 	} while (jugada < 0); /* hay algún tipo de error en el formato */
 
 	return jugada;
@@ -109,7 +110,7 @@ static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *
 	}
 
 	else if (dim > LONG_SAVE && dim < MAX_STR && strncmp(str, "save ", LONG_SAVE) == 0) {
-		const char *nuevoNombre = salteaEspacios(str+LONG_SAVE);
+		const char *nuevoNombre = salteaEspacios(str+LONG_SAVE); /* nuevoNombre apunta el primer carácter distinto de espacio */
 		if (nuevoNombre != NULL) {
 			strcpy(nombre, nuevoNombre);
 			jugada = SAVE;
@@ -118,7 +119,7 @@ static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *
 			jugada = ERR_FMT_SAVE; /* se ingresaron solo espacios como nombre */
 	}
 
-	else if (dim <= MAX_MOV)
+	else /* es un posible movimiento */
 		jugada = validarMovFormato (str, mov);
 
 	return jugada;
@@ -184,6 +185,8 @@ static const char *leerCoord (const char str[], tCoordenada *coord) {
 		if (isdigit(c)) {
 			num = num * 10 + c - '0';
 			seEscribioNum = 1;
+			if (num > MAX_DIM) /* si num es mayor a la máxima dimensión de tablero permitida */
+				estado = ERROR;
 		}
 		else if (c == ',' && esPrimerComa) {
 			filAux = num;
