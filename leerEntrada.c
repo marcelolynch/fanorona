@@ -11,20 +11,19 @@
 #include "fanorona.h"
 
 #define BORRA_BUFFER while (getchar() != '\n')
-#define MAX_STR 31
+#define STR_DIM 31 /* long del vector que se usará para guardar la entrada del usuario */
 #define LONG_SAVE 5 /* longitud del str "save " */
 #define MIN_STR 4
 #define MIN_MOV 12 /* no está en uso. borrar o revisar */
 #define MAX_MOV 19 /* no está en uso. borrar o revisar */
-#define MAX_DIM 19
 
-#define MAX_NOMBRE (MAX_STR-LONG_SAVE-1) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -1 por el '\0' */
+#define MAX_NOMBRE (STR_DIM-LONG_SAVE-1) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -1 por el '\0' */
 #define OK 1
 
 tFlag pedirJugada(tMovimiento *mov, char *nombre); 
 int getlinea(char str[], int dim);
 static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *nombre);
-static tFlag validarMovFormato (const char str[], tMovimiento *mov);
+tFlag validarMovFormato (const char str[], tMovimiento *mov);
 static tFlag leerCaptura (const char str[], tMovimiento *mov);
 static const char *leerCoord (const char str[], tCoordenada *coord);
 static const char *salteaEspacios (const char str[]); /* devuelve la dirección del primer carácter distitno de un isspace o NULL */
@@ -34,7 +33,7 @@ void imprimirError(tFlag error); /* TEMP: mover a un .h luego */
 
 /* MAIN / FUNCIONES PARA TESTEO */
 
- 
+/* 
 int main(void) {
 	char str[MAX_NOMBRE];
 	tMovimiento mov;
@@ -53,7 +52,7 @@ int main(void) {
 
 	return 0;
 }
-
+*/
 
 
 void imprimirMov (tMovimiento *mov) {
@@ -84,13 +83,13 @@ int getlinea(char str[], int dim) {
 
 tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 	int n;
-	char str[MAX_STR];
+	char str[STR_DIM];
 	tFlag jugada=OK;
 
 	printf("Ingrese una jugada:\n");
 
 	do {
-		n = getlinea(str, MAX_STR);
+		n = getlinea(str, STR_DIM);
 		jugada = validarFormato (str, n, mov, nombre);
 		imprimirError(jugada); /* solo imprime en casos de error */
 	} while (jugada < 0); /* hay algún tipo de error en el formato */
@@ -109,7 +108,7 @@ static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *
 			jugada = UNDO;
 	}
 
-	else if (dim > LONG_SAVE && dim < MAX_STR && strncmp(str, "save ", LONG_SAVE) == 0) {
+	else if (dim > LONG_SAVE && dim < STR_DIM && strncmp(str, "save ", LONG_SAVE) == 0) {
 		const char *nuevoNombre = salteaEspacios(str+LONG_SAVE); /* nuevoNombre apunta el primer carácter distinto de espacio */
 		if (nuevoNombre != NULL) {
 			strcpy(nombre, nuevoNombre);
@@ -119,7 +118,7 @@ static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *
 			jugada = ERR_FMT_SAVE; /* se ingresaron solo espacios como nombre */
 	}
 
-	else /* es un posible movimiento */
+	else if (dim <= MAX_MOV)/* es un posible movimiento */
 		jugada = validarMovFormato (str, mov);
 
 	return jugada;
@@ -133,7 +132,7 @@ static const char *salteaEspacios (const char str[]) {
 	return str;
 }
 
-static tFlag validarMovFormato (const char str[], tMovimiento *mov) {
+tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	int c, i;
 	const char *p;
 	tFlag esValido = OK;
@@ -194,15 +193,13 @@ static const char *leerCoord (const char str[], tCoordenada *coord) {
 			esPrimerComa = 0;
 			seEscribioNum = 0;
 			}
-		else {
+		else
 			estado = ERROR;
-			p = NULL;
-		}
-	}
-	if (estado != ERROR && (c == '\0' || esPrimerComa || !seEscribioNum))
-		p = NULL;
 
-	else if (estado != ERROR) { 
+	}
+	if (estado == ERROR || c == '\0' || esPrimerComa || !seEscribioNum)
+		p = NULL;
+	else { 
 		coord->fil = filAux;
 		coord->col = num;
 		p = &p[++i]; /* direccion del carácter siguiente al ']' */

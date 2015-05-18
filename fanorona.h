@@ -45,4 +45,7 @@ enum tDireccion {N=0, S, E, O, NE, NO, SE, SO};
 #define FUERTE 1 
 #define DEBIL 2
 
+#define MIN_DIM 3 /* minima dimensión de tablero permitida */
+#define MAX_DIM 19 /* máxima dimensión de tablero permitida */
+
 #endif
