@@ -107,18 +107,19 @@ int paika(char jugador, tTablero * tablero){
 	
 	for(i=0, c=0; i<tablero->filas ; i++)
 		for(j=0; j<tablero->cols ; j++, c=0){
-			if(hayComida(jugador, tablero, tablero->matriz[i][j], N)!=NINGUNO
-			|| hayComida(jugador, tablero, tablero->matriz[i][j], S)!=NINGUNO
-			|| hayComida(jugador, tablero, tablero->matriz[i][j], E)!=NINGUNO
-			|| hayComida(jugador, tablero, tablero->matriz[i][j], O)!=NINGUNO)
-				return 0;
-			else if(tablero->matriz[i][j].tipo == FUERTE
-			&& (hayComida(jugador, tablero, tablero->matriz[i][j], NE)!=NINGUNO
-			|| hayComida(jugador, tablero, tablero->matriz[i][j], NO)!=NINGUNO
-			|| hayComida(jugador, tablero, tablero->matriz[i][j], SE)!=NINGUNO
-			|| hayComida(jugador, tablero, tablero->matriz[i][j], SO)!=NINGUNO))
-				return 0;
-			
+			if(tablero->matriz[i][j].ocupante == jugador){
+				if(hayComida(jugador, tablero, tablero->matriz[i][j], N)!=NINGUNO
+				|| hayComida(jugador, tablero, tablero->matriz[i][j], S)!=NINGUNO
+				|| hayComida(jugador, tablero, tablero->matriz[i][j], E)!=NINGUNO
+				|| hayComida(jugador, tablero, tablero->matriz[i][j], O)!=NINGUNO)
+					return 0;
+				else if(tablero->matriz[i][j].tipo == FUERTE
+				&& (hayComida(jugador, tablero, tablero->matriz[i][j], NE)!=NINGUNO
+				|| hayComida(jugador, tablero, tablero->matriz[i][j], NO)!=NINGUNO
+				|| hayComida(jugador, tablero, tablero->matriz[i][j], SE)!=NINGUNO
+				|| hayComida(jugador, tablero, tablero->matriz[i][j], SO)!=NINGUNO))
+					return 0;
+			}
 		}
 
 	return 1; /*Estamos en situacion de Paika*/
@@ -148,35 +149,39 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	}
 
 	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >= tablero->filas || fd >= tablero->filas || co >= tablero->cols || cd >= tablero->cols)
-		return INCORRECTO; /*Fuera de limites del tablero*/
+		return ERR_FUERA_DE_RANGO; /*Fuera de limites del tablero*/
 
 	if(jugador != tablero->matriz[fo][co].ocupante)
-		return INCORRECTO; /* No puede mover la ficha porque no es suya */
+		return ERR_MOV_ORIG; /* No puede mover la ficha porque no es suya */
 
 	if(tablero->matriz[fd][cd].ocupante != VACIO)
-		return INCORRECTO; /* No puede mover porque la casilla no esta vacia */
+		return ERR_MOV_DEST; /* No puede mover porque la casilla no esta vacia */
 
 	for(i=0; casillasVisitadas[i] != NULL ;i++)
 		if(&(tablero->matriz[fd][cd]) == casillasVisitadas[i])
-			return INCORRECTO;	/*No puede moverse ahi porque ya estuvo antes en este turno */
+			return ERR_MOV_TOC;	/*No puede moverse ahi porque ya estuvo antes en este turno */
 
 	direccionMov = direccionDestino (movimiento.coordOrig, movimiento.coordDest);
 
 	if(direccionMov == ERROR)
-		return INCORRECTO;
+		return ERR_MOV_NO_ADY; /*No es una direccion valida*/
 
 	if(direccionMov == *direccionPrevia)
-		return INCORRECTO;		/*No puede moverse en la misma direccion en la que venia moviendose */	
+		return ERR_MOV_DIR;		/*No puede moverse en la misma direccion en la que venia moviendose */	
 
-	if((aux=hayComida(destino)) != NINGUNO || paika())
+	if((aux=hayComida(jugador, tablero, tablero->matriz[fo][co], direccionMov)) != NINGUNO || paika(jugador, tablero))
 		/*Solamente chequeo la situacion de Paika si no selecciono un movimiento donde pueda comer */
 		jugada=aux;
 	else
-		return INCORRECTO;
-		
+		return ERR_MOV_PAIKA;
+	
 	/*Si llegue hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
 	casillasVisitadas[i]=&(tablero->matriz[fo][co]); /* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
 	*direccionPrevia = direccionMov;
-	
+
+	if(jugada==AMBOS && movimiento.tipoMov!=NINGUNO)
+		/*Si el jugador puede hacer ambas cosas pero ya eligio*/
+		jugada=movimiento.tipoMov;
+
 	return jugada;
 }

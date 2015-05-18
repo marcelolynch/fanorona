@@ -37,6 +37,15 @@ void imprimirError(tFlag error) {
 	case ERR_MOV_PAIKA:
 		printf("Error: no puede mover una ficha que no puede realizar una captura cuando existen otras que sí pueden.\n");
 		break;	
+	case ERR_MOV_RANGO:
+		printf("Error: no puede moverse fuera del tablero\n");
+		break;
+	case ERR_MOV_NO_ADY:
+		printf("Error: debe moverse a una casilla adyacente\n");
+		break;
+	case ERR_MOV_DEBIL:
+		printf("Error: desde una casilla debil solo puede moverse arriba, abajo, y a ambos costados\n");
+		break;
 	default:
 		printf("Error desconocido\n");
 		break;

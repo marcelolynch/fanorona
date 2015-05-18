@@ -30,7 +30,7 @@ typedef struct{
 /* pensaba que podiamos poner los errores que se nos viniesen ocurriendo, 
 ** empieza en -120 porque así comparamos si es menor a 0, ya es error.
 ** cambié el tFlag a signed char. Despues se puede hacer un imprimirError y listo.*/
-enum tError {ERR_FMT= -120, ERR_FMT_SAVE, ERR_FMT_MOV1, ERR_FMT_MOV2, ERR_MOV_ORIG, ERR_MOV_DEST, ERR_MOV_TOC, ERR_MOV_DIR, ERR_MOV_PAIKA};
+enum tError {ERR_FMT= -120, ERR_FMT_SAVE, ERR_FMT_MOV1, ERR_FMT_MOV2, ERR_MOV_ORIG, ERR_MOV_DEST, ERR_MOV_TOC, ERR_MOV_DIR, ERR_MOV_PAIKA, ERR_FUERA_DE_RANDGO, ERR_PIEZA_CONTRARIA, ERR_DEST_OCUPADO, ERR_TOCADO, ERR_NO_ADY, ERR_MISMA_DIR, ERR_CAPTURA_OBLIGADA};
 
 enum tJugada {ERROR = -1, QUIT, SAVE, UNDO, MOV};
 enum tCaptura {NINGUNO=0, WITHDRAWAL, APPROACH, AMBOS}; 
