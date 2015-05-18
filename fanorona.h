@@ -4,7 +4,7 @@
 
 typedef struct {
 	char tipo; /* debil o fuerte */
-	char ocupante; /* blanco, negro o vacio*/
+	unsigned char ocupante; /* blanco, negro o vacio*/
 } tCasilla;
 
 typedef struct {

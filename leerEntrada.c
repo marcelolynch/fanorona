@@ -133,7 +133,6 @@ static const char *salteaEspacios (const char str[]) {
 }
 
 tFlag validarMovFormato (const char str[], tMovimiento *mov) {
-	int c, i;
 	const char *p;
 	tFlag esValido = OK;
 
@@ -161,7 +160,6 @@ tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 }
 
 static tFlag leerCaptura (const char str[], tMovimiento *mov) {
-	int c;
 	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' ) || str[2] != ']' || str[3] != '\0')
 		return ERROR;
 	mov->tipoMov = tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;

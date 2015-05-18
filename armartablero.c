@@ -18,7 +18,7 @@ tFlag leerSN(void);
 void PedirDimensiones(tTablero * tablero){
 	/*FUNCION DEL FRONT END*/
 	tFlag hayError, decision;
-	int cantfils, cantcols, impar;
+	int cantfils, cantcols;
 
 	do {
 		hayError = 0;
@@ -81,21 +81,6 @@ void rellenarTablero(tTablero * tablero){
 	
 	return;
 }
-
-void asignarFortaleza(tTablero * tablero){
-	int i,j;
-	int postCentral=0;
-	for(i=0;i<tablero->filas ; i++)
-	for(j=0;i<tablero->cols ; j++){
-              if (i%2 == j%2)
-                        tablero->matriz[i][j].tipo= FUERTE;
-                else
-                         tablero->matriz[i][j].tipo= DEBIL;
-
-
-
-                }
-
 
 void liberarTablero(tTablero * tablero, int n){
 	
@@ -162,7 +147,7 @@ int main (void)
 	tTablero tablero;
 	int i,j;
 		
-//	PedirDimensiones(&tablero);
+	PedirDimensiones(&tablero);
 	
 /*
 	printf("Las dimensiones son : %d x %d \n", tablero.filas,tablero.cols);
