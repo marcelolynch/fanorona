@@ -12,7 +12,7 @@
 #define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
 
 int getlinea(char str[], int dim);
-
+int guardarPartida(tTablero * tablero, int modo, const char * nombre);
 void PedirDimensiones(tTablero * tablero){
 	/*FUNCION DEL FRONT END*/
 	tFlag hayError;
@@ -154,15 +154,15 @@ int main (void)
 {	int c;
 	tTablero tablero;
 	int i,j;
-	
+		
 	PedirDimensiones(&tablero);
 	
-	printf("Las dimensiones son : %d x %d \n", fils,cols);
+	printf("Las dimensiones son : %d x %d \n", tablero.filas,tablero.cols);
 	
 	tablero= GenerarTablero(tablero.filas,tablero.cols);
 	if (tablero.matriz != NULL)
 		ImprimirTablero(&tablero);
 	
-	
+	guardarPartida(&tablero,0,"saved.bin"); 	
 	return 0;
 }

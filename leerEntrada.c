@@ -34,7 +34,7 @@ void imprimirError(tFlag error); /* TEMP: mover a un .h luego */
 
 /* MAIN / FUNCIONES PARA TESTEO */
 
- 
+/* 
 int main(void) {
 	char str[MAX_NOMBRE];
 	tMovimiento mov;
@@ -53,7 +53,7 @@ int main(void) {
 
 	return 0;
 }
-
+*/
 
 
 void imprimirMov (tMovimiento *mov) {
