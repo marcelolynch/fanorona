@@ -37,13 +37,100 @@ static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino)
 
 }
 
-int tJugada validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar){
+enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { /* las coordenada podrian ser punteros */
+        /*Devuelve el tipo de captura posible segun el movimiento que quiera relizar el usuario (direccion del movimiento desde de casilla origen
+	** si no encuentra, devuelve NINGUNO. Si la casilla a la que se quiere mover esta ocupada, devuelve NINGUNO (no devuelve error)
+	** esto es porque si se me llama de validarMovimiento() esto ya esta validado, y si se me llama de paika() me interesa solo si se puede o no hacer el movimiento */
+
+	char fo = origen.fila;
+        char co=origen.col;
+        char enemigo = !jugador;
+
+        signed char dirFil, dirCol;
+        tFlag hayAppr=0, hayWithdr=0;
+
+	switch(direccion){
+		case N:	dirFil=-1;
+			dirCol=0;
+		break;
+		case S:	dirFil=1;
+			dirCol=0;
+		break;
+		case E:	dirFil=0;
+			dirCol=1;
+		break;
+		case O:	dirFil=0;
+			dirCol=-1;
+		break;
+		case NE: dirFil=-1;
+			 dirCol=1;
+		break;
+		case NO: dirFil=-1;
+			 dirCol=0;
+		break;
+		case SE: dirFil=1;
+			 dirCol=1;
+		break;
+		case SO: dirFil=1;
+			 dirCol=-1;
+		break;
+	}
+	
+	fdA=fo+2*dirFil; /*Fila de la casilla a capturar por approach */
+	cdA=co+2*dirCol; /*Columna*/
+	fdW=fo-dirFil; /*Fila de la casilla a capturar po widthdraw */
+	cdW=co-dirFil; /*Columna*/
+
+	/*Reviso si los casilleros que tienen las fichas a capturar existen, y si la casilla a moverse esta vacia. Si no, el movimiento es invalido */ 
+	fueraDeRangoA = (tablero->matriz[fo+dirFil][co+dirCol] != VACIO || fdA < 0 || cdA < 0 || fdA >= tablero->filas || fdA >= tablero->cols);
+	fueraDeRangoW = (tablero->matriz[fo+dirFil][co+dirCol] != VACIO || fdW < 0 || cdW < 0 || fdW >= tablero->filas || fdW >= tablero->cols);
+	
+	if (!fueraDeRangoA && tablero->matriz[fdA][cdA].ocupante== enemigo)
+                /*El elementro de la matriz corresponde a la casilla a capturar por approach*/
+		hayAppr = 1;
+        if (!fueraDeRangoW && tablero->matriz[fdW][cdW] == enemigo)
+                /*El elementro de la matriz corresponde a la casilla a capturar por withdraw*/
+                hayWithdr = 1;
+
+        if (hayAppr && hayWithdr)
+                return AMBOS;
+        else if (hayAppr)
+                return APPROACH;
+        else if (hayWithdr)
+                return WITHDRAWAL;
+        else
+                return NINGUNO;
+}
+
+int paika(char jugador, tTablero * tablero){
+	int i, j, c;
+	
+	for(i=0, c=0; i<tablero->filas ; i++)
+		for(j=0; j<tablero->cols ; j++, c=0){
+			if(hayComida(jugador, tablero, tablero->matriz[i][j], N)!=NINGUNO
+			|| hayComida(jugador, tablero, tablero->matriz[i][j], S)!=NINGUNO
+			|| hayComida(jugador, tablero, tablero->matriz[i][j], E)!=NINGUNO
+			|| hayComida(jugador, tablero, tablero->matriz[i][j], O)!=NINGUNO)
+				return 0;
+			else if(tablero->matriz[i][j].tipo == FUERTE
+			&& (hayComida(jugador, tablero, tablero->matriz[i][j], NE)!=NINGUNO
+			|| hayComida(jugador, tablero, tablero->matriz[i][j], NO)!=NINGUNO
+			|| hayComida(jugador, tablero, tablero->matriz[i][j], SE)!=NINGUNO
+			|| hayComida(jugador, tablero, tablero->matriz[i][j], SO)!=NINGUNO))
+				return 0;
+			
+		}
+
+	return 1; /*Estamos en situacion de Paika*/
+}
+
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar){
 /*TODAVIA NO TERMINE DE ESCRIBIR ESTO. CREO QUE FALTAN COSAS*/ /* me parece que falta ver si se va de los limites del tablero 
 							       ** también creo que debería devolver qué tipo de captura es, así
 							       ** en caso de que sea ambiguo, ya preguntas si se trata de A o W*/	
 /*HAY MUCHOS CASOS DE ERROR, ENTONCES HAY MUCHOS RETURNS. CORREGIR? */ /* habría que preguntar, para mi no hay que corregir --Tomás */
 
-	int jugada;
+	int jugada, aux;
 
 	char fo=movimiento.coordOrig.fila;
 	char co=movimiento.coordOrig.col;
@@ -81,9 +168,9 @@ int tJugada validarMovimiento(char jugador, tTablero * tablero, tMovimiento movi
 	if(direccionMov == *direccionPrevia)
 		return INCORRECTO;		/*No puede moverse en la misma direccion en la que venia moviendose */	
 
-	if(hayComida(destino) || paika())
+	if((aux=hayComida(destino)) != NINGUNO || paika())
 		/*Solamente chequeo la situacion de Paika si no selecciono un movimiento donde pueda comer */
-		jugada=CORRECTO;
+		jugada=aux;
 	else
 		return INCORRECTO;
 		
