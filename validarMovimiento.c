@@ -5,7 +5,6 @@
 #define INCORRECTO 0
 #define CORRECTO 1
 #define AMBIGUO 2
-
 #include "fanorona.h"
 
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino){
@@ -31,13 +30,14 @@ static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino)
 		direccion=SO;
 	else if(fd==fo+1 && cd==co+1)
 		direccion=SE;
-
+	else
+		direccion=ERROR; /* Esta queriendo ir a casilla no adyacente */
 	return direccion;
 
 
 }
 
-int tJugada validarMovimiento(char jugador, tTablero tablero, int fils, int cols, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar){
+int tJugada validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar){
 /*TODAVIA NO TERMINE DE ESCRIBIR ESTO. CREO QUE FALTAN COSAS*/ /* me parece que falta ver si se va de los limites del tablero 
 							       ** también creo que debería devolver qué tipo de captura es, así
 							       ** en caso de que sea ambiguo, ya preguntas si se trata de A o W*/	
@@ -60,7 +60,9 @@ int tJugada validarMovimiento(char jugador, tTablero tablero, int fils, int cols
 			casillasVisitadas[i]=NULL;
 	}
 
-	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >
+	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >= tablero->filas || fd >= tablero->filas || co >= tablero->cols || cd >= tablero->cols)
+		return INCORRECTO; /*Fuera de limites del tablero*/
+
 	if(jugador != tablero[fo][co].ocupante)
 		return INCORRECTO; /* No puede mover la ficha porque no es suya */
 
@@ -73,8 +75,11 @@ int tJugada validarMovimiento(char jugador, tTablero tablero, int fils, int cols
 
 	direccionMov=direccionDestino(movimiento.coordOrig, movimiento.coordDest);
 
+	if(direccionMov == ERROR)
+		return INCORRECTO;
+
 	if(direccionMov == *direccionPrevia)
-		return INCORRECTO;		/*No puede moverse en la misma direccion en la que venia moviendose */
+		return INCORRECTO;		/*No puede moverse en la misma direccion en la que venia moviendose */	
 
 	if(hayComida(destino) || paika())
 		/*Solamente chequeo la situacion de Paika si no selecciono un movimiento donde pueda comer */
@@ -83,7 +88,7 @@ int tJugada validarMovimiento(char jugador, tTablero tablero, int fils, int cols
 		return INCORRECTO;
 		
 	/*Si llegue hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
-	casillasVisitadas[i]=&tablero[fo][co]; /* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
+	casillasVisitadas[i]=&(tablero.matriz[fo][co]); /* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
 	*direccionPrevia = direccionMov;
 	
 	return jugada;
