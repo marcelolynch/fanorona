@@ -8,8 +8,8 @@ typedef struct {
 } tCasilla;
 
 typedef struct {
-	char fil; /* OJO puede traer problemas usar char, por ejemplo si se ingresa M [300,1][1,1] lo lee como [44,1][1,1] */
-	char col;
+	int fil;
+	int col;
 } tCoordenada;
 
 typedef struct {
