@@ -166,6 +166,9 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	if(direccionMov == ERROR)
 		return ERR_MOV_NO_ADY; /*No es una direccion valida*/
 
+	if(tablero->matriz[fd][cd].tipo == DEBIL && (direccionMov > O)) /* NE, NO, SE, SO */  
+		return ERR_MOV_DEBIL;
+
 	if(direccionMov == *direccionPrevia)
 		return ERR_MOV_DIR;		/*No puede moverse en la misma direccion en la que venia moviendose */	
 
