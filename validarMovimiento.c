@@ -63,17 +63,17 @@ int tJugada validarMovimiento(char jugador, tTablero * tablero, tMovimiento movi
 	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >= tablero->filas || fd >= tablero->filas || co >= tablero->cols || cd >= tablero->cols)
 		return INCORRECTO; /*Fuera de limites del tablero*/
 
-	if(jugador != tablero[fo][co].ocupante)
+	if(jugador != tablero->matriz[fo][co].ocupante)
 		return INCORRECTO; /* No puede mover la ficha porque no es suya */
 
-	if(tablero[fd][cd].ocupante != VACIO)
+	if(tablero->matriz[fd][cd].ocupante != VACIO)
 		return INCORRECTO; /* No puede mover porque la casilla no esta vacia */
 
 	for(i=0; casillasVisitadas[i] != NULL ;i++)
-		if(&tablero[fd][cd] == casillasTocadas[i])
+		if(&(tablero->matriz[fd][cd]) == casillasVisitadas[i])
 			return INCORRECTO;	/*No puede moverse ahi porque ya estuvo antes en este turno */
 
-	direccionMov=direccionDestino(movimiento.coordOrig, movimiento.coordDest);
+	direccionMov = direccionDestino (movimiento.coordOrig, movimiento.coordDest);
 
 	if(direccionMov == ERROR)
 		return INCORRECTO;
@@ -88,7 +88,7 @@ int tJugada validarMovimiento(char jugador, tTablero * tablero, tMovimiento movi
 		return INCORRECTO;
 		
 	/*Si llegue hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
-	casillasVisitadas[i]=&(tablero.matriz[fo][co]); /* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
+	casillasVisitadas[i]=&(tablero->matriz[fo][co]); /* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
 	*direccionPrevia = direccionMov;
 	
 	return jugada;
