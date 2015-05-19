@@ -100,6 +100,7 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 
 static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *nombre) {
 	tFlag jugada = ERR_FMT;
+	const char *nuevoNombre;
 
 	if (dim == MIN_STR) {
 		if (strcmp(str, "quit") == 0)
@@ -109,16 +110,19 @@ static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *
 	}
 
 	else if (dim > LONG_SAVE && dim < STR_DIM && strncmp(str, "save ", LONG_SAVE) == 0) {
-		const char *nuevoNombre = salteaEspacios(str+LONG_SAVE); /* nuevoNombre apunta el primer carácter distinto de espacio */
+
+		nuevoNombre = salteaEspacios(str+LONG_SAVE); /* nuevoNombre apunta el primer carácter distinto de espacio */
+
 		if (nuevoNombre != NULL) {
 			strcpy(nombre, nuevoNombre);
 			jugada = SAVE;
 		}
+
 		else
 			jugada = ERR_FMT_SAVE; /* se ingresaron solo espacios como nombre */
 	}
 
-	else if (dim <= MAX_MOV)/* es un posible movimiento */
+	else if (dim <= MAX_MOV) /* es un posible movimiento */
 		jugada = validarMovFormato (str, mov);
 
 	return jugada;
@@ -166,11 +170,11 @@ static tFlag leerCaptura (const char str[], tMovimiento *mov) {
 	return OK;
 }
 
-/* devuelve la dirección siguiente al último carácter leído o NULL en caso de error */
+/* devuelve la dirección siguiente al último carácter leído o NULL en caso de error. Modifica coord */
 static const char *leerCoord (const char str[], tCoordenada *coord) {
 	int num=0;
-	const char *p = str;
 	int i, c, filAux;
+	const char *p = str;
 	tFlag estado=OK, esPrimerComa=1, seEscribioNum=0;
 
 	if (p[0] != '[') {

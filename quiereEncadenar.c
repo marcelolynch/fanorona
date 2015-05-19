@@ -28,7 +28,7 @@ tFlag quiereEncadenar (tMovimiento *mov) {
 	deseaCadena = leerSN();
 	
 	if (!deseaCadena)
-		return deseaCadena;
+		return 0;
 	
 	/* las coordenadas de origen nuevas son las del destino anterior */
 	fo = mov->coordOrig.fil = mov->coordDest.fil; 
@@ -44,7 +44,7 @@ tFlag quiereEncadenar (tMovimiento *mov) {
 
 		n = getlinea(nuevoStr, 15);
 
-		if (n >= MIN_STR && N <= MAX_STR) {
+		if (n >= MIN_STR && n <= MAX_STR) {
 			sprintf(str, "M [%d,%d]%s", fo, co, nuevoStr);
 			esValido = validarMovFormato (str, mov); /* devuelve menor a 0 en caso de error */
 		}
@@ -56,6 +56,7 @@ tFlag quiereEncadenar (tMovimiento *mov) {
 	return deseaCadena;
 }
 
+/* TESTEO */
 int main(void) {
 	tMovimiento mov;
 	mov.coordOrig.fil = 4;
