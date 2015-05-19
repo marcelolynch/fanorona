@@ -24,7 +24,7 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre);
 int getlinea(char str[], int dim);
 static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *nombre);
 tFlag validarMovFormato (const char str[], tMovimiento *mov);
-static tFlag leerCaptura (const char str[], tMovimiento *mov);
+static enum tCaptura leerCaptura (const char str[]);
 static const char *leerCoord (const char str[], tCoordenada *coord);
 static const char *salteaEspacios (const char str[]); /* devuelve la dirección del primer carácter distitno de un isspace o NULL */
 void imprimirMov (tMovimiento *mov); /* TEMP */
@@ -33,7 +33,7 @@ void imprimirError(tFlag error); /* TEMP: mover a un .h luego */
 
 /* MAIN / FUNCIONES PARA TESTEO */
 
-/* 
+ 
 int main(void) {
 	char str[MAX_NOMBRE];
 	tMovimiento mov;
@@ -52,11 +52,11 @@ int main(void) {
 
 	return 0;
 }
-*/
+
 
 
 void imprimirMov (tMovimiento *mov) {
-	printf("Origen: [%d, %d]\nDestino: [%d, %d]\n", mov->coordOrig.fil, mov->coordOrig.col, mov->coordDest.fil, mov->coordOrig.col);
+	printf("Origen: [%d, %d]\nDestino: [%d, %d]\n", mov->coordOrig.fil, mov->coordOrig.col, mov->coordDest.fil, mov->coordDest.col);
 	printf("Tipo Captura: ");
 	switch(mov->tipoMov) {
 	case NINGUNO: printf("no especificó captura\n"); break;
@@ -138,7 +138,7 @@ static const char *salteaEspacios (const char str[]) {
 
 tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	const char *p;
-	tFlag esValido = OK;
+	enum tCaptura captura;
 
 	if (str[0] != 'M' || str[1] != ' ')
 		return ERR_FMT;
@@ -146,28 +146,29 @@ tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	p = &str[2]; /* direccion del supuesto primer corchete '[' */
 
 	p = leerCoord(p, &(mov->coordOrig));
-
-	if (p != NULL)
-		p = leerCoord(p, &(mov->coordDest));
-
-	if (p != NULL && *p == '\0') /* se ingresó un movimiento sin aclaración de captura */
-		mov->tipoMov = NINGUNO;
-	else if (p != NULL)
-		esValido = leerCaptura(p, mov);
-
-	if (p != NULL && esValido == OK)
-		return MOV;
+	p = leerCoord(p, &(mov->coordDest));
 
 	if (p == NULL)
 		return ERR_FMT_MOV1;
+
+	if (*p == '\0') { /* se ingresó un movimiento sin aclaración de captura */
+		captura = NINGUNO;
+		mov->tipoMov = captura;
+	}
+
+	else if ( (captura = leerCaptura(p)) != ERROR ) /* en esValido se guarda APPROACH WITHDRAWAL o ERROR */
+		mov->tipoMov = captura;
+
+	if (captura != ERROR)
+		return MOV;
+
 	return ERR_FMT_MOV2; /* se introdujo mal el tipo de captura unicamente */
 }
 
-static tFlag leerCaptura (const char str[], tMovimiento *mov) {
+static enum tCaptura leerCaptura (const char str[]) {
 	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' ) || str[2] != ']' || str[3] != '\0')
 		return ERROR;
-	mov->tipoMov = tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;
-	return OK;
+	return tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;
 }
 
 /* devuelve la dirección siguiente al último carácter leído o NULL en caso de error. Modifica coord */
@@ -177,10 +178,8 @@ static const char *leerCoord (const char str[], tCoordenada *coord) {
 	const char *p = str;
 	tFlag estado=OK, esPrimerComa=1, seEscribioNum=0;
 
-	if (p[0] != '[') {
-		estado = ERROR;
-		p = NULL;
-	}
+	if (p == NULL || p[0] != '[')
+		return NULL;
 
 	for (i=1; estado != ERROR && (c=p[i])!=']' && c!='\0'; i++) {
 		if (isdigit(c)) {
