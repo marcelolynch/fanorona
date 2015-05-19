@@ -119,7 +119,7 @@ int paika(char jugador, tTablero * tablero){
 				|| hayComida(jugador, tablero, origen, S)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, E)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, O)!=NINGUNO)
-					return 0;
+					return 0; /* Aprovecho laziness */
 				else if(tablero->matriz[i][j].tipo == FUERTE
 				&& (hayComida(jugador, tablero, origen, NE)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, NO)!=NINGUNO
@@ -129,7 +129,7 @@ int paika(char jugador, tTablero * tablero){
 			}
 		}
 
-	return 1; /*Estamos en situacion de Paika*/
+	return 1; /*Estamos en situacion de paika*/
 }
 
 int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar){
