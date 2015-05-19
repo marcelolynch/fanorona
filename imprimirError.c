@@ -53,8 +53,3 @@ void imprimirError(tFlag error) {
 }
 
 
-int main(void){
-
-	imprimirError(ERR_MOV_TOC);
-	return 0;
-}

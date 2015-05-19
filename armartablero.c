@@ -147,7 +147,7 @@ int main (void)
 	tTablero tablero;
 	int i,j;
 		
-	PedirDimensiones(&tablero);
+//	PedirDimensiones(&tablero);
 	
 /*
 	printf("Las dimensiones son : %d x %d \n", tablero.filas,tablero.cols);

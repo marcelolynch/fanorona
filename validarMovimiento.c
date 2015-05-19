@@ -8,7 +8,11 @@
 #include "fanorona.h"
 #include <stdio.h>
 #define MAXMOVS 50
+
+void incrementoSegunDir(int * dirFil, int * dirCol, enum tDireccion direccion);
+
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino){
+
 	enum tDireccion direccion;
 	char fo=origen.fil;
 	char co=origen.col;
@@ -38,10 +42,15 @@ static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino)
 
 }
 
-enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { /* las coordenada podrian ser punteros */
-        /*Devuelve el tipo de captura posible segun el movimiento que quiera relizar el usuario (direccion del movimiento desde de casilla origen
-	** si no encuentra, devuelve NINGUNO. Si la casilla a la que se quiere mover esta ocupada, devuelve NINGUNO (no devuelve error)
-	** esto es porque si se me llama de validarMovimiento() esto ya esta validado, y si se me llama de paika() me interesa solo si se puede o no hacer el movimiento */
+enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { 
+
+	/* Devuelve el tipo de captura posible segun el movimiento que quiera relizar el usuario
+	** (direccion del movimiento desde de casilla origen). Si no encuentra, devuelve NINGUNO. 
+	** Si la casilla a la que se quiere mover esta ocupada, devuelve NINGUNO (no devuelve error)
+ 	** Esto es porque si se me llama de validarMovimiento() esto ya esta validado,
+ 	** y si se me llama de paika() me interesa solo si se puede o no hacer el movimiento, 
+	** no si el usuario ingreso algo valido */
+
 	int fdA, fdW, cdA, cdW;
 	int fueraDeRangoA, fueraDeRangoW;
 	char fo = origen.fil;
@@ -49,45 +58,26 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
         char enemigo = !jugador;
 	enum tCaptura captura;
 
-        signed char dirFil, dirCol;
+        int dirFil, dirCol;
         tFlag hayAppr=0, hayWithdr=0;
-
-	switch(direccion){
-		case N:	dirFil=-1;
-			dirCol=0;
-		break;
-		case S:	dirFil=1;
-			dirCol=0;
-		break;
-		case E:	dirFil=0;
-			dirCol=1;
-		break;
-		case O:	dirFil=0;
-			dirCol=-1;
-		break;
-		case NE: dirFil=-1;
-			 dirCol=1;
-		break;
-		case NO: dirFil=-1;
-			 dirCol=0;
-		break;
-		case SE: dirFil=1;
-			 dirCol=1;
-		break;
-		case SO: dirFil=1;
-			 dirCol=-1;
-		break;
-	}
+	
+	incrementoSegunDir(&dirFil, &dirCol, direccion);
 	
 	fdA=fo+2*dirFil; /*Fila de la casilla a capturar por approach */
 	cdA=co+2*dirCol; /*Columna*/
-	fdW=fo-dirFil; /*Fila de la casilla a capturar po widthdraw */
+	fdW=fo-dirFil; /*Fila de la casilla a capturar por withdraw */
 	cdW=co-dirFil; /*Columna*/
 
-	/*Reviso si los casilleros que tienen las fichas a capturar existen, y si la casilla a moverse esta vacia. Si no, el movimiento es invalido */ 
-	fueraDeRangoA = (tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO || fdA < 0 || cdA < 0 || fdA >= tablero->filas || fdA >= tablero->cols);
-	fueraDeRangoW = (tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO || fdW < 0 || cdW < 0 || fdW >= tablero->filas || fdW >= tablero->cols);
+	/* Reviso si los casilleros que tienen las fichas a capturar existen, y si la casilla a moverse esta vacia.
+	** Si no, el movimiento es invalido (NINGUNO) */ 
+
+	fueraDeRangoA = (tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO
+			 || fdA < 0 || cdA < 0 || fdA >= tablero->filas || fdA >= tablero->cols);
 	
+	fueraDeRangoW = (tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO 
+			|| fdW < 0 || cdW < 0 || fdW >= tablero->filas || fdW >= tablero->cols);
+	
+
 	if (!fueraDeRangoA && tablero->matriz[fdA][cdA].ocupante== enemigo)
                 /*El elementro de la matriz corresponde a la casilla a capturar por approach*/
 		hayAppr = 1;
@@ -107,11 +97,13 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 	return captura;
 }
 
+
 int paika(char jugador, tTablero * tablero){
-	int i, j, c;
+	/*Todavia no esta adaptada para ser aprovechada por el modo vs. PC */
+	int i, j;
 	tCoordenada origen;
-	for(i=0, c=0; i<tablero->filas ; i++)
-		for(j=0; j<tablero->cols ; j++, c=0){
+	for(i=0; i<tablero->filas ; i++)
+		for(j=0; j<tablero->cols ; j++){
 			if(tablero->matriz[i][j].ocupante == jugador){
 				origen.fil=i;
 				origen.col=j;
@@ -133,11 +125,7 @@ int paika(char jugador, tTablero * tablero){
 }
 
 int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar){
-/*TODAVIA NO TERMINE DE ESCRIBIR ESTO. CREO QUE FALTAN COSAS*/ /* me parece que falta ver si se va de los limites del tablero 
-							       ** también creo que debería devolver qué tipo de captura es, así
-							       ** en caso de que sea ambiguo, ya preguntas si se trata de A o W*/	
-/*HAY MUCHOS CASOS DE ERROR, ENTONCES HAY MUCHOS RETURNS. CORREGIR? */ /* habría que preguntar, para mi no hay que corregir --Tomás */
-
+	
 	int jugada, aux;
 
 	int fo=movimiento.coordOrig.fil;
@@ -151,7 +139,9 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	static tCasilla * casillasVisitadas[MAXMOVS]; 
 
 	if (limpiar) {
-		for(i=0; casillasVisitadas[i]!=NULL ;i++)	/*En casillasVisitadas se guardara la direccion de las casillas visitadas. Cada ves que cambia el jugador, hay que limpiarlo */
+	/*En casillasVisitadas se guarda la direccion de las casillas visitadas.
+	** Cada vez que cambia el jugador, hay que limpiarlo. Si continua el turno, no. */
+		for(i=0; casillasVisitadas[i]!=NULL ;i++)
 			casillasVisitadas[i]=NULL;
 	}
 
@@ -184,9 +174,13 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 		jugada=aux;
 	else
 		return ERR_MOV_PAIKA;
+
 	
 	/*Si llegue hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
-	casillasVisitadas[i]=&(tablero->matriz[fo][co]); /* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
+	
+	casillasVisitadas[i]=&(tablero->matriz[fo][co]); 
+	/* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
+	
 	*direccionPrevia = direccionMov;
 
 	if(jugada==AMBOS && movimiento.tipoMov!=NINGUNO)
