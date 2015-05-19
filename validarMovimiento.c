@@ -10,6 +10,7 @@
 #define MAXMOVS 50
 
 void incrementoSegunDir(int * dirFil, int * dirCol, enum tDireccion direccion);
+int jugadaObligada(tTablero * tablero, int jugador, tCasilla * visitadas[], tCoordenada origen);
 
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino){
 
@@ -124,7 +125,7 @@ int paika(char jugador, tTablero * tablero){
 	return 1; /*Estamos en situacion de paika*/
 }
 
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar){
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar, tFlag proxObligado){
 	
 	int jugada, aux;
 
@@ -135,7 +136,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	
 	enum tDireccion direccionMov;
 	int i;
-	
+
 	static tCasilla * casillasVisitadas[MAXMOVS]; 
 
 	if (limpiar) {
@@ -187,8 +188,39 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 		/*Si el jugador puede hacer ambas cosas pero ya eligio*/
 		jugada=movimiento.tipoMov;
 
+	/* Valido si la proxima jugada es obligada */
+	*proxObligado = jugadaObligada(tablero, jugador, casillasVisitadas, movimiento.coordDest);	
+
 	return jugada;
 }
+
+
+
+int jugadaObligada(tTablero * tablero, int jugador, tCasilla * visitadas[], tCoordenada origen){
+	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
+	int dir, i, chequear=1;
+	int dirFil, dirCol;
+	tCoordenada destino;
+	int dirsPosibles = tablero->matriz[origen.fil][origen.col].tipo == FUERTE ? 8:4; 
+
+	for(dir=0 ; dir<dirsPosibles ; dir++, chequear=1){
+		incrementoSegunDir(&dirFil, &dirCol, direcciones[dir]);
+		destino.fil = origen.fil + dirFil;
+		destino.col = origen.col + dirCol;
+
+		for(i=0; visitadas[i] != NULL ; i++)
+			if(&(tablero->matriz[destino.fil][destino.col]) == visitadas[i])
+				chequear=0; /*Solo chequeo si hay comida si no visite esa casilla antes*/
+		if(chequear)
+			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
+				return 1; /*Debe capturar esa pieza la proxima jugada */
+		}
+	
+
+	return 0;
+}
+
+
 int main(void){
 	 return 0;
 }
