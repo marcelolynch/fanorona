@@ -22,9 +22,9 @@
 
 tFlag pedirJugada(tMovimiento *mov, char *nombre); 
 int getlinea(char str[], int dim);
-static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *nombre);
+static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre);
 tFlag validarMovFormato (const char str[], tMovimiento *mov);
-static enum tCaptura leerCaptura (const char str[]);
+enum tCaptura leerCaptura (const char str[]);
 static const char *leerCoord (const char str[], tCoordenada *coord);
 static const char *salteaEspacios (const char str[]); /* devuelve la dirección del primer carácter distitno de un isspace o NULL */
 void imprimirMov (tMovimiento *mov); /* TEMP */
@@ -33,7 +33,7 @@ void imprimirError(tFlag error); /* TEMP: mover a un .h luego */
 
 /* MAIN / FUNCIONES PARA TESTEO */
 
- 
+/* 
 int main(void) {
 	char str[MAX_NOMBRE];
 	tMovimiento mov;
@@ -52,7 +52,7 @@ int main(void) {
 
 	return 0;
 }
-
+*/
 
 
 void imprimirMov (tMovimiento *mov) {
@@ -98,14 +98,17 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 }
 
 
-static tFlag validarFormato (const char str[], int dim, tMovimiento *mov, char *nombre) {
+static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre) {
 	tFlag jugada = ERR_FMT;
 	const char *nuevoNombre;
+
+	if (str[0] != 'M') /* ignora si la primer letra es mayúscula o minúscula excepto si es M, pues el movimiento se llama con M */
+		str[0] = tolower(str[0]);
 
 	if (dim == MIN_STR) {
 		if (strcmp(str, "quit") == 0)
 			jugada = QUIT;
-		else if (strcmp(str, "Undo") == 0)
+		else if (strcmp(str, "undo") == 0)
 			jugada = UNDO;
 	}
 
@@ -165,7 +168,7 @@ tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	return ERR_FMT_MOV2; /* se introdujo mal el tipo de captura unicamente */
 }
 
-static enum tCaptura leerCaptura (const char str[]) {
+enum tCaptura leerCaptura (const char str[]) {
 	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' ) || str[2] != ']' || str[3] != '\0')
 		return ERROR;
 	return tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;
@@ -199,12 +202,10 @@ static const char *leerCoord (const char str[], tCoordenada *coord) {
 
 	}
 	if (estado == ERROR || c == '\0' || esPrimerComa || !seEscribioNum)
-		p = NULL;
-	else { 
-		coord->fil = filAux;
-		coord->col = num;
-		p = &p[++i]; /* direccion del carácter siguiente al ']' */
-	}
+		return NULL;
 
+	coord->fil = filAux;
+	coord->col = num;
+	p = &p[++i]; /* direccion del carácter siguiente al ']' */
 	return p;
 }
