@@ -204,8 +204,8 @@ static const char *leerCoord (const char str[], tCoordenada *coord) {
 	if (estado == ERROR || c == '\0' || esPrimerComa || !seEscribioNum)
 		return NULL;
 
-	coord->fil = filAux;
-	coord->col = num;
+	coord->fil = filAux-1; /* se resta 1 porque en las demás funciones se empieza a contar desde 0 */
+	coord->col = num-1;
 	p = &p[++i]; /* direccion del carácter siguiente al ']' */
 	return p;
 }
