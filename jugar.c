@@ -35,32 +35,41 @@ int main(){
 	int jugador=0;
 	int movimiento;
 	enum tDireccion dir=-1;
+	int concat;
 
 	PedirDimensiones(&tablero);
 	tablero=GenerarTablero(tablero.filas,tablero.cols);
 	ImprimirTablero(&tablero);
 
 	do{	
-		movimiento=-1;	
+		movimiento=-1;
+		concat=1;
 		do{
 			
-			if (obligado)
+			if (obligado && concat){
 				pedirCadena(&mov);
+				}
 			else
 				jugada=pedirJugada(&mov, str);
 				
 			if(jugada==MOV){	
-				movimiento=validarMovimiento(jugador, &tablero, mov,  &dir, limpiar, &obligado);
-
+				movimiento=validarMovimiento(jugador, &tablero, mov, &dir, limpiar, &obligado);
 				if (movimiento == AMBOS) {
 					mov.tipoMov = pedirCaptura();
 				}
-
-				imprimirError(movimiento);
+				else if(movimiento>0){
+					mov.tipoMov=movimiento;
+					}	
+				else
+					imprimirError(movimiento);
+				
+				concat=movimiento>0;
+				
 				printf("\n MOVIMIENTO: %d\n OBLIGADO:%d\n", movimiento, obligado);
 			}	
-			else
+			else{
 				limpiar=0;
+				}
 		}while(jugada==MOV && movimiento<0); /*ERROR*/
 	
 	
