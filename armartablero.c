@@ -5,9 +5,18 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+<<<<<<< Updated upstream
+=======
+#define MIN_DIM 3
+#define MAX_DIM 19
+
+#define BORRA_BUFFER while (getchar() != '\n')
+
+>>>>>>> Stashed changes
 #define ES_IMPAR(a) ((a) % 2 == 1)
 #define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
 
+<<<<<<< Updated upstream
 int getlinea(char str[], int dim);
 
 int guardarPartida(tTablero * tablero, int modo, const char * nombre);
@@ -17,8 +26,32 @@ tFlag leerSN(void);
 
 void PedirDimensiones(tTablero * tablero){
 	/*FUNCION DEL FRONT END*/
+<<<<<<< Updated upstream
 	tFlag hayError, decision;
+<<<<<<< Updated upstream
 	int cantfils, cantcols;
+=======
+=======
+	tFlag hayError;
+=======
+int getlinea(char str[], int dim) {
+	int c, i;
+
+	for (i=0; i<dim-1 && (c=getchar())!='\n'; i++)
+		str[i] = c;
+	if (c != '\n')
+		BORRA_BUFFER;
+
+	str[i] = '\0';
+	return i;
+}
+
+void PedirDimensiones(int *filas, int *columnas)
+{	tFlag hayError;
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
+	int cantfils, cantcols, impar;
+>>>>>>> Stashed changes
 
 	do {
 		hayError = 0;

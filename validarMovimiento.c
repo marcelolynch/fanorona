@@ -46,7 +46,7 @@ static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino)
 
 enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { 
 
-	/* Devuelve el tipo de captura posible segun el movimiento que quiera relizar el usuario
+	/* Devuelve el tipo de captura posible segun el movimiento que quiera realizar el usuario
 	** (direccion del movimiento desde de casilla origen). Si no encuentra, devuelve NINGUNO. 
 	** Si la casilla a la que se quiere mover esta ocupada, devuelve NINGUNO (no devuelve error)
  	** Esto es porque si se me llama de validarMovimiento() esto ya esta validado,
@@ -66,8 +66,13 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 	
 	fdA=fo+2*dirFil; /*Fila de la casilla a capturar por approach */
 	cdA=co+2*dirCol; /*Columna*/
+<<<<<<< HEAD
 	fdW=fo-dirFil; /*Fila de la casilla a capturar por withdraw */
 	cdW=co-dirCol; /*Columna*/
+=======
+	fdW=fo-dirFil; /*Fila de la casilla a capturar por withdrawal */
+	cdW=co-dirCol; /*Columna*/
+>>>>>>> a0fbed7a5373dbd9b818384aa4e95ad2c8f13af3
 
 	/* Reviso si los casilleros que tienen las fichas a capturar existen, y si la casilla a moverse esta vacia.
 	** Si no, el movimiento es invalido (NINGUNO) */ 
@@ -86,9 +91,9 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 	       {hayAppr = 1;
 		printf("HAY APPROACH\n");}
         if (!fueraDeRangoW && tablero->matriz[fdW][cdW].ocupante == enemigo)
-                /*El elementro de la matriz corresponde a la casilla a capturar por withdraw*/
+                /*El elementro de la matriz corresponde a la casilla a capturar por withdrawal*/
                 {hayWithdr = 1;
-			printf("HAY WIDTHDRAW\n");
+			printf("HAY WIDTHDRAWAL\n");
 		}
         if (hayAppr && hayWithdr)
                 captura=AMBOS;

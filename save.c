@@ -5,7 +5,7 @@
 
 void liberarTablero(tTablero * tablero, int n);
 
-int guardarPartida(tTablero * tablero, int modo, const char * nombre){
+int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombre){
 	FILE *f;
 	int nfilas=tablero->filas;
 	int ncols=tablero->cols;
@@ -14,6 +14,7 @@ int guardarPartida(tTablero * tablero, int modo, const char * nombre){
 	if((f=fopen(nombre, "wb")) == NULL)
 		return ERROR;
 	fwrite(&modo, sizeof(int),1,f);
+	fwrite(&jugador,sizeof(int),1,f);
 	fwrite(&nfilas, sizeof(int),1,f);
 	fwrite(&ncols, sizeof(int),1,f);
 	for(i=0; i<nfilas ; i++)
@@ -31,7 +32,7 @@ int guardarPartida(tTablero * tablero, int modo, const char * nombre){
 	return 0;
 }
 
-tTablero cargarPartida(int * modo, const char * nombre){
+tTablero cargarPartida(int * modo, int * jugador, const char * nombre){
 	/*asumo que los datos estan validados, el archivo no esta corrputo*/
 	int fils,cols;
 	int i,j;
@@ -42,10 +43,11 @@ tTablero cargarPartida(int * modo, const char * nombre){
 		return tablero;
 
 	fread(modo, sizeof(int),1, f);
+	fread(jugador, sizeof(int),1,f);
 	fread(&fils, sizeof(int), 1, f);
 	fread(&cols, sizeof(int), 1, f);
 
-	printf("\n DIMS %d %d %d \n\n",*modo,fils,cols);
+	printf("\nMODO DE JUEGO:%d\nTURNO DEL JUGARDOR Nº%d\nDIMS:%dx%d\n\n",*modo,*jugador,fils,cols);
 
         tablero.matriz=malloc(fils*sizeof(*tablero.matriz));
 
