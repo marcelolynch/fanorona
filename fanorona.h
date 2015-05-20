@@ -58,6 +58,6 @@ typedef signed char tFlag;
 #define MAX_MOV 19 /* no está en uso. borrar o revisar */
 #define MAX_NOM (STR_DIM - LONG_SAVE - 1) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -1 por el '\0' */
 #define OK 1
-
+int getlinea(char str[], int dim);
 
 #endif

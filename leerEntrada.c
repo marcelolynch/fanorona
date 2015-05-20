@@ -21,7 +21,6 @@
 //#define OK 1
 
 tFlag pedirJugada(tMovimiento *mov, char *nombre); 
-int getlinea(char str[], int dim);
 static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre);
 tFlag validarMovFormato (const char str[], tMovimiento *mov);
 enum tCaptura leerCaptura (const char str[]);
@@ -68,8 +67,7 @@ void imprimirMov (tMovimiento *mov) {
 }
 
 /*FIN FUNCIONES DE TESTEO */
-
-int getlinea(char str[], int dim) {
+int getlinea(char str[], int dim){
 	int c, i;
 
 	for (i=0; i<dim-1 && (c=getchar())!='\n'; i++)
