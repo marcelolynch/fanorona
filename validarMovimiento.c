@@ -67,7 +67,7 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 	fdA=fo+2*dirFil; /*Fila de la casilla a capturar por approach */
 	cdA=co+2*dirCol; /*Columna*/
 	fdW=fo-dirFil; /*Fila de la casilla a capturar por withdraw */
-	cdW=co-dirFil; /*Columna*/
+	cdW=co-dirCol; /*Columna*/
 
 	/* Reviso si los casilleros que tienen las fichas a capturar existen, y si la casilla a moverse esta vacia.
 	** Si no, el movimiento es invalido (NINGUNO) */ 

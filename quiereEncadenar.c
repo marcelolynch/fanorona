@@ -13,27 +13,21 @@
 #define MAX_STR2 10  /* máxima longitud de string de coordenada válida que puede escribir el usuario */
 
 int getlinea(char str[], int dim);
-tFlag leerSN(void);
 tFlag validarMovFormato (const char str[], tMovimiento *mov);
 void imprimirError(tFlag error);
-tFlag quiereEncadenar (tMovimiento *mov) {
-	tFlag deseaCadena, esValido = 1;
+
+void pedirCadena (tMovimiento *mov) {
+	tFlag esValido = 1;
 	char str[STR_DIM2]; 
 	char nuevoStr[15]; /* tamaño suficiente para evaluar si el usuario introdujo de más */
 	int fo, co;
 	int n;
 
-	printf ("Desea encadenar un movimiento?\n");
-
-	deseaCadena = leerSN();
-	
-	if (!deseaCadena)
-		return 0;
-	
 	/* las coordenadas de origen nuevas son las del destino anterior */
 	fo = mov->coordOrig.fil = mov->coordDest.fil; 
 	co = mov->coordOrig.col = mov->coordDest.col;
 
+	printf("Puede encadenar una movimiento!\n");
 	printf("Ingrese solo la coordenada de la casilla a la que desea moverse y el tipo de captura si es necesario\n");
 	printf("Se imprimira su nueva casilla de origen.\n");
 
@@ -53,7 +47,7 @@ tFlag quiereEncadenar (tMovimiento *mov) {
 
 	} while (esValido < 0); /* si es menor a cero es error */
 
-	return deseaCadena;
+	return; 
 }
 
 /* TESTEO

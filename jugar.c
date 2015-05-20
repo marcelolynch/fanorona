@@ -14,8 +14,8 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre);
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
 int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar, tFlag * proxObligado);
 void imprimirError(tFlag error);
-
-enum tCaptura leerCaptura (const char str[]);
+enum tCaptura pedirCaptura (void);
+void pedirCadena(tMovimiento *mov);
 
 void limpiarTocadas(tTablero * tablero){
 	int i,j;
@@ -31,7 +31,7 @@ int main(){
 	char str[MAX_NOMBRE];
 	tMovimiento mov;
         tTablero tablero;
-	tFlag jugada,limpiar=0,obligado=1;
+	tFlag jugada,limpiar=0,obligado=0;
 	int jugador=0;
 	int movimiento;
 	enum tDireccion dir=-1;
@@ -44,22 +44,23 @@ int main(){
 		movimiento=-1;	
 		do{
 			
-			if(!obligado){
-				printf("Cambio\n");
-				jugador=!jugador; /*Cambia*/
-				printf("\nLe toca al jugador %s\n", jugador?"negro":"blanco");
-				limpiar=1;
-				}
-			if(movimiento<0)
+			if (obligado)
+				pedirCadena(&mov);
+			else
 				jugada=pedirJugada(&mov, str);
 				
 			if(jugada==MOV){	
 				movimiento=validarMovimiento(jugador, &tablero, mov,  &dir, limpiar, &obligado);
+
+				if (movimiento == AMBOS) {
+					mov.tipoMov = pedirCaptura();
+				}
+
 				imprimirError(movimiento);
 				printf("\n MOVIMIENTO: %d\n OBLIGADO:%d\n", movimiento, obligado);
-				}	
-				else
-					limpiar=0;
+			}	
+			else
+				limpiar=0;
 		}while(jugada==MOV && movimiento<0); /*ERROR*/
 	
 	
@@ -67,7 +68,15 @@ int main(){
 			printf("TipoMov: %d\n", mov.tipoMov);
 			actualizarTablero(&tablero, dir, mov);	
 			ImprimirTablero(&tablero);
-			limpiarTocadas(&tablero);
+			if(!obligado){
+				printf("Cambio\n");
+				jugador=!jugador; /*Cambia*/
+				printf("\nLe toca al jugador %s\n", jugador?"negro":"blanco");
+				dir = -1;
+				limpiar=1;
+			}	
+			if (limpiar)
+				limpiarTocadas(&tablero);
 		}
 	
 	}while(jugada!=QUIT);
