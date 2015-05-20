@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#define STR_DIM 30
-#define MIN_STR 5 /* mínima longitud de string de coordenada válida que puede escribir el usuario */
-#define MAX_STR 10  /* máxima longitud de string de coordenada válida que puede escribir el usuario */
+#define STR_DIM2 30
+#define MIN_STR2 5 /* mínima longitud de string de coordenada válida que puede escribir el usuario */
+#define MAX_STR2 10  /* máxima longitud de string de coordenada válida que puede escribir el usuario */
 
 int getlinea(char str[], int dim);
 tFlag leerSN(void);
@@ -18,7 +18,7 @@ tFlag validarMovFormato (const char str[], tMovimiento *mov);
 void imprimirError(tFlag error);
 tFlag quiereEncadenar (tMovimiento *mov) {
 	tFlag deseaCadena, esValido = 1;
-	char str[STR_DIM]; 
+	char str[STR_DIM2]; 
 	char nuevoStr[15]; /* tamaño suficiente para evaluar si el usuario introdujo de más */
 	int fo, co;
 	int n;
@@ -44,7 +44,7 @@ tFlag quiereEncadenar (tMovimiento *mov) {
 
 		n = getlinea(nuevoStr, 15);
 
-		if (n >= MIN_STR && n <= MAX_STR) {
+		if (n >= MIN_STR2 && n <= MAX_STR2) {
 			sprintf(str, "M [%d,%d]%s", fo, co, nuevoStr);
 			esValido = validarMovFormato (str, mov); /* devuelve menor a 0 en caso de error */
 		}

@@ -17,6 +17,16 @@ void imprimirError(tFlag error);
 
 enum tCaptura leerCaptura (const char str[]);
 
+void limpiarTocadas(tTablero * tablero){
+	int i,j;
+	for(i=0; i<tablero->filas ; i++)
+		for(j=0; j<tablero->cols ; j++){
+			if(tablero->matriz[i][j].estado == TOCADA)
+				tablero->matriz[i][j].estado = VACIO;
+		}
+}
+
+
 int main(){
 	char str[MAX_NOMBRE];
 	tMovimiento mov;
@@ -57,6 +67,7 @@ int main(){
 			printf("TipoMov: %d\n", mov.tipoMov);
 			actualizarTablero(&tablero, dir, mov);	
 			ImprimirTablero(&tablero);
+			limpiarTocadas(&tablero);
 		}
 	
 	}while(jugada!=QUIT);

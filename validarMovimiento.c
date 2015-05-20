@@ -2,12 +2,13 @@
 **	Faltaria ver como manejamos los errores
 */
 
+#include "fanorona.h"
 #define INCORRECTO 0
 #define CORRECTO 1
 #define AMBIGUO 2
-#include "fanorona.h"
 #include <stdio.h>
 #define MAXMOVS 50
+
 
 void incrementoSegunDir(int * dirFil, int * dirCol, enum tDireccion direccion);
 int jugadaObligada(tTablero * tablero, int jugador, tCasilla * visitadas[], tCoordenada origen);
@@ -72,7 +73,7 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 	** Si no, el movimiento es invalido (NINGUNO) */ 
 		
 	#define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols) 
-
+	
 	fueraDeRangoA = ( FDERANGO(fdA,cdA) || FDERANGO(fo+dirFil, co+dirCol)
 			|| tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO);
 	
@@ -82,11 +83,13 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 
 	if (!fueraDeRangoA && tablero->matriz[fdA][cdA].ocupante== enemigo)
                 /*El elementro de la matriz corresponde a la casilla a capturar por approach*/
-		hayAppr = 1;
+	       {hayAppr = 1;
+		printf("HAY APPROACH\n");}
         if (!fueraDeRangoW && tablero->matriz[fdW][cdW].ocupante == enemigo)
                 /*El elementro de la matriz corresponde a la casilla a capturar por withdraw*/
-                hayWithdr = 1;
-
+                {hayWithdr = 1;
+			printf("HAY WIDTHDRAW\n");
+		}
         if (hayAppr && hayWithdr)
                 captura=AMBOS;
         else if (hayAppr)
@@ -165,7 +168,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 		if(&(tablero->matriz[fd][cd]) == casillasVisitadas[i])
 			return ERR_MOV_TOC;	}/*No puede moverse ahi porque ya estuvo antes en este turno */
 
-	direccionMov = direccionDestino (movimiento.coordOrig, movimiento.coordDest);
+	direccionMov = direccionDestino(movimiento.coordOrig, movimiento.coordDest);
 
 	if(direccionMov == ERROR)
 		return ERR_MOV_NO_ADY; /*No es una direccion valida*/
@@ -189,6 +192,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	casillasVisitadas[i]=&(tablero->matriz[fo][co]);
 	printf("%p", casillasVisitadas[i]);
 
+	tablero->matriz[fo][co].estado=TOCADA;
 	/* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
 	
 	*direccionPrevia = direccionMov;
@@ -216,16 +220,23 @@ int jugadaObligada(tTablero * tablero, int jugador, tCasilla * visitadas[], tCoo
 		incrementoSegunDir(&dirFil, &dirCol, direcciones[dir]);
 		destino.fil = origen.fil + dirFil;
 		destino.col = origen.col + dirCol;
-
+/*
 		for(i=0; visitadas[i] != NULL ; i++)
-			if(destino.fil<(tablero->filas) && destino.fil>=0 && destino.col<(tablero->cols) && destino.col>=0)		
 				if(&(tablero->matriz[destino.fil][destino.col]) == visitadas[i])
-					chequear=0; /*Solo chequeo si hay comida si no visite esa casilla antes*/
-		if(chequear)
+					chequear=0; */
+		
+		if(destino.fil<(tablero->filas) && destino.fil>=0 && destino.col<(tablero->cols) && destino.col>=0){
+
+		if(tablero->matriz[destino.fil][destino.col].estado != TOCADA)  /*Solo chequeo si hay comida si no visite esa casilla antes*/
+			{ printf("%d, %d no esta tocada\n", destino.fil, destino.col);
 			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
-				return 1; /*Debe capturar esa pieza la proxima jugada */
+			{	printf("Hay comida desde %d, %d\n", destino.fil, destino.col);
+				return 1; /*Debe capturar esa pieza la proxima jugada */}
 		}
-	
+			else
+				printf("%d, %d esta tocada\n", destino.fil, destino.col);
+		}
+		}	
 
 	return 0;
 }
