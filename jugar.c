@@ -11,7 +11,7 @@ enum tCaptura leerCaptura (const char str[]);
 void PedirDimensiones(tTablero * tablero);
 tTablero GenerarTablero(int fils, int cols);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
-void actualizarTablero(tTablero * tablero, int jugador, enum tDireccion direccion, tMovimiento mov);
+void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
 int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar, tFlag * proxObligado);
 void imprimirError(tFlag error);
 
@@ -55,7 +55,7 @@ int main(){
 	
 		if(jugada==MOV){
 			printf("TipoMov: %d\n", mov.tipoMov);
-			actualizarTablero(&tablero, jugador, dir, mov);	
+			actualizarTablero(&tablero, dir, mov);	
 			ImprimirTablero(&tablero);
 		}
 	
@@ -65,10 +65,11 @@ int main(){
 
 }
 
-void actualizarTablero(tTablero * tablero, int jugador, enum tDireccion direccion, tMovimiento mov){
+void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov){
 	int i, j;
 	int dirFil, dirCol;
 	int fini, cini;
+	int jugador = tablero->matriz[mov.coordOrig.fil][mov.coordOrig.col].ocupante;
 	int enemigo = !jugador;
 	incrementoSegunDir(&dirFil, &dirCol, direccion);
 	
