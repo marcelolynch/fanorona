@@ -48,4 +48,15 @@ enum tDireccion {N=0, S, E, O, NE, NO, SE, SO};
 #define MIN_DIM 3 /* minima dimensión de tablero permitida */
 #define MAX_DIM 19 /* máxima dimensión de tablero permitida */
 
+
+#define BORRA_BUFFER while (getchar() != '\n')
+#define STR_DIM 31 /* long del vector que se usará para guardar la entrada del usuario */
+#define LONG_SAVE 5 /* longitud del str "save " */
+#define MIN_STR 4
+#define MIN_MOV 12 /* no está en uso. borrar o revisar */
+#define MAX_MOV 19 /* no está en uso. borrar o revisar */
+#define MAX_NOM (STR_DIM - LONG_SAVE - 1) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -1 por el '\0' */
+#define OK 1
+
+
 #endif

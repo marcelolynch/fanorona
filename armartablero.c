@@ -47,7 +47,7 @@ void PedirDimensiones(tTablero * tablero){
 
 /* LAS FUNCIONES QUE SIGUEN SON DEL BACK END */
 
-void rellenarTablero(tTablero * tablero){
+static void rellenarTablero(tTablero * tablero){
 	int i,j;
 	int postCentral=0;
 	for(i=0; i<tablero->filas ; i++){
@@ -142,24 +142,24 @@ void ImprimirTablero ( tTablero * tablero )
 
 
 /*main para probarlas */
-int main (void)
+/*int main (void)
 {	int c;
 	tTablero tablero;
 	int i,j;
 		
 //	PedirDimensiones(&tablero);
 	
-/*
+
 	printf("Las dimensiones son : %d x %d \n", tablero.filas,tablero.cols);
 
 	printf("Las dimensiones son : %d x %d \n", tablero.filas, tablero.cols);
-*/
+
 	
-/*	tablero= GenerarTablero(tablero.filas,tablero.cols);*/
+	tablero= GenerarTablero(tablero.filas,tablero.cols);
 
 	tablero=cargarPartida(&i,"saved.bin"); 	
 	if (tablero.matriz != NULL)
 		ImprimirTablero(&tablero);
 	
 	return 0;
-}
+}*/

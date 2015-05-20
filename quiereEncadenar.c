@@ -15,7 +15,7 @@
 int getlinea(char str[], int dim);
 tFlag leerSN(void);
 tFlag validarMovFormato (const char str[], tMovimiento *mov);
-
+void imprimirError(tFlag error);
 tFlag quiereEncadenar (tMovimiento *mov) {
 	tFlag deseaCadena, esValido = 1;
 	char str[STR_DIM]; 
@@ -56,7 +56,7 @@ tFlag quiereEncadenar (tMovimiento *mov) {
 	return deseaCadena;
 }
 
-/* TESTEO */
+/* TESTEO
 int main(void) {
 	tMovimiento mov;
 	mov.coordOrig.fil = 4;
@@ -75,4 +75,4 @@ int main(void) {
 		printf("No quiere encadenar\n");
 
 	return 0;
-}
+}*/

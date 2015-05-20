@@ -51,7 +51,6 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
  	** Esto es porque si se me llama de validarMovimiento() esto ya esta validado,
  	** y si se me llama de paika() me interesa solo si se puede o no hacer el movimiento, 
 	** no si el usuario ingreso algo valido */
-
 	int fdA, fdW, cdA, cdW;
 	int fueraDeRangoA, fueraDeRangoW;
 	char fo = origen.fil;
@@ -71,13 +70,15 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 
 	/* Reviso si los casilleros que tienen las fichas a capturar existen, y si la casilla a moverse esta vacia.
 	** Si no, el movimiento es invalido (NINGUNO) */ 
+		
+	#define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols) 
 
-	fueraDeRangoA = (tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO
-			 || fdA < 0 || cdA < 0 || fdA >= tablero->filas || fdA >= tablero->cols);
+	fueraDeRangoA = ( FDERANGO(fdA,cdA) || FDERANGO(fo+dirFil, co+dirCol)
+			|| tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO);
 	
-	fueraDeRangoW = (tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO 
-			|| fdW < 0 || cdW < 0 || fdW >= tablero->filas || fdW >= tablero->cols);
-	
+	fueraDeRangoW = ((FDERANGO(fdW,cdW) || FDERANGO(fo+dirFil, co+dirCol))
+			 || tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO);
+	#undef FDERANGO	
 
 	if (!fueraDeRangoA && tablero->matriz[fdA][cdA].ocupante== enemigo)
                 /*El elementro de la matriz corresponde a la casilla a capturar por approach*/
@@ -103,7 +104,7 @@ int paika(char jugador, tTablero * tablero){
 	/*Todavia no esta adaptada para ser aprovechada por el modo vs. PC */
 	int i, j;
 	tCoordenada origen;
-	for(i=0; i<tablero->filas ; i++)
+	for(i=0; i < tablero->filas ; i++)
 		for(j=0; j<tablero->cols ; j++){
 			if(tablero->matriz[i][j].ocupante == jugador){
 				origen.fil=i;
@@ -112,20 +113,22 @@ int paika(char jugador, tTablero * tablero){
 				|| hayComida(jugador, tablero, origen, S)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, E)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, O)!=NINGUNO)
-					return 0; /* Aprovecho laziness */
+					{printf("Hay comida en %d %d", i, j);
+					return 0;} /* Aprovecho laziness */
 				else if(tablero->matriz[i][j].tipo == FUERTE
 				&& (hayComida(jugador, tablero, origen, NE)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, NO)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, SE)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, SO)!=NINGUNO))
-					return 0;
+					{printf("Hay comida en %d %d", i, j);
+					return 0;}
 			}
 		}
 
 	return 1; /*Estamos en situacion de paika*/
 }
 
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar, tFlag proxObligado){
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar, tFlag * proxObligado){
 	
 	int jugada, aux;
 
@@ -138,6 +141,8 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	int i;
 
 	static tCasilla * casillasVisitadas[MAXMOVS]; 
+	
+	*proxObligado=1; /*Si hay error, esta obligado a seguir moviendo*/
 
 	if (limpiar) {
 	/*En casillasVisitadas se guarda la direccion de las casillas visitadas.
@@ -156,8 +161,9 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 		return ERR_MOV_DEST; /* No puede mover porque la casilla no esta vacia */
 
 	for(i=0; casillasVisitadas[i] != NULL ;i++)
+	{	printf("%d %p\n", i, casillasVisitadas[i]);
 		if(&(tablero->matriz[fd][cd]) == casillasVisitadas[i])
-			return ERR_MOV_TOC;	/*No puede moverse ahi porque ya estuvo antes en este turno */
+			return ERR_MOV_TOC;	}/*No puede moverse ahi porque ya estuvo antes en este turno */
 
 	direccionMov = direccionDestino (movimiento.coordOrig, movimiento.coordDest);
 
@@ -173,13 +179,16 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	if((aux=hayComida(jugador, tablero, movimiento.coordOrig, direccionMov)) != NINGUNO || paika(jugador, tablero))
 		/*Solamente chequeo la situacion de Paika si no selecciono un movimiento donde pueda comer */
 		jugada=aux;
-	else
+	else{
+		printf("aux: %d, paika: %d", aux, paika(jugador,tablero));
 		return ERR_MOV_PAIKA;
-
+	}
 	
 	/*Si llegue hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
 	
-	casillasVisitadas[i]=&(tablero->matriz[fo][co]); 
+	casillasVisitadas[i]=&(tablero->matriz[fo][co]);
+	printf("%p", casillasVisitadas[i]);
+
 	/* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
 	
 	*direccionPrevia = direccionMov;
@@ -209,8 +218,9 @@ int jugadaObligada(tTablero * tablero, int jugador, tCasilla * visitadas[], tCoo
 		destino.col = origen.col + dirCol;
 
 		for(i=0; visitadas[i] != NULL ; i++)
-			if(&(tablero->matriz[destino.fil][destino.col]) == visitadas[i])
-				chequear=0; /*Solo chequeo si hay comida si no visite esa casilla antes*/
+			if(destino.fil<(tablero->filas) && destino.fil>=0 && destino.col<(tablero->cols) && destino.col>=0)		
+				if(&(tablero->matriz[destino.fil][destino.col]) == visitadas[i])
+					chequear=0; /*Solo chequeo si hay comida si no visite esa casilla antes*/
 		if(chequear)
 			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
 				return 1; /*Debe capturar esa pieza la proxima jugada */
@@ -220,7 +230,3 @@ int jugadaObligada(tTablero * tablero, int jugador, tCasilla * visitadas[], tCoo
 	return 0;
 }
 
-
-int main(void){
-	 return 0;
-}

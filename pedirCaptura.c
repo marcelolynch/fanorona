@@ -24,7 +24,7 @@ enum tCaptura pedirCaptura (void) {
 	
 	return tipoCaptura;
 }
-
+/*
 int main(void) {
 	int algo = pedirCaptura();
 
@@ -36,3 +36,4 @@ int main(void) {
 
 	return 0;
 }
+*/

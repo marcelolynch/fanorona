@@ -10,15 +10,15 @@
 #include <ctype.h>
 #include "fanorona.h"
 
-#define BORRA_BUFFER while (getchar() != '\n')
-#define STR_DIM 31 /* long del vector que se usará para guardar la entrada del usuario */
-#define LONG_SAVE 5 /* longitud del str "save " */
-#define MIN_STR 4
-#define MIN_MOV 12 /* no está en uso. borrar o revisar */
-#define MAX_MOV 19 /* no está en uso. borrar o revisar */
+//#define BORRA_BUFFER while (getchar() != '\n')
+//#define STR_DIM 31 /* long del vector que se usará para guardar la entrada del usuario */
+//#define LONG_SAVE 5 /* longitud del str "save " */
+//#define MIN_STR 4
+//#define MIN_MOV 12 /* no está en uso. borrar o revisar */
+//#define MAX_MOV 19 /* no está en uso. borrar o revisar */
 
-#define MAX_NOMBRE (STR_DIM-LONG_SAVE-1) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -1 por el '\0' */
-#define OK 1
+//#define MAX_NOMBRE (STR_DIM-LONG_SAVE-1) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -1 por el '\0' */
+//#define OK 1
 
 tFlag pedirJugada(tMovimiento *mov, char *nombre); 
 int getlinea(char str[], int dim);
@@ -168,11 +168,13 @@ tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	return ERR_FMT_MOV2; /* se introdujo mal el tipo de captura unicamente */
 }
 
+
 enum tCaptura leerCaptura (const char str[]) {
 	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' ) || str[2] != ']' || str[3] != '\0')
 		return ERROR;
 	return tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;
 }
+
 
 /* devuelve la dirección siguiente al último carácter leído o NULL en caso de error. Modifica coord */
 static const char *leerCoord (const char str[], tCoordenada *coord) {
