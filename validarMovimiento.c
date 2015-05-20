@@ -164,8 +164,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 		return ERR_MOV_DEST; /* No puede mover porque la casilla no esta vacia */
 
 	for(i=0; casillasVisitadas[i] != NULL ;i++)
-	{	printf("%d %p\n", i, casillasVisitadas[i]);
-		if(&(tablero->matriz[fd][cd]) == casillasVisitadas[i])
+	{	if(&(tablero->matriz[fd][cd]) == casillasVisitadas[i])
 			return ERR_MOV_TOC;	}/*No puede moverse ahi porque ya estuvo antes en este turno */
 
 	direccionMov = direccionDestino(movimiento.coordOrig, movimiento.coordDest);
@@ -190,7 +189,6 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	/*Si llegue hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
 	
 	casillasVisitadas[i]=&(tablero->matriz[fo][co]);
-	printf("%p", casillasVisitadas[i]);
 
 	tablero->matriz[fo][co].estado=TOCADA;
 	/* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/

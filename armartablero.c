@@ -41,7 +41,7 @@ void PedirDimensiones(tTablero * tablero)
 		printf("¿Desea continuar?\nIngrese S si es así o N para ingresar nuevas dimensiones.\n");
 
 		decision = leerSN();
-	} while (decision == NO); /* se desean ingresar nuevas dimensiones */
+	} while (decision != 1); /* se desean ingresar nuevas dimensiones */
 
 	tablero->filas=cantfils;
 	tablero->cols=cantcols;
