@@ -13,7 +13,7 @@ void PedirDimensiones(tTablero * tablero);
 tTablero GenerarTablero(int fils, int cols);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar, tFlag * proxObligado);
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia);
 void imprimirError(tFlag error);
 enum tCaptura pedirCaptura (void);
 void pedirCadena(tMovimiento *mov);
@@ -38,7 +38,6 @@ int main(){
 	int jugador=0;
 	int movimiento;
 	enum tDireccion dir=-1;
-	int concat;
 	int a,b;
 	PedirDimensiones(&tablero);
 	tablero=GenerarTablero(tablero.filas,tablero.cols);
@@ -46,33 +45,26 @@ int main(){
 
 	do{	
 		movimiento=-1;
-		concat=1;
 		do{
 			
-			if (obligado && concat){
+			if (obligado)
 				pedirCadena(&mov);
-				}
 			else
 				jugada=pedirJugada(&mov, str);
 				
 			if(jugada==MOV){	
-				movimiento=validarMovimiento(jugador, &tablero, mov, &dir, limpiar, &obligado);
+				movimiento=validarMovimiento(jugador, &tablero, mov, &dir);
 				if (movimiento == AMBOS) {
 					mov.tipoMov = pedirCaptura();
 				}
 				else if(movimiento==APPROACH || movimiento==WITHDRAWAL){
 					mov.tipoMov=movimiento;
-					}	
+					}
 				else
 					imprimirError(movimiento);
-				
-				concat=movimiento>0;
-				
+					
 				printf("\n MOVIMIENTO: %d\n OBLIGADO:%d\n", movimiento, obligado);
 			}	
-			else{
-				limpiar=0;
-				}
 		}while(jugada==MOV && movimiento<0); /*ERROR*/
 	
 	
@@ -87,24 +79,23 @@ int main(){
 					printf("Tocada: %d, %d\n",a+1,b+1);
 				}
 
+			obligado=jugadaObligada(&tablero, jugador, mov.coordDest);
 
-			if(obligado=jugadaObligada(&tablero, jugador, mov.coordDest))
-				limpiar=0;					
-
-			else{ /*Cambio de turno*/
+			if (obligado) {
+			mov.coordOrig.fil = mov.coordDest.fil; /* al tener que concatenar una jugada, el origen es el destino de antes */ 
+			mov.coordOrig.col = mov.coordDest.col;
+			}
+			else { /*Cambio de turno*/
 				printf("Cambio\n");
 				jugador=!jugador; /*Cambia*/
 				printf("\nLe toca al jugador %s\n", jugador?"negro":"blanco");
 				dir = 0; /*Ninguna*/
-				limpiar=1;
-			}	
-
-			if (limpiar)
 				limpiarTocadas(&tablero);
+			}
 		}
-	
+
 	}while(jugada!=QUIT);
-	
+
 	return 0;
 
 }

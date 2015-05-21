@@ -131,7 +131,7 @@ int paika(char jugador, tTablero * tablero){
 	return 1; /*Estamos en situacion de paika*/
 }
 
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag limpiar, tFlag * proxObligado){
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia) {
 	
 	int jugada, aux;
 
@@ -145,15 +145,6 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 
 	static tCasilla * casillasVisitadas[MAXMOVS]; 
 	
-	*proxObligado=1; /*Si hay error, esta obligado a seguir moviendo*/
-
-	if (limpiar) {
-	/*En casillasVisitadas se guarda la direccion de las casillas visitadas.
-	** Cada vez que cambia el jugador, hay que limpiarlo. Si continua el turno, no. */
-		for(i=0; casillasVisitadas[i]!=NULL ;i++)
-			casillasVisitadas[i]=NULL;
-	}
-
 	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >= tablero->filas || fd >= tablero->filas || co >= tablero->cols || cd >= tablero->cols)
 		return ERR_MOV_RANGO; /*Fuera de limites del tablero*/
 
@@ -162,11 +153,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 
 	if(tablero->matriz[fd][cd].ocupante != VACIO)
 		return ERR_MOV_DEST; /* No puede mover porque la casilla no esta vacia */
-/*
-	for(i=0; casillasVisitadas[i] != NULL ;i++)
-	{	if(&(tablero->matriz[fd][cd]) == casillasVisitadas[i])
-			return ERR_MOV_TOC;  }*/ /*No puede moverse ahi porque ya estuvo antes en este turno */
-	
+
 	if(tablero->matriz[fd][cd].estado==TOCADA)
 		return ERR_MOV_TOC;
 
@@ -191,10 +178,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	
 	/*Si llegue hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
 	
-	/* casillasVisitadas[i]=&(tablero->matriz[fo][co]); */
-
 	tablero->matriz[fo][co].estado=TOCADA;
-	/* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
 	
 	*direccionPrevia = direccionMov;
 
@@ -203,15 +187,13 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 		jugada=movimiento.tipoMov;
 
 	/* Valido si la proxima jugada es obligada */
-	/**proxObligado = jugadaObligada(tablero, jugador, casillasVisitadas, movimiento.coordDest);	
-	*/
 
 	return jugada;
 }
 
 
 
-int jugadaObligada(tTablero * tablero, int jugador, /*tCasilla * visitadas[],*/ tCoordenada origen){
+int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen){
 
 	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
 	int dir, i, chequear=1;
@@ -223,21 +205,17 @@ int jugadaObligada(tTablero * tablero, int jugador, /*tCasilla * visitadas[],*/ 
 		incrementoSegunDir(&dirFil, &dirCol, direcciones[dir]);
 		destino.fil = origen.fil + dirFil;
 		destino.col = origen.col + dirCol;
-/*
-		for(i=0; visitadas[i] != NULL ; i++)
-				if(&(tablero->matriz[destino.fil][destino.col]) == visitadas[i])
-					chequear=0; */
 		
 		if(destino.fil<(tablero->filas) && destino.fil>=0 && destino.col<(tablero->cols) && destino.col>=0){
 
 		if(tablero->matriz[destino.fil][destino.col].estado != TOCADA)  /*Solo chequeo si hay comida si no visite esa casilla antes*/
 			{ printf("%d, %d no esta tocada\n", destino.fil+1, destino.col+1);
 			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
-			{	printf("Hay comida yendo a %d, %d\n", destino.fil, destino.col);
+			{	printf("Hay comida yendo a %d, %d\n", destino.fil+1, destino.col+1);
 				return 1; /*Debe capturar esa pieza la proxima jugada */}
 		}
 			else
-				printf("%d, %d esta tocada\n", destino.fil, destino.col);
+				printf("%d, %d esta tocada\n", destino.fil+1, destino.col+1);
 		}
 		}	
 

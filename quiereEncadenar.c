@@ -23,9 +23,8 @@ void pedirCadena (tMovimiento *mov) {
 	int fo, co;
 	int n;
 
-	/* las coordenadas de origen nuevas son las del destino anterior */
-	fo = mov->coordOrig.fil = mov->coordDest.fil+1; /* se le suma 1 ya que se le había restado antes en leerCoord */ 
-	co = mov->coordOrig.col = mov->coordDest.col+1;
+	fo = ++(mov->coordOrig.fil); /* sumamos 1 a las coordenadas, pues leerCoord les resta 1 */
+	co = ++(mov->coordOrig.col);
 
 	printf("Puede encadenar una movimiento!\n");
 	printf("Ingrese solo la coordenada de la casilla a la que desea moverse y el tipo de captura si es necesario\n");
