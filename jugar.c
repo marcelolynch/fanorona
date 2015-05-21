@@ -13,12 +13,12 @@ void PedirDimensiones(tTablero * tablero);
 tTablero GenerarTablero(int fils, int cols);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia);
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, int hayPaika);
 void imprimirError(tFlag error);
 enum tCaptura pedirCaptura (void);
 void pedirCadena(tMovimiento *mov);
 int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen);
-
+int paika(char jugador, tTablero * tablero);
 
 void limpiarTocadas(tTablero * tablero){
 	int i,j;
@@ -39,6 +39,7 @@ int main(){
 	int movimiento;
 	enum tDireccion dir=-1;
 	int a,b;
+	int hayPaika;
 	PedirDimensiones(&tablero);
 	tablero=GenerarTablero(tablero.filas,tablero.cols);
 	ImprimirTablero(&tablero);
@@ -47,13 +48,15 @@ int main(){
 		movimiento=-1;
 		do{
 			
+			hayPaika=paika(jugador, &tablero);
+			
 			if (obligado)
 				pedirCadena(&mov);
 			else
 				jugada=pedirJugada(&mov, str);
 				
 			if(jugada==MOV){	
-				movimiento=validarMovimiento(jugador, &tablero, mov, &dir);
+				movimiento=validarMovimiento(jugador, &tablero, mov, &dir, hayPaika);
 				if (movimiento == AMBOS) {
 					mov.tipoMov = pedirCaptura();
 				}
@@ -72,14 +75,10 @@ int main(){
 			printf("TipoMov: %d\n", mov.tipoMov);
 			actualizarTablero(&tablero, dir, mov);	
 			ImprimirTablero(&tablero);
-
-			for(a=0; a<tablero.filas ; a++)
-			for(b=0; b<tablero.cols ; b++){
-				if(tablero.matriz[a][b].estado==TOCADA)
-					printf("Tocada: %d, %d\n",a+1,b+1);
-				}
-
-			obligado=jugadaObligada(&tablero, jugador, mov.coordDest);
+			
+		
+			obligado = !hayPaika && jugadaObligada(&tablero, jugador, mov.coordDest);
+			
 
 			if (obligado) {
 			mov.coordOrig.fil = mov.coordDest.fil; /* al tener que concatenar una jugada, el origen es el destino de antes */ 
@@ -89,9 +88,16 @@ int main(){
 				printf("Cambio\n");
 				jugador=!jugador; /*Cambia*/
 				printf("\nLe toca al jugador %s\n", jugador?"negro":"blanco");
-				dir = 0; /*Ninguna*/
+				dir = -1; /*Ninguna*/
 				limpiarTocadas(&tablero);
 			}
+			
+			for(a=0; a<tablero.filas ; a++)
+			for(b=0; b<tablero.cols ; b++){
+				if(tablero.matriz[a][b].estado==TOCADA)
+					printf("Tocada: %d, %d\n",a+1,b+1);
+				}
+
 		}
 
 	}while(jugada!=QUIT);

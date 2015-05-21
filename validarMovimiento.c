@@ -112,26 +112,27 @@ int paika(char jugador, tTablero * tablero){
 			if(tablero->matriz[i][j].ocupante == jugador){
 				origen.fil=i;
 				origen.col=j;
-				if(hayComida(jugador, tablero, origen, N)!=NINGUNO
+			if(hayComida(jugador, tablero, origen, N)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, S)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, E)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, O)!=NINGUNO)
-					{printf("Hay comida en %d %d", i, j);
-					return 0;} /* Aprovecho laziness */
+					{printf("Hay comida desde %d, %d\n", i+1, j+1);
+					return 0;} 
 				else if(tablero->matriz[i][j].tipo == FUERTE
 				&& (hayComida(jugador, tablero, origen, NE)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, NO)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, SE)!=NINGUNO
 				|| hayComida(jugador, tablero, origen, SO)!=NINGUNO))
-					{printf("Hay comida en %d %d", i, j);
-					return 0;}
+					{printf("Hay comida desde %d, %d\n", i+1, j+1);
+				return 0;}
+
 			}
 		}
 
 	return 1; /*Estamos en situacion de paika*/
 }
 
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia) {
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, int hayPaika) {
 	
 	int jugada, aux;
 
@@ -168,11 +169,11 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	if(direccionMov == *direccionPrevia)
 		return ERR_MOV_DIR;		/*No puede moverse en la misma direccion en la que venia moviendose */	
 
-	if((aux=hayComida(jugador, tablero, movimiento.coordOrig, direccionMov)) != NINGUNO || paika(jugador, tablero))
+	if((aux=hayComida(jugador, tablero, movimiento.coordOrig, direccionMov)) != NINGUNO || hayPaika)
 		/*Solamente chequeo la situacion de Paika si no selecciono un movimiento donde pueda comer */
 		jugada=aux;
 	else{
-		printf("aux: %d, paika: %d", aux, paika(jugador,tablero));
+		printf("aux: %d, paika: %d", aux, hayPaika);
 		return ERR_MOV_PAIKA;
 	}
 	
