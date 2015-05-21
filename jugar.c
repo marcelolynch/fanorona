@@ -13,7 +13,7 @@ void PedirDimensiones(tTablero * tablero);
 tTablero GenerarTablero(int fils, int cols);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, int hayPaika);
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia);
 void imprimirError(tFlag error);
 enum tCaptura pedirCaptura (void);
 void pedirCadena(tMovimiento *mov);
@@ -39,7 +39,6 @@ int main(){
 	int movimiento;
 	enum tDireccion dir=-1;
 	int a,b;
-	int hayPaika;
 	PedirDimensiones(&tablero);
 	tablero=GenerarTablero(tablero.filas,tablero.cols);
 	ImprimirTablero(&tablero);
@@ -48,7 +47,6 @@ int main(){
 		movimiento=-1;
 		do{
 			
-			hayPaika=paika(jugador, &tablero);
 			
 			if (obligado)
 				pedirCadena(&mov);
@@ -56,14 +54,14 @@ int main(){
 				jugada=pedirJugada(&mov, str);
 				
 			if(jugada==MOV){	
-				movimiento=validarMovimiento(jugador, &tablero, mov, &dir, hayPaika);
+				movimiento=validarMovimiento(jugador, &tablero, mov, &dir);
 				if (movimiento == AMBOS) {
 					mov.tipoMov = pedirCaptura();
 				}
 				else if(movimiento==APPROACH || movimiento==WITHDRAWAL){
 					mov.tipoMov=movimiento;
 					}
-				else
+				else if (movimiento != NINGUNO)
 					imprimirError(movimiento);
 					
 				printf("\n MOVIMIENTO: %d\n OBLIGADO:%d\n", movimiento, obligado);
@@ -75,14 +73,14 @@ int main(){
 			printf("TipoMov: %d\n", mov.tipoMov);
 			actualizarTablero(&tablero, dir, mov);	
 			ImprimirTablero(&tablero);
-			
-		
-			obligado = !hayPaika && jugadaObligada(&tablero, jugador, mov.coordDest);
-			
+			obligado = 0;			
+
+			if (movimiento != NINGUNO) /* no puede encadenar luego de paika */
+				obligado = jugadaObligada(&tablero, jugador, mov.coordDest);
 
 			if (obligado) {
-			mov.coordOrig.fil = mov.coordDest.fil; /* al tener que concatenar una jugada, el origen es el destino de antes */ 
-			mov.coordOrig.col = mov.coordDest.col;
+				mov.coordOrig.fil = mov.coordDest.fil; /*al tener que concatenar una jugada, el origen es el destino de antes*/ 
+				mov.coordOrig.col = mov.coordDest.col;
 			}
 			else { /*Cambio de turno*/
 				printf("Cambio\n");
@@ -125,7 +123,7 @@ void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimient
 		fini=mov.coordDest.fil + dirFil; /*De donde empieza a comer*/
 		cini=mov.coordDest.col + dirCol;
 		}
-	else
+	else if (mov.tipoMov != NINGUNO)
 		printf("ERROOOOOOOOOR\n\a\a\a\a");
 	printf("%d,%d -> %d,%d\n", mov.coordOrig.fil, mov.coordOrig.col, mov.coordDest.fil, mov.coordDest.col);
 	tablero->matriz[mov.coordDest.fil][mov.coordDest.col].ocupante = jugador;

@@ -132,7 +132,7 @@ int paika(char jugador, tTablero * tablero){
 	return 1; /*Estamos en situacion de paika*/
 }
 
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, int hayPaika) {
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia) {
 	
 	int jugada, aux;
 
@@ -143,6 +143,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	
 	enum tDireccion direccionMov;
 	int i;
+	int hayPaika;
 
 	static tCasilla * casillasVisitadas[MAXMOVS]; 
 	
@@ -169,7 +170,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	if(direccionMov == *direccionPrevia)
 		return ERR_MOV_DIR;		/*No puede moverse en la misma direccion en la que venia moviendose */	
 
-	if((aux=hayComida(jugador, tablero, movimiento.coordOrig, direccionMov)) != NINGUNO || hayPaika)
+	if((aux=hayComida(jugador, tablero, movimiento.coordOrig, direccionMov)) != NINGUNO || (hayPaika = paika(jugador, tablero)))
 		/*Solamente chequeo la situacion de Paika si no selecciono un movimiento donde pueda comer */
 		jugada=aux;
 	else{
