@@ -11,7 +11,7 @@
 
 
 void incrementoSegunDir(int * dirFil, int * dirCol, enum tDireccion direccion);
-int jugadaObligada(tTablero * tablero, int jugador, tCasilla * visitadas[], tCoordenada origen);
+int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen);
 
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino){
 
@@ -162,10 +162,13 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 
 	if(tablero->matriz[fd][cd].ocupante != VACIO)
 		return ERR_MOV_DEST; /* No puede mover porque la casilla no esta vacia */
-
+/*
 	for(i=0; casillasVisitadas[i] != NULL ;i++)
 	{	if(&(tablero->matriz[fd][cd]) == casillasVisitadas[i])
-			return ERR_MOV_TOC;	}/*No puede moverse ahi porque ya estuvo antes en este turno */
+			return ERR_MOV_TOC;  }*/ /*No puede moverse ahi porque ya estuvo antes en este turno */
+	
+	if(tablero->matriz[fd][cd].estado==TOCADA)
+		return ERR_MOV_TOC;
 
 	direccionMov = direccionDestino(movimiento.coordOrig, movimiento.coordDest);
 
@@ -188,7 +191,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	
 	/*Si llegue hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
 	
-	casillasVisitadas[i]=&(tablero->matriz[fo][co]);
+	/* casillasVisitadas[i]=&(tablero->matriz[fo][co]); */
 
 	tablero->matriz[fo][co].estado=TOCADA;
 	/* i ya esta al final de casillasVisitadas (el primer NULL). Me estoy yendo de la casilla, la agrego como tocada*/
@@ -200,14 +203,16 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 		jugada=movimiento.tipoMov;
 
 	/* Valido si la proxima jugada es obligada */
-	*proxObligado = jugadaObligada(tablero, jugador, casillasVisitadas, movimiento.coordDest);	
+	/**proxObligado = jugadaObligada(tablero, jugador, casillasVisitadas, movimiento.coordDest);	
+	*/
 
 	return jugada;
 }
 
 
 
-int jugadaObligada(tTablero * tablero, int jugador, tCasilla * visitadas[], tCoordenada origen){
+int jugadaObligada(tTablero * tablero, int jugador, /*tCasilla * visitadas[],*/ tCoordenada origen){
+
 	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
 	int dir, i, chequear=1;
 	int dirFil, dirCol;
@@ -226,9 +231,9 @@ int jugadaObligada(tTablero * tablero, int jugador, tCasilla * visitadas[], tCoo
 		if(destino.fil<(tablero->filas) && destino.fil>=0 && destino.col<(tablero->cols) && destino.col>=0){
 
 		if(tablero->matriz[destino.fil][destino.col].estado != TOCADA)  /*Solo chequeo si hay comida si no visite esa casilla antes*/
-			{ printf("%d, %d no esta tocada\n", destino.fil, destino.col);
+			{ printf("%d, %d no esta tocada\n", destino.fil+1, destino.col+1);
 			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
-			{	printf("Hay comida desde %d, %d\n", destino.fil, destino.col);
+			{	printf("Hay comida yendo a %d, %d\n", destino.fil, destino.col);
 				return 1; /*Debe capturar esa pieza la proxima jugada */}
 		}
 			else

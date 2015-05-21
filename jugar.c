@@ -1,6 +1,7 @@
 #include "fanorona.h"
 #include <stdio.h>
 #define MAX_NOMBRE 25
+
 void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion);
 void PedirDimensiones(tTablero * tablero);
 tTablero GenerarTablero(int fils, int cols);
@@ -16,6 +17,8 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 void imprimirError(tFlag error);
 enum tCaptura pedirCaptura (void);
 void pedirCadena(tMovimiento *mov);
+int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen);
+
 
 void limpiarTocadas(tTablero * tablero){
 	int i,j;
@@ -36,7 +39,7 @@ int main(){
 	int movimiento;
 	enum tDireccion dir=-1;
 	int concat;
-
+	int a,b;
 	PedirDimensiones(&tablero);
 	tablero=GenerarTablero(tablero.filas,tablero.cols);
 	ImprimirTablero(&tablero);
@@ -57,7 +60,7 @@ int main(){
 				if (movimiento == AMBOS) {
 					mov.tipoMov = pedirCaptura();
 				}
-				else if(movimiento>0){
+				else if(movimiento==APPROACH || movimiento==WITHDRAWAL){
 					mov.tipoMov=movimiento;
 					}	
 				else
@@ -77,13 +80,25 @@ int main(){
 			printf("TipoMov: %d\n", mov.tipoMov);
 			actualizarTablero(&tablero, dir, mov);	
 			ImprimirTablero(&tablero);
-			if(!obligado){
+
+			for(a=0; a<tablero.filas ; a++)
+			for(b=0; b<tablero.cols ; b++){
+				if(tablero.matriz[a][b].estado==TOCADA)
+					printf("Tocada: %d, %d\n",a+1,b+1);
+				}
+
+
+			if(obligado=jugadaObligada(&tablero, jugador, mov.coordDest))
+				limpiar=0;					
+
+			else{ /*Cambio de turno*/
 				printf("Cambio\n");
 				jugador=!jugador; /*Cambia*/
 				printf("\nLe toca al jugador %s\n", jugador?"negro":"blanco");
-				dir = -1;
+				dir = 0; /*Ninguna*/
 				limpiar=1;
 			}	
+
 			if (limpiar)
 				limpiarTocadas(&tablero);
 		}

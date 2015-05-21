@@ -10,7 +10,7 @@ enum tError {ERR_FMT= -120, ERR_FMT_SAVE, ERR_FMT_MOV1, ERR_FMT_MOV2, ERR_MOV_OR
 enum tEstado {LIBRE=0, TOCADA, BLOQUEADA, OBLIGADA};
 enum tJugada {QUIT, SAVE, UNDO, MOV};
 enum tCaptura {NINGUNO=0, WITHDRAWAL, APPROACH, AMBOS}; 
-enum tDireccion {N=0, S, E, O, NE, NO, SE, SO};
+enum tDireccion {N=1, S, E, O, NE, NO, SE, SO};
 
 typedef struct {
 	char tipo; /* debil o fuerte */
