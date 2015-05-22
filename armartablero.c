@@ -31,7 +31,7 @@ void PedirDimensiones(tTablero * tablero)
 			if (hayError)
 				printf("No ingresó dimensiones correctas. Ingrese nuevamente:\n");
 			cantfils= getint("Cantidad de Filas (impar entre %d y %d): ", MIN_DIM, MAX_DIM); 
-			cantcols= getint("Cantidad de Columnas (impar entre %d y %d): ", MIN_DIM, MAX_DIM);
+			cantcols= getint("Cantidad de Columnas (impar entre %d y %d, mayor o igual que las filas): ", MIN_DIM, MAX_DIM);
 			putchar('\n');
 			hayError = 1;
 		} while ( !ES_IMPAR(cantfils) || !ES_IMPAR(cantcols) || !ES_DIM_VALIDA(cantfils, cantcols) || cantfils > cantcols);
@@ -130,9 +130,16 @@ void ImprimirTablero ( tTablero * tablero )
 {	int i, j;
 	static char idColor[]={'B', 'N', 'O'}; /*BLANCO, NEGRO, VACIO*/
 
-	for(i=0; i<tablero->filas; i++)
+	for(i=-1; i<tablero->filas; i++)
 		{	putchar('\n');
+			if(i<0)
+			printf("\t\t\t    ");
+			else
+			printf("\t\t\t %c  ",i<0?' ':i+'1');
 			for(j=0; j<tablero->cols; j++)
+				if(i==-1)
+					printf("%d   ", j+1);
+				else
 				{	if (tablero->matriz[i][j].tipo==DEBIL)
 						printf("%c   ", tolower( idColor[ tablero->matriz[i][j].ocupante ] )); /*BLANCO=0, NEGRO=1, VACIO=2*/
 					else 
