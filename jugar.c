@@ -34,7 +34,7 @@ int main(){
 	char str[MAX_NOMBRE];
 	tMovimiento mov;
         tTablero tablero;
-	tFlag jugada,limpiar=0,obligado=0;
+	tFlag jugada,obligado=0;
 	int jugador=0;
 	int movimiento;
 	enum tDireccion dir=-1;

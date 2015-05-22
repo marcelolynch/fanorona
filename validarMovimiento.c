@@ -142,11 +142,8 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	int cd=movimiento.coordDest.col;
 	
 	enum tDireccion direccionMov;
-	int i;
 	int hayPaika;
 
-	static tCasilla * casillasVisitadas[MAXMOVS]; 
-	
 	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >= tablero->filas || fd >= tablero->filas || co >= tablero->cols || cd >= tablero->cols)
 		return ERR_MOV_RANGO; /*Fuera de limites del tablero*/
 
@@ -198,12 +195,12 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen){
 
 	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
-	int dir, i, chequear=1;
+	int dir;
 	int dirFil, dirCol;
 	tCoordenada destino;
 	int dirsPosibles = tablero->matriz[origen.fil][origen.col].tipo == FUERTE ? 8:4; 
 
-	for(dir=0 ; dir<dirsPosibles ; dir++, chequear=1){
+	for(dir=0 ; dir<dirsPosibles ; dir++){
 		incrementoSegunDir(&dirFil, &dirCol, direcciones[dir]);
 		destino.fil = origen.fil + dirFil;
 		destino.col = origen.col + dirCol;
