@@ -44,6 +44,7 @@ int main(){
 	ImprimirTablero(&tablero);
 
 	do{	
+		quiereGuardar = 0;
 		movimiento=-1;
 		do{
 			
@@ -101,6 +102,7 @@ int main(){
 			quiereGuardar = pedirGuardar(nombre);
 		if (jugada == SAVE || quiereGuardar) {
 			/* poner lo del SAVE aca */
+			printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
 		}
 
 	}while(jugada!=QUIT);
