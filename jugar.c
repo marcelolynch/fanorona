@@ -73,6 +73,7 @@ int main(){
 			actualizarTablero(&tablero, dir, mov);	
 			ImprimirTablero(&tablero);
 			obligado = 0;			
+			quiereGuardar = 0;
 
 			if (movimiento != NINGUNO) /* no puede encadenar luego de paika */
 				obligado = jugadaObligada(&tablero, jugador, mov.coordDest);
@@ -101,6 +102,7 @@ int main(){
 			quiereGuardar = pedirGuardar(nombre);
 		if (jugada == SAVE || quiereGuardar) {
 			/* poner lo del SAVE aca */
+			printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
 		}
 
 	}while(jugada!=QUIT);
