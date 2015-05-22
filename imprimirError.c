@@ -11,8 +11,11 @@ void imprimirError(tFlag error) {
 	case ERR_FMT: 
 		printf("\aError: no se introdujo un tipo de jugada válido.\n"); 
 		break;
-	case ERR_FMT_SAVE: 
+	case ERR_FMT_SAVE1: 
 		printf("\aError: no se introdujo un nombre válido; debe contener al menos un carácter distinto de espacio.\n"); 
+		break;
+	case ERR_FMT_SAVE2:
+		printf("\aError: se introdujo un nombre más largo de lo permitido.\n");
 		break;
 	case ERR_FMT_MOV1: 
 		printf("\aError: no se introdujo un movimiento con el formato adecuado o algúna coordenada es mayor de lo permitido.\n");

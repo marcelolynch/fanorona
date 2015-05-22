@@ -1,6 +1,5 @@
 #include "fanorona.h"
 #include <stdio.h>
-#define MAX_NOMBRE 25
 
 void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion);
 void PedirDimensiones(tTablero * tablero);
@@ -12,6 +11,7 @@ enum tCaptura leerCaptura (const char str[]);
 void PedirDimensiones(tTablero * tablero);
 tTablero GenerarTablero(int fils, int cols);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
+tFlag pedirGuardar(char nombre[]);
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
 int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia);
 void imprimirError(tFlag error);
@@ -31,10 +31,10 @@ void limpiarTocadas(tTablero * tablero){
 
 
 int main(){
-	char str[MAX_NOMBRE];
+	char nombre[MAX_NOM];
 	tMovimiento mov;
         tTablero tablero;
-	tFlag jugada,obligado=0;
+	tFlag jugada, quiereGuardar, obligado=0;
 	int jugador=0;
 	int movimiento;
 	enum tDireccion dir=-1;
@@ -47,11 +47,10 @@ int main(){
 		movimiento=-1;
 		do{
 			
-			
 			if (obligado)
 				pedirCadena(&mov);
 			else
-				jugada=pedirJugada(&mov, str);
+				jugada=pedirJugada(&mov, nombre);
 				
 			if(jugada==MOV){	
 				movimiento=validarMovimiento(jugador, &tablero, mov, &dir);
@@ -96,6 +95,12 @@ int main(){
 					printf("Tocada: %d, %d\n",a+1,b+1);
 				}
 
+		}
+
+		if (jugada == QUIT)
+			quiereGuardar = pedirGuardar(nombre);
+		if (jugada == SAVE || quiereGuardar) {
+			/* poner lo del SAVE aca */
 		}
 
 	}while(jugada!=QUIT);

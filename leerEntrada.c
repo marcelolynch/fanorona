@@ -3,8 +3,6 @@
 **	Piden jugada al usuario y validan el formato
 */
 
-/* cosas pendientes: case-sensitivity */
-
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -15,16 +13,16 @@ static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre
 tFlag validarMovFormato (const char str[], tMovimiento *mov);
 enum tCaptura leerCaptura (const char str[]);
 static const char *leerCoord (const char str[], tCoordenada *coord);
-static const char *salteaEspacios (const char str[]); /* devuelve la dirección del primer carácter distitno de un isspace o NULL */
+static const char *salteaEspacios (const char str[], int *cantEspacios); /* devuelve la dirección del primer carácter distitno de un isspace o NULL */
 void imprimirMov (tMovimiento *mov); /* TEMP */
 void imprimirError(tFlag error); /* TEMP: mover a un .h luego */
-
+int validarFmtNombre(char destino[], const char origen[], int longOrigen);
 
 /* MAIN / FUNCIONES PARA TESTEO */
 
 /* 
 int main(void) {
-	char str[MAX_NOMBRE];
+	char str[MAX_NOM];
 	tMovimiento mov;
 	tFlag jugada;
 
@@ -41,8 +39,8 @@ int main(void) {
 
 	return 0;
 }
-*/
 
+*/
 
 void imprimirMov (tMovimiento *mov) {
 	printf("Origen: [%d, %d]\nDestino: [%d, %d]\n", mov->coordOrig.fil, mov->coordOrig.col, mov->coordDest.fil, mov->coordDest.col);
@@ -93,25 +91,16 @@ static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre
 	if (str[0] != 'M') /* ignora si la primer letra es mayúscula o minúscula excepto si es M, pues el movimiento se llama con M */
 		str[0] = tolower(str[0]);
 
-	if (dim == MIN_STR) {
+	if (dim == MIN_STR && str[0] != 'M') {
 		if (strcmp(str, "quit") == 0)
 			jugada = QUIT;
 		else if (strcmp(str, "undo") == 0)
 			jugada = UNDO;
 	}
 
-	else if (dim > LONG_SAVE && dim < STR_DIM && strncmp(str, "save ", LONG_SAVE) == 0) {
-
-		nuevoNombre = salteaEspacios(str+LONG_SAVE); /* nuevoNombre apunta el primer carácter distinto de espacio */
-
-		if (nuevoNombre != NULL) {
-			strcpy(nombre, nuevoNombre);
-			jugada = SAVE;
-		}
-
-		else
-			jugada = ERR_FMT_SAVE; /* se ingresaron solo espacios como nombre */
-	}
+	else if (dim > LONG_SAVE && strncmp(str, "save ", LONG_SAVE) == 0)
+		jugada = validarFmtNombre (nombre, str+LONG_SAVE, dim-LONG_SAVE); /*str+LONG_SAVE es la dirección en donde comienza el nombre
+										  ** y dim-LONG_SAVE es la longitud de dicho nombre */
 
 	else if (dim <= MAX_MOV) /* es un posible movimiento */
 		jugada = validarMovFormato (str, mov);
@@ -119,11 +108,12 @@ static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre
 	return jugada;
 }
 
-static const char *salteaEspacios (const char str[]) {
-	while (isspace(*str))
+static const char *salteaEspacios (const char str[], int *cantEspacios) {
+	*cantEspacios = 0;
+	while (isspace(*str)) {
 		str++;
-	if (*str == '\0')
-		return NULL;
+		(*cantEspacios)++;
+	}
 	return str;
 }
 
@@ -198,4 +188,24 @@ static const char *leerCoord (const char str[], tCoordenada *coord) {
 	coord->col = num-1;
 	p = &p[++i]; /* direccion del carácter siguiente al ']' */
 	return p;
+}
+
+
+int validarFmtNombre(char destino[], const char origen[], int longOrigen) {
+	const char *nuevoNombre;
+	int cantEspacios;
+	int longNombre;
+
+	nuevoNombre = salteaEspacios(origen, &cantEspacios); /* nuevoNombre apunta el primer caracter distinto de espacio */
+
+	longNombre = longOrigen - cantEspacios; /* longitud del nombre; los espacios iniciales se desestiman */
+
+	if (longNombre >= 1 && longNombre <= MAX_NOM) {
+		strcpy(destino, nuevoNombre);
+		return SAVE;
+	}
+
+	if (longNombre == 0)
+		return ERR_FMT_SAVE1; /* se ingresaron solo espacios como nombre */
+	return ERR_FMT_SAVE2; /* la longitud del nombre es mayor de lo permitida */
 }
