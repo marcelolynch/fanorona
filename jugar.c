@@ -34,7 +34,7 @@ int main(){
 	char nombre[MAX_NOM];
 	tMovimiento mov;
         tTablero tablero;
-	tFlag jugada, quiereGuardar, obligado=0;
+	tFlag jugada, quiereGuardar=0, obligado=0;
 	int jugador=0;
 	int movimiento;
 	enum tDireccion dir=-1;
@@ -44,7 +44,6 @@ int main(){
 	ImprimirTablero(&tablero);
 
 	do{	
-		quiereGuardar = 0;
 		movimiento=-1;
 		do{
 			

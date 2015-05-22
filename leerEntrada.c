@@ -86,7 +86,6 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 
 static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre) {
 	tFlag jugada = ERR_FMT;
-	const char *nuevoNombre;
 
 	if (str[0] != 'M') /* ignora si la primer letra es mayúscula o minúscula excepto si es M, pues el movimiento se llama con M */
 		str[0] = tolower(str[0]);
