@@ -150,6 +150,9 @@ int jugar(tTablero tablero, int modo, int jugador){
 				if(tablero.matriz[a][b].estado==TOCADA)
 					printf("Tocada: %d, %d\n",a+1,b+1);
 				}
+		
+		
+
 
 		}
 
@@ -164,6 +167,27 @@ int jugar(tTablero tablero, int modo, int jugador){
 return 0;
 
 }
+
+
+int puedeMover(tTablero * tablero, int jugador){
+	int i,j;
+	enum tDireccion direcciones[]={N,S,E,O,NE,NO,SE,SO};
+	int dirsPosibles;
+
+	for(i=0; i<tablero->filas; i++)
+		for(i=0; i<tablero->cols; j++){
+
+			#define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols)
+		dirsPosibles = tablero->matriz[posicion.fil][posicion.col].tipo == FUERTE ? 8:4;  
+		for(i=0; i<dirsPosibles ; i++){
+                	dir = direcciones[i];
+                	incrementoSegunDir(&dirFil, &dirCol, dir);
+		
+
+			#undef FDERANGO
+
+}
+
 
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov){
 	int i, j;

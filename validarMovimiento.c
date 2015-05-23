@@ -44,6 +44,48 @@ static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino)
 
 }
 
+
+int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador){
+
+	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
+	int dirsPosibles = tablero->matriz[posicion.fil][posicion.col].tipo == FUERTE ? 8:4;
+	int i, dirFil, dirCol;
+	enum tDireccion dir;
+	tCoordenada adyacente, siguienteAdy;	
+	int enemigo = !jugador;
+
+	for(i=0; i<dirsPosibles ; i++){
+		dir = direcciones[i];
+		incrementoSegunDir(&dirFil, &dirCol, dir);
+		
+		/*Las casillas que pueden comerme por approach o widthraw en el proximo turno*/
+		adyacente.fil = posicion.fil + dirFil;
+		adyacente.fil = posicion.fil + dirFil;
+		siguienteAdy.fil = adyacente.fil + dirFil;
+		siguienteAdy.col = adyacente.col + dirCol;
+
+        	#define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols)		
+		
+		if(!FDERANGO(adyacente.fil, adyacente.col) && !FDERANGO(siguienteAdy.fil, siguienteAdy.col)){
+
+			if(tablero->matriz[adyacente.fil][adyacente.col].ocupante == enemigo
+				&& tablero->matriz[siguienteAdy.fil][siguienteAdy.col].ocupante == VACIO){
+					/*Me comen por WITHDRAWAL en la proxima jugada en esa direcicon*/
+					return 1;
+			}	
+			if(tablero->matriz[adyacente.fil][adyacente.col].ocupante == VACIO
+				&& tablero->matriz[siguienteAdy.fil][siguienteAdy.col].ocupante == enemigo){
+					/*Me comen por APPROACH en la proxima jugada, desde esa direccion*/
+					return 1;
+		}
+		#undef FDERANGO
+		}
+	}
+
+	return 0; /*Si llegue hasta aca, no hay manera de que me capturen*/	
+
+}
+
 enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { 
 
 	/* Devuelve el tipo de captura posible segun el movimiento que quiera realizar el usuario
