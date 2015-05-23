@@ -1,15 +1,14 @@
-#include "fanorona.h"
 #include <stdio.h>
-
+#include "getnum.h"
+#include "fanorona.h"
 void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion);
-void PedirDimensiones(tTablero * tablero);
-tTablero GenerarTablero(int fils, int cols);
-void ImprimirTablero ( tTablero * tablero );
+void pedirDimensiones(tTablero * tablero);
+tTablero generarTablero(int fils, int cols);
+void imprimirTablero ( tTablero * tablero );
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
 void liberarTablero(tTablero * tablero, int n);
 enum tCaptura leerCaptura (const char str[]);
-void PedirDimensiones(tTablero * tablero);
-tTablero GenerarTablero(int fils, int cols);
+void pedirDimensiones(tTablero * tablero);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
 tFlag pedirGuardar(char nombre[]);
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
@@ -19,6 +18,9 @@ enum tCaptura pedirCaptura (void);
 void pedirCadena(tMovimiento *mov);
 int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen);
 int paika(char jugador, tTablero * tablero);
+int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombre);
+tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
+int jugar(tTablero tablero, int modo, int jugador);
 
 void limpiarTocadas(tTablero * tablero){
 	int i,j;
@@ -30,18 +32,72 @@ void limpiarTocadas(tTablero * tablero){
 }
 
 
-int main(){
-	char nombre[MAX_NOM];
-	tMovimiento mov;
-        tTablero tablero;
-	tFlag jugada, quiereGuardar=0, obligado=0;
-	int jugador=0;
-	int movimiento;
+int main(void){
+	
+	enum tOpcion {PVP=1, PVE, CARGAR, SALIR};
+	enum tOpcion opcion;
+	int modo;
+	tTablero tablero;
+	int jugador;
+	char nombre[MAX_NOM];	
+
+	printf("\n\t\t=*=*=*=*=*=*=*=*=*==FANORONA==*=*=*=*=*=*=*=*=*=*=");
+	printf("\n\t\t=*=*=*=*=*=*=*=*=FUTURAMA EDITION=*=*=*=*=*=*=*=*=\n\n");
+
+	printf("\n\t\t=*=*=*=*=*=*=*=*=REGLAS DE JUEGO==*=*=*=*=*=*=*=*=\n");
+	printf("\n\t\t    Hay bastantes reglas, Wikipedialo, ni idea\n\t\t    Ah, salvo que hay que capturar si o si\n\n");
+	printf("\t\t=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=\n\n");
+	printf("\tElija una opcion:\n\n");
+	printf("\t\t1. Juego nuevo: dos jugadores\n");
+	printf("\t\t2. **Cerrado por refacciones** Juego nuevo: un jugador (vs. computadora) \n");
+	printf("\t\t3. Cargar partida de archivo\n");
+	printf("\t\t4. Salir\n\n");
+	do{
+		opcion=getint("Ingrese un numero de opcion >"); 
+	}while(opcion<1 || opcion>4);
+
+	if(opcion == PVP || opcion == PVE){
+		modo = (opcion == PVP); /* 1 para dos jugadores, 0 para juego contra la computadora*/	
+		jugador=BLANCO;
+		if(opcion == PVE){
+			printf("\nCERRADO POR REFACCIONES. ASSERT'D!\n\n");
+			return 1;
+			}
+		pedirDimensiones(&tablero);
+		tablero=generarTablero(tablero.filas,tablero.cols);
+
+	}
+	else if(opcion == CARGAR){
+		printf("Ingrese el nombre del archivo:\n   >");
+		getlinea(nombre, MAX_NOM);
+		tablero=cargarPartida(&modo, &jugador, nombre); /*modo cambia al correspondiente (0 o 1)*/
+	        printf("\nMODO DE JUEGO: %s\n", modo?"DOS JUGADORES":"JUGADOR VS COMPUTADORA");
+		printf("TURNO DEL JUGARDOR %s\n", jugador?"NEGRO":"BLANCO");
+		printf("DIMENSIONES DEL TABLERO: %dx%d\n\n",tablero.filas,tablero.cols);
+	}
+			
+	else{
+		printf("\n\t\t¡Adios!\n\n");
+		return 0;
+	}
+
+
+	jugar(tablero, modo, jugador);		
+
+	return 0;
+
+}
+
+int jugar(tTablero tablero, int modo, int jugador){
+
 	enum tDireccion dir=NULA;
-	int a,b;
-	PedirDimensiones(&tablero);
-	tablero=GenerarTablero(tablero.filas,tablero.cols);
-	ImprimirTablero(&tablero);
+	tMovimiento mov;
+	char nombre[MAX_NOM];
+	tFlag jugada, quiereGuardar=0, obligado=0;
+	int movimiento;
+	int a,b; /*TEMP*/
+
+	imprimirTablero(&tablero);
 
 	do{	
 		movimiento=-1;
@@ -71,7 +127,7 @@ int main(){
 		if(jugada==MOV){
 			printf("TipoMov: %d\n", mov.tipoMov);
 			actualizarTablero(&tablero, dir, mov);	
-			ImprimirTablero(&tablero);
+			imprimirTablero(&tablero);
 			obligado = 0;			
 
 			if (movimiento != NINGUNO) /* no puede encadenar luego de paika */
@@ -100,13 +156,12 @@ int main(){
 		if (jugada == QUIT)
 			quiereGuardar = pedirGuardar(nombre);
 		if (jugada == SAVE || quiereGuardar) {
-			/* poner lo del SAVE aca */
+			guardarPartida(&tablero, modo, jugador, nombre);
 			printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
 		}
 
 	}while(jugada!=QUIT);
-
-	return 0;
+return 0;
 
 }
 

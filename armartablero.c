@@ -18,7 +18,7 @@ tTablero cargarPartida(int * modo, const char * nombre);
 tFlag leerSN(void);
 
 
-void PedirDimensiones(tTablero * tablero)
+void pedirDimensiones(tTablero * tablero)
 {	tFlag hayError;
 	int decision;
 	int cantfils, cantcols;
@@ -95,7 +95,7 @@ void liberarTablero(tTablero * tablero, int n){
 			  
 }
 
-tTablero GenerarTablero(int fils, int cols)
+tTablero generarTablero(int fils, int cols)
 {	int i;
 	
 	tTablero tablero;
@@ -126,7 +126,7 @@ tTablero GenerarTablero(int fils, int cols)
 /* FIN BACK END*/
 
 /*LAS FUNCIONES QUE SIGUEN SON DE FRONT END*/
-void ImprimirTablero ( tTablero * tablero )
+void imprimirTablero ( tTablero * tablero )
 {	int i, j;
 	static char idColor[]={'B', 'N', 'O'}; /*BLANCO, NEGRO, VACIO*/
 

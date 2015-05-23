@@ -72,7 +72,7 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 	char str[STR_DIM];
 	tFlag jugada=OK;
 
-	printf("Ingrese una jugada:\n");
+	printf("Ingrese una jugada:\n > ");
 
 	do {
 		n = getlinea(str, STR_DIM);

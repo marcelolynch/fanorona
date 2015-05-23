@@ -10,6 +10,8 @@ int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombr
 	int nfilas=tablero->filas;
 	int ncols=tablero->cols;
 	int i,j;
+	
+	jugador++; /*Debe ser 1 para el jugador 1 (que esta alojado como 0), y 2 para el jugador 2*/
 
 	if((f=fopen(nombre, "wb")) == NULL)
 		return ERROR;
@@ -47,7 +49,8 @@ tTablero cargarPartida(int * modo, int * jugador, const char * nombre){
 	fread(&fils, sizeof(int), 1, f);
 	fread(&cols, sizeof(int), 1, f);
 
-	printf("\nMODO DE JUEGO:%d\nTURNO DEL JUGARDOR Nº%d\nDIMS:%dx%d\n\n",*modo,*jugador,fils,cols);
+	(*jugador)--; /* En el savefile estan guardados como 1,2. Se manejan como 0,1*/
+	
 
         tablero.matriz=malloc(fils*sizeof(*tablero.matriz));
 
