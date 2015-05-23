@@ -37,7 +37,7 @@ int main(){
 	tFlag jugada, quiereGuardar, obligado=0;
 	int jugador=0;
 	int movimiento;
-	enum tDireccion dir=-1;
+	enum tDireccion dir=NULA;
 	int a,b;
 	PedirDimensiones(&tablero);
 	tablero=GenerarTablero(tablero.filas,tablero.cols);
@@ -85,7 +85,7 @@ int main(){
 				printf("Cambio\n");
 				jugador=!jugador; /*Cambia*/
 				printf("\nLe toca al jugador %s\n", jugador?"negro":"blanco");
-				dir = -1; /*Ninguna*/
+				dir = NULA; /*Ninguna*/
 				limpiarTocadas(&tablero);
 			}
 			
@@ -174,5 +174,7 @@ void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion){
                 case SO: *dirFil=1;
                          *dirCol=-1;
                 break;
+		default:
+		break;
         }
 }

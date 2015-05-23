@@ -4,6 +4,7 @@
 tFlag leerSN(void);
 tFlag validarFmtNombre (char destino[], char origen[], int dimOrigen);
 int getlinea(char str[], int dim);
+void imprimirError(tFlag error);
 
 tFlag pedirGuardar (char nombre[]) {
 	char str[STR_DIM];
