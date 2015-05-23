@@ -34,7 +34,7 @@ int main(){
 	char nombre[MAX_NOM];
 	tMovimiento mov;
         tTablero tablero;
-	tFlag jugada, quiereGuardar, obligado=0;
+	tFlag jugada, quiereGuardar=0, obligado=0;
 	int jugador=0;
 	int movimiento;
 	enum tDireccion dir=NULA;
@@ -101,6 +101,7 @@ int main(){
 			quiereGuardar = pedirGuardar(nombre);
 		if (jugada == SAVE || quiereGuardar) {
 			/* poner lo del SAVE aca */
+			printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
 		}
 
 	}while(jugada!=QUIT);
