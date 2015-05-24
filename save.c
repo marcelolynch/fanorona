@@ -3,7 +3,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
-void liberarTablero(tTablero * tablero, int n);
+void liberarTodo(tCasilla ** matriz, int n);
+tCasilla ** generarMatrizTablero(int fils, int cols);
 
 int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombre){
 	FILE *f;
@@ -52,21 +53,9 @@ tTablero cargarPartida(int * modo, int * jugador, const char * nombre){
 	(*jugador)--; /* En el savefile estan guardados como 1,2. Se manejan como 0,1*/
 	
 
-        tablero.matriz=malloc(fils*sizeof(*tablero.matriz));
-
-        if (tablero.matriz == NULL)
-                return tablero;
-
-        for(i=0; i<fils; i++)
-        {
-                tablero.matriz[i]=malloc(cols*sizeof(tCasilla));
-
-                if(tablero.matriz[i] ==NULL){
-                        liberarTablero(&tablero, i);
-                        return tablero;
-                }
-        }
-
+        tablero.matriz=generarMatrizTablero(fils, cols);
+	if(tablero.matriz==NULL)
+		return tablero;
 
 	tablero.filas=fils;
 	tablero.cols=cols;
@@ -89,7 +78,8 @@ tTablero cargarPartida(int * modo, int * jugador, const char * nombre){
 				tablero.matriz[i][j].ocupante=NEGRO;
 				break;	
 				default:
-				liberarTablero(&tablero, tablero.filas);
+				liberarTodo(tablero.matriz, tablero.filas);
+				tablero.matriz=NULL;
 				return tablero;
 				break;
  			}

@@ -85,38 +85,51 @@ static void rellenarTablero(tTablero * tablero){
 	return;
 }
 
-void liberarTablero(tTablero * tablero, int n){
+void liberarTodo(tCasilla ** matriz, int n){
 	
 	int i;
 	for(i=0; i<n ; i++)
-		free(tablero->matriz[i]);
+		free(matriz[i]);
 	
-	free(tablero->matriz);
+	free(matriz);
 			  
 }
 
-tTablero generarTablero(int fils, int cols)
-{	int i;
+tCasilla ** generarMatrizTablero(int fils, int cols){
+
+	tCasilla ** matriz;
+	int i;
+	
+	matriz=malloc(fils *sizeof(*matriz));
+
+	if (matriz == NULL)
+		return NULL;
+		
+	for(i=0;  i< fils; i++)
+	{	
+		matriz[i]= malloc(cols*sizeof(tCasilla));
+				
+		if(matriz[i] ==NULL){
+			liberarTodo(matriz, i);
+			return NULL;
+		}	
+	}
+
+	return matriz;
+}
+
+
+tTablero generarTablero(int fils, int cols){
 	
 	tTablero tablero;
 	
+	tablero.matriz=generarMatrizTablero(fils, cols);
+	if(tablero.matriz == NULL)
+		return tablero;
+
 	tablero.filas=fils;
 	tablero.cols=cols;
-	tablero.matriz=malloc(fils *sizeof(*tablero.matriz));
-
-	if (tablero.matriz == NULL)
-		return tablero;
-		
-	for(i=0; i< fils; i++)
-	{	
-		tablero.matriz[i]= malloc(cols*sizeof(tCasilla));
-		
-		if(tablero.matriz[i] ==NULL){
-			liberarTablero(&tablero, i);
-			return tablero;
-		}
-	}
-
+	
 	rellenarTablero(&tablero);
 	
 	return tablero;

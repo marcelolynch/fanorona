@@ -6,7 +6,7 @@ void pedirDimensiones(tTablero * tablero);
 tTablero generarTablero(int fils, int cols);
 void imprimirTablero ( tTablero * tablero );
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
-void liberarTablero(tTablero * tablero, int n);
+void liberarTodo(tCasilla ** tablero, int n);
 enum tCaptura leerCaptura (const char str[]);
 void pedirDimensiones(tTablero * tablero);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
@@ -168,6 +168,7 @@ return 0;
 
 }
 
+/*
 
 int puedeMover(tTablero * tablero, int jugador){
 	int i,j;
@@ -186,9 +187,10 @@ int puedeMover(tTablero * tablero, int jugador){
 
 			#undef FDERANGO
 
+		}		
 }
 
-
+*/
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov){
 	int i, j;
 	int dirFil, dirCol;
