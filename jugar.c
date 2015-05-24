@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "getnum.h"
 #include "fanorona.h"
+
 void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion);
 void pedirDimensiones(tTablero * tablero);
 tTablero generarTablero(int fils, int cols);
@@ -21,6 +22,7 @@ int paika(char jugador, tTablero * tablero);
 int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombre);
 tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
 int jugar(tTablero tablero, int modo, int jugador);
+int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador);
 
 void limpiarTocadas(tTablero * tablero){
 	int i,j;
@@ -29,6 +31,87 @@ void limpiarTocadas(tTablero * tablero){
 			if(tablero->matriz[i][j].estado == TOCADA)
 				tablero->matriz[i][j].estado = VACIO;
 		}
+}
+
+#define SEGUIR 0
+#define GANADOR_BLANCO 1
+#define GANADOR_NEGRO 2
+#define EMPATE 3
+int estadoPostJugada(tTablero * tablero){
+	int hayBlancos=0, hayNegros=0;
+	int ocupante;
+	int i,j,n;
+	int hayMovimientos=0;
+	tCoordenada origen;
+	tCoordenada ady;
+	enum tDireccion direcciones[]={N, S, E, O, NE, NO, SE, SO};
+	int dir, dirsPosibles, dirFil, dirCol;
+	int estado;
+
+	for(i=0; i<tablero->filas ; i++)
+	for(j=0; j<tablero->cols ; j++){
+
+		if((ocupante = tablero->matriz[i][j].ocupante) == VACIO){
+			/* Limpieza de las casillas tocadas */
+			if(tablero->matriz[i][j].estado == TOCADA) 
+                	      	tablero->matriz[i][j].estado = LIBRE;
+		}
+		else{ 
+			if(ocupante==BLANCO){
+				/*printf("Hay un blanco en %d, %d\n", i,j);*/
+				hayBlancos=1;
+			}
+			else{
+				hayNegros=1;
+				/*printf("Hay un negro en %d, %d\n", i,j);*/
+			}
+
+
+			/*Voy a analiar si esta casilla esta en una posicion desfavorable (bloqueada) en la proxima movida
+			** es decir, si no puede capturar nada en la siguiente movida que haga, y que no importa donde se mueva
+			** alguien lo captura. Si todas las piezas (de ambos jugadores) cumplen con esto, el juego termina en empate. */
+			origen.fil = i;
+			origen.col = j;
+			if(jugadaObligada(tablero, ocupante, origen)){
+				hayMovimientos=1;
+			}
+			/*Si puede comer en la jugada posterior, la casilla no esta bloqueada
+			** (esta obligada a comer aunque sea mala estrategia)
+			** si la jugada no es obligada, analizo para cada direccion si la captura es inminente en caso de dirigirse a ella*/
+			else{
+        	        	dirsPosibles = tablero->matriz[i][j].tipo == FUERTE ? 8:4;
+                		for(n=0; n<dirsPosibles ; n++){
+                        		dir = direcciones[n];
+                      	  		incrementoSegunDir(&dirFil, &dirCol, dir);
+														
+	              	 #define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols)
+			
+				if( !FDERANGO(i+dirFil, j+dirCol) ){
+					ady.fil=i+dirFil;
+					ady.col=j+dirCol;
+					if(! meCapturan(tablero, ady, ocupante)) 
+						hayMovimientos=1; /* Existe un movimiento en el que no se ve amenazado en la jugada posterior */
+				}
+				}
+			}	
+			#undef FDERANGO		
+	  
+		}			
+	}
+
+	if(hayMovimientos){
+		if(!hayBlancos)
+			estado = GANADOR_NEGRO;
+		else if(!hayNegros)
+			estado = GANADOR_BLANCO;
+		else
+			estado = SEGUIR;
+	}
+	else
+		estado = EMPATE;
+
+
+	return estado;
 }
 
 
@@ -96,6 +179,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 	tFlag jugada, quiereGuardar=0, obligado=0;
 	int movimiento;
 	int a,b; /*TEMP*/
+	int estado = SEGUIR;
 
 	imprimirTablero(&tablero);
 
@@ -149,9 +233,18 @@ int jugar(tTablero tablero, int modo, int jugador){
 			for(b=0; b<tablero.cols ; b++){
 				if(tablero.matriz[a][b].estado==TOCADA)
 					printf("Tocada: %d, %d\n",a+1,b+1);
+				
+
 				}
 		
+			estado = estadoPostJugada(&tablero);
 		
+			switch(estado){
+				case SEGUIR: printf("SEGUIR\n\n"); break;
+				case EMPATE: printf("EMPATE\n\n"); break;
+				case GANADOR_NEGRO: printf("GANA NEGRO\n\n"); break;
+				case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
+				}	
 
 
 		}
@@ -163,13 +256,13 @@ int jugar(tTablero tablero, int modo, int jugador){
 			printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
 		}
 
-	}while(jugada!=QUIT);
+	}while(jugada!=QUIT && estado==SEGUIR);
 return 0;
 
 }
 
-/*
 
+/*
 int puedeMover(tTablero * tablero, int jugador){
 	int i,j;
 	enum tDireccion direcciones[]={N,S,E,O,NE,NO,SE,SO};
@@ -189,8 +282,9 @@ int puedeMover(tTablero * tablero, int jugador){
 
 		}		
 }
-
 */
+
+
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov){
 	int i, j;
 	int dirFil, dirCol;

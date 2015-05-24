@@ -13,6 +13,7 @@
 void incrementoSegunDir(int * dirFil, int * dirCol, enum tDireccion direccion);
 int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen);
 
+
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino){
 
 	enum tDireccion direccion;
@@ -126,11 +127,11 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 	if (!fueraDeRangoA && tablero->matriz[fdA][cdA].ocupante== enemigo)
                 /*El elementro de la matriz corresponde a la casilla a capturar por approach*/
 	       {hayAppr = 1;
-		printf("HAY APPROACH\n");}
+		}
         if (!fueraDeRangoW && tablero->matriz[fdW][cdW].ocupante == enemigo)
                 /*El elementro de la matriz corresponde a la casilla a capturar por withdrawal*/
                 {hayWithdr = 1;
-			printf("HAY WIDTHDRAWAL\n");
+		 
 		}
         if (hayAppr && hayWithdr)
                 captura=AMBOS;
@@ -250,13 +251,13 @@ int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen){
 		if(destino.fil<(tablero->filas) && destino.fil>=0 && destino.col<(tablero->cols) && destino.col>=0){
 
 		if(tablero->matriz[destino.fil][destino.col].estado != TOCADA)  /*Solo chequeo si hay comida si no visite esa casilla antes*/
-			{ printf("%d, %d no esta tocada\n", destino.fil+1, destino.col+1);
+			{ //printf("%d, %d no esta tocada\n", destino.fil+1, destino.col+1);
 			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
-			{	printf("Hay comida yendo a %d, %d\n", destino.fil+1, destino.col+1);
+			{//	printf("Hay comida yendo a %d, %d\n", destino.fil+1, destino.col+1);
 				return 1; /*Debe capturar esa pieza la proxima jugada */}
 		}
 			else
-				printf("%d, %d esta tocada\n", destino.fil+1, destino.col+1);
+			;//	printf("%d, %d esta tocada\n", destino.fil+1, destino.col+1);
 		}
 		}	
 
