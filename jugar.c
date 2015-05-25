@@ -23,6 +23,7 @@ int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombr
 tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
 int jugar(tTablero tablero, int modo, int jugador);
 int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador);
+tFlag leerSN(void);
 
 void limpiarTocadas(tTablero * tablero){
 	int i,j;
@@ -154,7 +155,11 @@ int main(void){
 		printf("Ingrese el nombre del archivo:\n   >");
 		getlinea(nombre, MAX_NOM);
 		tablero=cargarPartida(&modo, &jugador, nombre); /*modo cambia al correspondiente (0 o 1)*/
-	        printf("\nMODO DE JUEGO: %s\n", modo?"DOS JUGADORES":"JUGADOR VS COMPUTADORA");
+	        if(tablero.matriz == NULL){
+			printf("\nError al intentar abrir el archivo \"%s\". Abortando...\n\n", nombre);
+			return 1;
+		}
+		printf("\nMODO DE JUEGO: %s\n", modo?"DOS JUGADORES":"JUGADOR VS COMPUTADORA");
 		printf("TURNO DEL JUGARDOR %s\n", jugador?"NEGRO":"BLANCO");
 		printf("DIMENSIONES DEL TABLERO: %dx%d\n\n",tablero.filas,tablero.cols);
 	}

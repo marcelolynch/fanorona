@@ -43,8 +43,9 @@ tTablero cargarPartida(int * modo, int * jugador, const char * nombre){
 	tTablero tablero;
 
 	if((f=fopen(nombre,"rb"))==NULL)
+		{tablero.matriz=NULL;
 		return tablero;
-
+		}
 	fread(modo, sizeof(int),1, f);
 	fread(jugador, sizeof(int),1,f);
 	fread(&fils, sizeof(int), 1, f);
