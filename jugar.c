@@ -13,7 +13,7 @@ void pedirDimensiones(tTablero * tablero);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
 void pedirNombre(char nombre[]);
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia);
+int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag hayPaika);
 void imprimirError(tFlag error);
 enum tCaptura pedirCaptura (void);
 void pedirCadena(tMovimiento *mov);
@@ -38,7 +38,7 @@ void limpiarTocadas(tTablero * tablero){
 #define GANADOR_BLANCO 1
 #define GANADOR_NEGRO 2
 #define EMPATE 3
-int estadoPostJugada(tTablero * tablero, int jugador){
+int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika){
 	int hayBlancos=0, hayNegros=0;
 	int ocupante;
 	int i,j,n;
@@ -48,6 +48,8 @@ int estadoPostJugada(tTablero * tablero, int jugador){
 	enum tDireccion direcciones[]={N, S, E, O, NE, NO, SE, SO};
 	int dir, dirsPosibles, dirFil, dirCol;
 	int estado;
+
+	*hayPaika = 1;
 
 	for(i=0; i<tablero->filas ; i++)
 	for(j=0; j<tablero->cols ; j++){
@@ -75,6 +77,7 @@ int estadoPostJugada(tTablero * tablero, int jugador){
 			origen.fil = i;
 			origen.col = j;
 			if(jugadaObligada(tablero, ocupante, origen)){
+				*hayPaika=0;
 				hayMovimientos=1;
 			}
 			/*Si puede comer en la jugada posterior, la casilla no esta bloqueada
@@ -116,6 +119,86 @@ int estadoPostJugada(tTablero * tablero, int jugador){
 }
 
 
+int estadoPostJugada2(tTablero * tablero, int jugador, tFlag * hayPaika){
+	int hayBlancos=0, hayNegros=0;
+	int ocupante;
+	int i,j,n;
+	int hayMovimientos=0;
+	tCoordenada origen;
+	tCoordenada ady;
+	enum tDireccion direcciones[]={N, S, E, O, NE, NO, SE, SO};
+	int dir, dirsPosibles, dirFil, dirCol;
+	int estado;
+
+	*hayPaika=1;
+
+	for(i=0; i<tablero->filas ; i++)
+	for(j=0; j<tablero->cols ; j++){
+
+		if((ocupante = tablero->matriz[i][j].ocupante) == VACIO){
+			/* Limpieza de las casillas tocadas */
+			if(tablero->matriz[i][j].estado == TOCADA) 
+                	      	tablero->matriz[i][j].estado = LIBRE;
+		}
+		else{ 
+			if(ocupante==BLANCO){
+				/*printf("Hay un blanco en %d, %d\n", i,j);*/
+				hayBlancos=1;
+			}
+			else{
+				hayNegros=1;
+				/*printf("Hay un negro en %d, %d\n", i,j);*/
+			}
+
+
+			/*Voy a analiar si esta casilla esta en una posicion desfavorable (bloqueada) en la proxima movida
+			** es decir, si no puede capturar nada en la siguiente movida que haga, y que no importa donde se mueva
+			** alguien lo captura. Si todas las piezas (de ambos jugadores) cumplen con esto, el juego termina en empate. */
+			
+			origen.fil = i;
+			origen.col = j;
+			if(jugadaObligada(tablero, ocupante, origen)){
+				hayMovimientos=1;
+				if(ocupante==jugador)
+					*hayPaika=0;
+			}
+			/*Si puede comer en la jugada posterior, la casilla no esta bloqueada
+			** (esta obligada a comer aunque sea mala estrategia)
+			** si la jugada no es obligada, analizo para cada direccion si la captura es inminente en caso de dirigirse a ella*/
+			else{
+        	        	dirsPosibles = tablero->matriz[i][j].tipo == FUERTE ? 8:4;
+                		for(n=0; n<dirsPosibles ; n++){
+                        		dir = direcciones[n];
+                      	  		incrementoSegunDir(&dirFil, &dirCol, dir);
+														
+	              	 #define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols)
+			
+				if( !FDERANGO(i+dirFil, j+dirCol) ){
+					ady.fil=i+dirFil;
+					ady.col=j+dirCol;
+					if(tablero->matriz[ady.fil][ady.col].ocupante==VACIO && !meCapturan(tablero, ady, ocupante)) 
+						hayMovimientos=1; /* Existe un movimiento en el que no se ve amenazado en la jugada posterior */
+				}
+				}
+			}	
+			#undef FDERANGO		
+	  		
+		}			
+	}
+
+	if(!hayBlancos)
+		estado = GANADOR_NEGRO;
+	else if(!hayNegros)
+		estado = GANADOR_BLANCO;
+	else if(!hayMovimientos)
+		estado = EMPATE;
+	
+	else
+		estado = SEGUIR;
+
+
+	return estado;
+}
 int main(void){
 	
 	enum tOpcion {PVP=1, PVE, CARGAR, SALIR};
@@ -185,11 +268,12 @@ int jugar(tTablero tablero, int modo, int jugador){
 	int movimiento;
 	int a,b; /*TEMP*/
 	int estado = SEGUIR;
+	tFlag hayPaika=0;
 
 	imprimirTablero(&tablero);
 
 	do{	
-		movimiento=-1;
+		movimiento=START; /*START es <0, != MOV*/
 		do{
 			
 			if (obligado)
@@ -198,7 +282,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 				jugada=pedirJugada(&mov, nombre);
 				
 			if(jugada==MOV){	
-				movimiento=validarMovimiento(jugador, &tablero, mov, &dir);
+				movimiento=validarMovimiento(jugador, &tablero, mov, &dir, hayPaika);
 				if (movimiento == AMBOS) {
 					mov.tipoMov = pedirCaptura();
 				}
@@ -210,15 +294,15 @@ int jugar(tTablero tablero, int modo, int jugador){
 					
 				printf("\n MOVIMIENTO: %d\n OBLIGADO:%d\n", movimiento, obligado);
 			}	
-		}while(jugada==MOV && movimiento<0); /*ERROR*/
+		}while(jugada==MOV && movimiento<0); /*Quiere moverse, pero hay ERROR en lo que pide*/
 	
 	
 		if(jugada==MOV){
 			printf("TipoMov: %d\n", mov.tipoMov);
 			actualizarTablero(&tablero, dir, mov);	
 			imprimirTablero(&tablero);
+			
 			obligado = 0;			
-
 			if (movimiento != NINGUNO) /* no puede encadenar luego de paika */
 				obligado = jugadaObligada(&tablero, jugador, mov.coordDest);
 
@@ -233,8 +317,10 @@ int jugar(tTablero tablero, int modo, int jugador){
 				dir = NULA; /*Ninguna*/
 				limpiarTocadas(&tablero);
 				
-				estado = estadoPostJugada(&tablero, jugador);
-		
+				estado = estadoPostJugada2(&tablero, jugador, &hayPaika);
+	
+				printf("\n%sHAY PAIKA\n\n", hayPaika?"":"NO ");
+	
 				switch(estado){
 					case SEGUIR: printf("SEGUIR\n\n"); break;
 					case EMPATE: printf("EMPATE\n\n"); break;
