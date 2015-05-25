@@ -61,7 +61,7 @@ int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador){
 		
 		/*Las casillas que pueden comerme por approach o widthraw en el proximo turno*/
 		adyacente.fil = posicion.fil + dirFil;
-		adyacente.fil = posicion.fil + dirFil;
+		adyacente.col= posicion.col + dirCol;
 		siguienteAdy.fil = adyacente.fil + dirFil;
 		siguienteAdy.col = adyacente.col + dirCol;
 
@@ -72,17 +72,20 @@ int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador){
 			if(tablero->matriz[adyacente.fil][adyacente.col].ocupante == enemigo
 				&& tablero->matriz[siguienteAdy.fil][siguienteAdy.col].ocupante == VACIO){
 					/*Me comen por WITHDRAWAL en la proxima jugada en esa direcicon*/
+				printf("Si voy a %d, %d me capturan por withdrawal desde %d, %d\n",posicion.fil+1, posicion.col+1, adyacente.fil+1, adyacente.col+1);
 					return 1;
 			}	
 			if(tablero->matriz[adyacente.fil][adyacente.col].ocupante == VACIO
 				&& tablero->matriz[siguienteAdy.fil][siguienteAdy.col].ocupante == enemigo){
 					/*Me comen por APPROACH en la proxima jugada, desde esa direccion*/
+					printf("Si voy a %d, %d me capturan por approach desde %d, %d\n", posicion.fil+1, posicion.col+1, siguienteAdy.fil+1, siguienteAdy.col+1);
 					return 1;
 		}
 		#undef FDERANGO
 		}
 	}
 
+	printf("No me capturan desde %d, %d\n", posicion.fil, posicion.col);
 	return 0; /*Si llegue hasta aca, no hay manera de que me capturen*/	
 
 }

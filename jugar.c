@@ -38,7 +38,7 @@ void limpiarTocadas(tTablero * tablero){
 #define GANADOR_BLANCO 1
 #define GANADOR_NEGRO 2
 #define EMPATE 3
-int estadoPostJugada(tTablero * tablero){
+int estadoPostJugada(tTablero * tablero, int jugador){
 	int hayBlancos=0, hayNegros=0;
 	int ocupante;
 	int i,j,n;
@@ -71,6 +71,7 @@ int estadoPostJugada(tTablero * tablero){
 			/*Voy a analiar si esta casilla esta en una posicion desfavorable (bloqueada) en la proxima movida
 			** es decir, si no puede capturar nada en la siguiente movida que haga, y que no importa donde se mueva
 			** alguien lo captura. Si todas las piezas (de ambos jugadores) cumplen con esto, el juego termina en empate. */
+			if(ocupante==jugador){
 			origen.fil = i;
 			origen.col = j;
 			if(jugadaObligada(tablero, ocupante, origen)){
@@ -90,26 +91,25 @@ int estadoPostJugada(tTablero * tablero){
 				if( !FDERANGO(i+dirFil, j+dirCol) ){
 					ady.fil=i+dirFil;
 					ady.col=j+dirCol;
-					if(! meCapturan(tablero, ady, ocupante)) 
+					if(tablero->matriz[ady.fil][ady.col].ocupante==VACIO && !meCapturan(tablero, ady, ocupante)) 
 						hayMovimientos=1; /* Existe un movimiento en el que no se ve amenazado en la jugada posterior */
 				}
 				}
 			}	
 			#undef FDERANGO		
-	  
+	  		}
 		}			
 	}
 
-	if(hayMovimientos){
-		if(!hayBlancos)
-			estado = GANADOR_NEGRO;
-		else if(!hayNegros)
-			estado = GANADOR_BLANCO;
-		else
-			estado = SEGUIR;
-	}
-	else
+	if(!hayBlancos)
+		estado = GANADOR_NEGRO;
+	else if(!hayNegros)
+		estado = GANADOR_BLANCO;
+	else if(!hayMovimientos)
 		estado = EMPATE;
+	
+	else
+		estado = SEGUIR;
 
 
 	return estado;
@@ -232,6 +232,16 @@ int jugar(tTablero tablero, int modo, int jugador){
 				printf("\nLe toca al jugador %s\n", jugador?"negro":"blanco");
 				dir = NULA; /*Ninguna*/
 				limpiarTocadas(&tablero);
+				
+				estado = estadoPostJugada(&tablero, jugador);
+		
+				switch(estado){
+					case SEGUIR: printf("SEGUIR\n\n"); break;
+					case EMPATE: printf("EMPATE\n\n"); break;
+					case GANADOR_NEGRO: printf("GANA NEGRO\n\n"); break;
+					case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
+				}	
+
 			}
 			
 			for(a=0; a<tablero.filas ; a++)
@@ -242,16 +252,6 @@ int jugar(tTablero tablero, int modo, int jugador){
 
 				}
 		
-			estado = estadoPostJugada(&tablero);
-		
-			switch(estado){
-				case SEGUIR: printf("SEGUIR\n\n"); break;
-				case EMPATE: printf("EMPATE\n\n"); break;
-				case GANADOR_NEGRO: printf("GANA NEGRO\n\n"); break;
-				case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
-				}	
-
-
 		}
 
 		if (jugada == QUIT) {
