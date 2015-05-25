@@ -7,25 +7,18 @@ void imprimirError(tFlag error);
 int getlinea(char str[], int dim);
 void imprimirError(tFlag error);
 
-tFlag pedirGuardar (char nombre[]) {
+void pedirNombre (char nombre[]) {
 	char str[STR_DIM];
 	int n;
-	tFlag quiereGuardar, esValido = 1;
+	tFlag esValido = 1;
 
-	printf("Desea guardar su juego antes de salir?\n");
-
-	quiereGuardar = leerSN();
-
-	if (!quiereGuardar)
-		return 0;
-	
 	printf("Escriba el nombre con el que quiere guardar su juego. (Max %d caracteres)\n", MAX_NOM);
 
 	do {
-		imprimirError(esValido);
+		imprimirError(esValido); /* en una primera instancia no imprime nada, pues esValido es mayor o igual a 0*/
 		n = getlinea(str, STR_DIM);
 		esValido = validarFmtNombre (nombre, str, n);
 	} while (esValido < 0);
 
-	return esValido;
+	return;
 }

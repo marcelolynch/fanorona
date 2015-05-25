@@ -11,7 +11,7 @@ void liberarTodo(tCasilla ** tablero, int n);
 enum tCaptura leerCaptura (const char str[]);
 void pedirDimensiones(tTablero * tablero);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
-tFlag pedirGuardar(char nombre[]);
+void pedirNombre(char nombre[]);
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
 int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia);
 void imprimirError(tFlag error);
@@ -176,7 +176,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 	enum tDireccion dir=NULA;
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada, quiereGuardar=0, obligado=0;
+	tFlag jugada, quiereGuardar=0, obligado=0, quiereCambiar;
 	int movimiento;
 	int a,b; /*TEMP*/
 	int estado = SEGUIR;
@@ -249,9 +249,20 @@ int jugar(tTablero tablero, int modo, int jugador){
 
 		}
 
-		if (jugada == QUIT)
-			quiereGuardar = pedirGuardar(nombre);
+		if (jugada == QUIT) {
+			printf("Desea guardar su juego antes de salir?\n");
+			quiereGuardar = leerSN();
+			if (quiereGuardar)
+				pedirNombre(nombre);
+		}
 		if (jugada == SAVE || quiereGuardar) {
+			do {
+				printf("Se guardará su juego con el nombre '%s'.\n", nombre);
+				printf("Desea elegir otro nombre?\n");
+				quiereCambiar = leerSN();
+				if (quiereCambiar)
+					pedirNombre(nombre);
+			} while (quiereCambiar);
 			guardarPartida(&tablero, modo, jugador, nombre);
 			printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
 		}
