@@ -53,8 +53,8 @@ int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika){
 
 	for(i=0; i<tablero->filas ; i++)
 	for(j=0; j<tablero->cols ; j++){
-		
-		if( (ocupante = tablero->matriz[i][j].ocupante) != VACIO){
+
+		if( (ocupante=tablero->matriz[i][j].ocupante) != VACIO){
  
 			if(ocupante==BLANCO){
 				/*printf("Hay un blanco en %d, %d\n", i,j);*/
@@ -71,45 +71,40 @@ int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika){
 			** es decir, si no puede capturar nada en la siguiente movida que haga, y que no importa donde se mueva
 			** alguien lo captura. Si todas las piezas (de ambos jugadores) cumplen con esto, el juego termina en empate.
 			*/
-			if(ocupante==jugador && *hayPaika && !hayMovimientos){
-			/*Si no hay paika o hay algun movimiento valido para hacer, no tiene sentido seguir analizando eso*/
-
+			
+			if(ocupante==jugador){
 				origen.fil = i;
 				origen.col = j;
 				
 				if(jugadaObligada(tablero, ocupante, origen)){
 					*hayPaika=0;
 					hayMovimientos=1;
-				}
+			}
 			
-				/*Si puede comer en la jugada posterior (jugadaObligada), la casilla no esta bloqueada
-				** (esta obligada a comer aunque sea mala estrategia)
-				** si la jugada no es obligada, analizo para cada direccion si la captura
-				** es inminente en caso de dirigirse a ella: */
+			/*Si puede comer en la jugada posterior (jugadaObligada), la casilla no esta bloqueada
+			** (esta obligada a comer aunque sea mala estrategia)
+			** si la jugada no es obligada, analizo para cada direccion si la captura
+			** es inminente en caso de dirigirse a ella: */
 			
-				else{
-        		       		dirsPosibles = tablero->matriz[i][j].tipo == FUERTE ? 8:4;
-                			/*Recorro las casillas adyacentes (posibles destinos)*/
-					for(n=0; n<dirsPosibles ; n++){
-                        			dir = direcciones[n];
-                      				incrementoSegunDir(&dirFil, &dirCol, dir);
+			else{
+        	        	dirsPosibles = tablero->matriz[i][j].tipo == FUERTE ? 8:4;
+                		for(n=0; n<dirsPosibles ; n++){
+                        		dir = direcciones[n];
+                      	  		incrementoSegunDir(&dirFil, &dirCol, dir);
 														
-	        	      	 #define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols)
-				
-						if( !FDERANGO(i+dirFil, j+dirCol) ){
-							ady.fil=i+dirFil;
-							ady.col=j+dirCol;
+	              	 #define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols)
 			
-							if(tablero->matriz[ady.fil][ady.col].ocupante==VACIO 
-							   && !meCapturan(tablero, ady, ocupante)) 
-								hayMovimientos=1; 
-							/* Existe un movimiento en el que no se ve amenazado en la jugada posterior */
-						}
-				#undef FDERANGO		
-					
-					}
-				}	
-	  			}
+				if( !FDERANGO(i+dirFil, j+dirCol) ){
+					ady.fil=i+dirFil;
+					ady.col=j+dirCol;
+					if(tablero->matriz[ady.fil][ady.col].ocupante==VACIO && !meCapturan(tablero, ady, ocupante)) 
+						hayMovimientos=1; 
+						/* Existe un movimiento en el que no se ve amenazado en la jugada posterior */
+			#undef FDERANGO		
+				}
+				}
+			}	
+	  		}
 		}			
 	}
 
@@ -208,8 +203,6 @@ int estadoPostJugada2(tTablero * tablero, int jugador, tFlag * hayPaika){
 
 	return estado;
 }
-
-
 int main(void){
 	
 	enum tOpcion {PVP=1, PVE, CARGAR, SALIR};
@@ -275,7 +268,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 	enum tDireccion dir=NULA;
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada, quiereGuardar=0, hayCadena=0, quiereCambiar;
+	tFlag jugada, quiereGuardar=0, obligado=0, quiereCambiar;
 	int movimiento;
 	int a,b; /*TEMP*/
 	int estado = SEGUIR;
@@ -284,6 +277,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 	imprimirTablero(&tablero);
 
 	do{	
+		movimiento=START; /*START es <0, != MOV*/
 		estado = estadoPostJugada(&tablero, jugador, &hayPaika);
 		printf("\n%sHAY PAIKA\n\n", hayPaika?"":"NO ");
 	
@@ -298,7 +292,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 
 		do{
 			
-			if (hayCadena)
+			if (obligado)
 				pedirCadena(&mov);
 			else
 				jugada=pedirJugada(&mov, nombre);
@@ -314,7 +308,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 				else if (movimiento != NINGUNO)
 					imprimirError(movimiento);
 					
-				printf("\n MOVIMIENTO: %d\n OBLIGADO:%d\n", movimiento, hayCadena);
+				printf("\n MOVIMIENTO: %d\n OBLIGADO:%d\n", movimiento, obligado);
 			}	
 		}while(jugada==MOV && movimiento<0); /*Quiere moverse, pero hay ERROR en lo que pide*/
 	
@@ -324,11 +318,11 @@ int jugar(tTablero tablero, int modo, int jugador){
 			actualizarTablero(&tablero, dir, mov);	
 			imprimirTablero(&tablero);
 			
-			hayCadena = 0;			
+			obligado = 0;			
 			if (movimiento != NINGUNO) /* no puede encadenar luego de paika */
-				hayCadena = jugadaObligada(&tablero, jugador, mov.coordDest);
+				obligado = jugadaObligada(&tablero, jugador, mov.coordDest);
 
-			if (hayCadena) {
+			if (obligado) {
 				mov.coordOrig.fil = mov.coordDest.fil; /*al tener que concatenar una jugada, el origen es el destino de antes*/ 
 				mov.coordOrig.col = mov.coordDest.col;
 			}
@@ -338,6 +332,8 @@ int jugar(tTablero tablero, int modo, int jugador){
 				printf("\nLe toca al jugador %s\n", jugador?"negro":"blanco");
 				dir = NULA; /*Ninguna*/
 				limpiarTocadas(&tablero);
+				
+	
 				}	
 
 			
