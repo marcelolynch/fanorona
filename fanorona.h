@@ -6,6 +6,7 @@
 ** empieza en -120 porque así comparamos si es menor a 0, ya es error.
 ** imprimirError() imprime el error correspondiente. Ir actualizando-
 **/ 
+enum tOpcion {PVP=1, PVE, CARGAR, SALIR};
 enum tError {ERR_FMT= -120, ERR_FMT_SAVE1, ERR_FMT_SAVE2, ERR_FMT_MOV1, ERR_FMT_MOV2, ERR_MOV_ORIG, ERR_MOV_DEST, ERR_MOV_TOC, ERR_MOV_DIR, ERR_MOV_PAIKA, ERR_MOV_RANGO, ERR_MOV_NO_ADY,ERR_MOV_DEBIL, ERR_MOV_AMBIGUO};
 enum tEstado {LIBRE=0, TOCADA, BLOQUEADA, OBLIGADA};
 enum tJugada {START=-1, QUIT, SAVE, UNDO, MOV};
