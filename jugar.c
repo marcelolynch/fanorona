@@ -274,6 +274,18 @@ int jugar(tTablero tablero, int modo, int jugador){
 
 	do{	
 		movimiento=START; /*START es <0, != MOV*/
+		estado = estadoPostJugada(&tablero, jugador, &hayPaika);
+		printf("\n%sHAY PAIKA\n\n", hayPaika?"":"NO ");
+	
+			switch(estado){
+				case SEGUIR: printf("SEGUIR\n\n"); break;
+				case EMPATE: printf("EMPATE\n\n"); break;
+				case GANADOR_NEGRO: printf("GANA NEGRO\n\n"); break;
+				case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
+			}
+
+		if(estado == SEGUIR){
+
 		do{
 			
 			if (obligado)
@@ -317,18 +329,10 @@ int jugar(tTablero tablero, int modo, int jugador){
 				dir = NULA; /*Ninguna*/
 				limpiarTocadas(&tablero);
 				
-				estado = estadoPostJugada2(&tablero, jugador, &hayPaika);
 	
-				printf("\n%sHAY PAIKA\n\n", hayPaika?"":"NO ");
-	
-				switch(estado){
-					case SEGUIR: printf("SEGUIR\n\n"); break;
-					case EMPATE: printf("EMPATE\n\n"); break;
-					case GANADOR_NEGRO: printf("GANA NEGRO\n\n"); break;
-					case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
 				}	
 
-			}
+			
 			
 			for(a=0; a<tablero.filas ; a++)
 			for(b=0; b<tablero.cols ; b++){
@@ -358,7 +362,12 @@ int jugar(tTablero tablero, int modo, int jugador){
 			printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
 		}
 
+	}
 	}while(jugada!=QUIT && estado==SEGUIR);
+	
+	
+
+
 return 0;
 
 }

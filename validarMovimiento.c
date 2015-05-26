@@ -148,9 +148,8 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 	return captura;
 }
 
-
+/*
 int paika(char jugador, tTablero * tablero){
-	/*Todavia no esta adaptada para ser aprovechada por el modo vs. PC */
 	int i, j;
 	tCoordenada origen;
 	for(i=0; i < tablero->filas ; i++)
@@ -175,9 +174,9 @@ int paika(char jugador, tTablero * tablero){
 			}
 		}
 
-	return 1; /*Estamos en situacion de paika*/
+	return 1; 
 }
-
+*/
 int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag hayPaika) {
 	
 	int jugada, aux;
@@ -221,7 +220,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 		return ERR_MOV_PAIKA;
 	}
 	
-	/*Si llegue hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
+	/*Si llega hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
 	
 	tablero->matriz[fo][co].estado=TOCADA;
 	
@@ -230,8 +229,6 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 	if(jugada==AMBOS && movimiento.tipoMov!=NINGUNO)
 		/*Si el jugador puede hacer ambas cosas pero ya eligio*/
 		jugada=movimiento.tipoMov;
-
-	/* Valido si la proxima jugada es obligada */
 
 	return jugada;
 }
@@ -254,13 +251,13 @@ int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen){
 		if(destino.fil<(tablero->filas) && destino.fil>=0 && destino.col<(tablero->cols) && destino.col>=0){
 
 		if(tablero->matriz[destino.fil][destino.col].estado != TOCADA)  /*Solo chequeo si hay comida si no visite esa casilla antes*/
-			{ //printf("%d, %d no esta tocada\n", destino.fil+1, destino.col+1);
+			{ /*printf("%d, %d no esta tocada\n", destino.fil+1, destino.col+1)*/;
 			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
-			{//	printf("Hay comida yendo a %d, %d\n", destino.fil+1, destino.col+1);
+			{/*	printf("Hay comida yendo a %d, %d\n", destino.fil+1, destino.col+1);*/
 				return 1; /*Debe capturar esa pieza la proxima jugada */}
 		}
 			else
-			;//	printf("%d, %d esta tocada\n", destino.fil+1, destino.col+1);
+			;/*	printf("%d, %d esta tocada\n", destino.fil+1, destino.col+1);*/
 		}
 		}	
 
