@@ -267,7 +267,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 	enum tDireccion dir=NULA;
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1;
+	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1;
 	int captura;
 	int a,b; /*TEMP*/
 	int estado = SEGUIR;
