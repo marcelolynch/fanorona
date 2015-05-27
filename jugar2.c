@@ -343,7 +343,9 @@ int jugar(tTablero tablero, int modo, int jugador){
 						calcularGanador = 1; /* calculamos un posible ganador */
 						limpiarTocadas(&tablero);
 						
-						if(modo==PVE)
+						if(modo==PVE && jugador==BLANCO)
+							/*Copia el tablero al auxiliar solo antes de que juegue el usuario
+							** (siempre es BLANCO) y solo si el juego es vs. Computadora*/
 							copiarTablero(&tablero, tableroAuxiliar);
 					}
 				}
@@ -355,8 +357,8 @@ int jugar(tTablero tablero, int modo, int jugador){
 				imprimirTablero(&tablero);
 				}
 				else
-				{
-				}	
+					imprimirError(ERR_UNDO);
+				
 				/* aca va lo del error del undo */
 			}
 

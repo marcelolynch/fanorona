@@ -49,6 +49,9 @@ void imprimirError(tFlag error) {
 	case ERR_MOV_DEBIL:
 		printf("\aError: desde una casilla debil solo puede moverse arriba, abajo, y a ambos costados\n");
 		break;
+	case ERR_UNDO:
+		printf("\aError: no puede realizar UNDO si el juego es entre dos jugadores\n");
+		break;
 	default:
 		printf("\aError desconocido\n");
 		break;

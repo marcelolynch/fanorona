@@ -33,7 +33,7 @@ void pedirCadena (tMovimiento *mov) {
 	do {
 		imprimirError(esValido); /* en una primer instancia no imprimirá nada, pues esValido es mayor a 0 */
 
-		printf("M [%d,%d]", fo, co);
+		printf("> M [%d,%d]", fo, co);
 
 		n = getlinea(nuevoStr, 15);
 
