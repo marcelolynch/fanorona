@@ -52,6 +52,9 @@ void imprimirError(tFlag error) {
 	case ERR_UNDO:
 		printf("\aError: no puede realizar UNDO si el juego es entre dos jugadores\n");
 		break;
+	case ERR_UNDO_DOBLE:
+		printf("\aError: no puede realizar UNDO dos veces seguidas\n");
+		break;
 	default:
 		printf("\aError desconocido\n");
 		break;

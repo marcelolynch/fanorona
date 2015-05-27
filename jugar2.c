@@ -283,7 +283,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 	enum tDireccion dir=NULA;
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1;
+	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1, primerUndo=1;
 	int captura;
 	int a,b; /*TEMP*/
 	int estado = SEGUIR;
@@ -342,18 +342,22 @@ int jugar(tTablero tablero, int modo, int jugador){
 						dir = NULA; /* Ninguna */
 						calcularGanador = 1; /* calculamos un posible ganador */
 						limpiarTocadas(&tablero);
-						
-						if(modo==PVE && jugador==BLANCO)
+						if(modo==PVE && jugador==BLANCO){
 							/*Copia el tablero al auxiliar solo antes de que juegue el usuario
 							** (siempre es BLANCO) y solo si el juego es vs. Computadora*/
 							copiarTablero(&tablero, tableroAuxiliar);
+							primerUndo=1;
+						}
 					}
 				}
 			}
 
 			else if (jugada == UNDO) {
 				if (modo == PVE) {
-				intercambiarTableros(&tablero, &tableroAuxiliar);
+					if(primerUndo)
+						intercambiarTableros(&tablero, &tableroAuxiliar);
+					else
+						imprimirError(ERR_UNDO_DOBLE);
 				imprimirTablero(&tablero);
 				}
 				else
