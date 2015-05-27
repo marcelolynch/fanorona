@@ -219,7 +219,7 @@ int main(void){
 	}while(opcion<1 || opcion>4);
 
 	if(opcion == PVP || opcion == PVE){
-		modo = (opcion == PVP); /* 1 para dos jugadores, 0 para juego contra la computadora*/	
+		modo = opcion; /* )1 para dos jugadores, 0 para juego contra la computadora*/	
 		jugador=BLANCO;
 		if(opcion == PVE){
 			printf("\nCERRADO POR REFACCIONES. ASSERT'D!\n\n");
@@ -283,14 +283,14 @@ int jugar(tTablero tablero, int modo, int jugador){
 	enum tDireccion dir=NULA;
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada=MOV, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1;
+	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1;
 	int captura;
 	int a,b; /*TEMP*/
 	int estado = SEGUIR;
 	tFlag hayPaika;
 	tCasilla ** tableroAuxiliar;
 	
-	if(modo=PVE)
+	if(modo==PVE)
 		tableroAuxiliar = generarMatrizTablero(tablero.filas, tablero.cols);	
 	
 	imprimirTablero(&tablero);
