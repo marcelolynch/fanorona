@@ -24,6 +24,7 @@ tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
 int jugar(tTablero tablero, int modo, int jugador);
 int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador);
 tFlag leerSN(void);
+tCasilla ** generarMatrizTablero(int fils, int cols);
 
 void limpiarTocadas(tTablero * tablero){
 	int i,j;
@@ -262,18 +263,38 @@ int main(void){
 
 void calcularMovComp (tMovimiento *mov, tFlag hayCadena); /* DECLARACION PARA QUE COMPILE NOMAS, es temporal */
 
+void copiarTablero(tTablero * tablero, tCasilla ** tableroAuxiliar){
+	int i, j;
+	for(i=0; i<tablero->filas ; i++)
+		for(j=0 ; j<tablero->cols ; j++)
+			tableroAuxiliar[i][j] = tablero->matriz[i][j];
+}	
+
+void intercambiarTableros(tTablero * tablero, tCasilla *** tableroAuxiliar){
+	tCasilla ** aux;
+	aux = *tableroAuxiliar;
+	*tableroAuxiliar = tablero->matriz;
+	tablero->matriz = aux;
+
+}
+
 int jugar(tTablero tablero, int modo, int jugador){
 
 	enum tDireccion dir=NULA;
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1;
+	tFlag jugada=MOV, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1;
 	int captura;
 	int a,b; /*TEMP*/
 	int estado = SEGUIR;
 	tFlag hayPaika;
-
+	tCasilla ** tableroAuxiliar;
+	
+	if(modo=PVE)
+		tableroAuxiliar = generarMatrizTablero(tablero.filas, tablero.cols);	
+	
 	imprimirTablero(&tablero);
+		
 
 	while (!hayGanador && jugada != QUIT) {
 		if (calcularGanador) {
@@ -321,16 +342,21 @@ int jugar(tTablero tablero, int modo, int jugador){
 						dir = NULA; /* Ninguna */
 						calcularGanador = 1; /* calculamos un posible ganador */
 						limpiarTocadas(&tablero);
+						
+						if(modo==PVE)
+							copiarTablero(&tablero, tableroAuxiliar);
 					}
 				}
 			}
 
 			else if (jugada == UNDO) {
 				if (modo == PVE) {
-				/* aca va lo del undo */
+				intercambiarTableros(&tablero, &tableroAuxiliar);
+				imprimirTablero(&tablero);
 				}
 				else
-					;
+				{
+				}	
 				/* aca va lo del error del undo */
 			}
 
