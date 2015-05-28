@@ -154,6 +154,10 @@ void imprimirTablero ( tTablero * tablero )
 				{	if(j==0)
 						putchar('\t');
 					printf("%-4d",j+1);
+
+					if( j== tablero->cols-1)
+						putchar('\n');
+
 				}
 				else
 				{	if (tablero->matriz[i][j].tipo==DEBIL)
