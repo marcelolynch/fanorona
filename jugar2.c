@@ -307,6 +307,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 			else{
 				/*Mueve la computadora */
 				jugada=MOV;
+				captura=1;
 				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena) != 0){
 					imprimirError(ERR_MEM_COMPU);
 					exit(1);
@@ -343,6 +344,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 						dir = NULA; /* Ninguna */
 						calcularGanador = 1; /* calculamos un posible ganador */
 						limpiarTocadas(&tablero);
+						hayCadena=0;
 						if(modo==PVE && jugador==BLANCO){
 							/*Copia el tablero al auxiliar solo antes de que juegue el usuario
 							** (siempre es BLANCO) y solo si el juego es vs. Computadora*/
