@@ -1,3 +1,4 @@
+#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "getnum.h"
@@ -204,6 +205,8 @@ int main(void){
 	int jugador;
 	char nombre[MAX_NOM];	
 	tFlag ganador;
+	
+	srand(time(0));
 
 	printf("\n\t\t=*=*=*=*=*=*=*=*=*==FANORONA==*=*=*=*=*=*=*=*=*=*=");
 	printf("\n\t\t=*=*=*=*=*=*=*=*=FUTURAMA EDITION=*=*=*=*=*=*=*=*=\n\n");
@@ -307,14 +310,21 @@ int jugar(tTablero tablero, int modo, int jugador){
 			else{
 				/*Mueve la computadora */
 				jugada=MOV;
-				captura=1;
 				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena) != 0){
 					imprimirError(ERR_MEM_COMPU);
 					exit(1);
 				}
 			}
 			if (jugada == MOV) {
-				if (jugador == BLANCO || modo == PVP) {
+						
+				if(modo==PVE && jugador==BLANCO){
+					/*Copia el tablero al auxiliar solo antes de que juegue el usuario
+					** (siempre es BLANCO) y solo si el juego es vs. Computadora*/
+					copiarTablero(&tablero, tableroAuxiliar);
+					primerUndo=1;
+				}
+				
+				if (jugador == BLANCO || jugador == NEGRO) {
 					captura = validarMovimiento(jugador, &tablero, mov, &dir, hayPaika);
 					if (captura == AMBOS) /* ambiguedad en la jugada*/
 						mov.tipoMov = pedirCaptura();
@@ -344,21 +354,16 @@ int jugar(tTablero tablero, int modo, int jugador){
 						dir = NULA; /* Ninguna */
 						calcularGanador = 1; /* calculamos un posible ganador */
 						limpiarTocadas(&tablero);
-						hayCadena=0;
-						if(modo==PVE && jugador==BLANCO){
-							/*Copia el tablero al auxiliar solo antes de que juegue el usuario
-							** (siempre es BLANCO) y solo si el juego es vs. Computadora*/
-							copiarTablero(&tablero, tableroAuxiliar);
-							primerUndo=1;
-						}
 					}
 				}
 			}
 
 			else if (jugada == UNDO) {
 				if (modo == PVE) {
-					if(primerUndo)
+					if(primerUndo){
 						intercambiarTableros(&tablero, &tableroAuxiliar);
+						primerUndo=0;
+						}
 					else
 						imprimirError(ERR_UNDO_DOBLE);
 				imprimirTablero(&tablero);
@@ -437,7 +442,7 @@ void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimient
 		}
 	else if (mov.tipoMov != NINGUNO)
 		printf("ERROOOOOOOOOR\n\a\a\a\a");
-	printf("%d,%d -> %d,%d\n", mov.coordOrig.fil, mov.coordOrig.col, mov.coordDest.fil, mov.coordDest.col);
+	printf("%d,%d -> %d,%d\n", mov.coordOrig.fil+1, mov.coordOrig.col+1, mov.coordDest.fil+1, mov.coordDest.col+1);
 	tablero->matriz[mov.coordDest.fil][mov.coordDest.col].ocupante = jugador;
 	tablero->matriz[mov.coordOrig.fil][mov.coordOrig.col].ocupante = VACIO;	/*Movi la ficha*/
 
