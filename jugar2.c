@@ -212,21 +212,17 @@ int main(void){
 	printf("\n\t\t    Hay bastantes reglas, Wikipedialo, ni idea\n\t\t    Ah, salvo que hay que capturar si o si\n\n");
 	printf("\t\t=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=\n\n");
 	printf("\tElija una opcion:\n\n");
-	printf("\t\t1. Juego nuevo: dos jugadores\n");
-	printf("\t\t2. **Cerrado por refacciones** Juego nuevo: un jugador (vs. computadora) \n");
+	printf("\t\t1. Juego nuevo: vs PC\n");
+	printf("\t\t2. Juego nuevo: dos jugadores \n");
 	printf("\t\t3. Cargar partida de archivo\n");
 	printf("\t\t4. Salir\n\n");
 	do{
-		opcion=getint("Ingrese un numero de opcion >"); 
-	}while(opcion<1 || opcion>4);
+		opcion=getint("Ingrese un numero de opcion >") - 1; 
+	}while(opcion<0 || opcion>3);
 
 	if(opcion == PVP || opcion == PVE){
 		modo = opcion; /* )1 para dos jugadores, 0 para juego contra la computadora*/	
 		jugador=BLANCO;
-		if(opcion == PVE){
-			printf("\nCERRADO POR REFACCIONES. ASSERT'D!\n\n");
-			return 1;
-			}
 		pedirDimensiones(&tablero);
 		tablero=generarTablero(tablero.filas,tablero.cols);
 
@@ -342,8 +338,8 @@ int jugar(tTablero tablero, int modo, int jugador){
 
 					else {	/* cambio de turno */
 						printf("Cambio!\n");
-						printf("\nLe toca al jugador %s\n", jugador ? "negro" : "blanco");
 						jugador = !jugador; /* Cambia */
+						printf("\nLe toca al jugador %s\n", jugador ? "negro" : "blanco");
 						dir = NULA; /* Ninguna */
 						calcularGanador = 1; /* calculamos un posible ganador */
 						limpiarTocadas(&tablero);
