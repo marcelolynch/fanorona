@@ -136,6 +136,7 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
                 {hayWithdr = 1;
 		 
 		}
+
         if (hayAppr && hayWithdr)
                 captura=AMBOS;
         else if (hayAppr)

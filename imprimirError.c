@@ -55,6 +55,9 @@ void imprimirError(tFlag error) {
 	case ERR_UNDO_DOBLE:
 		printf("\aError: no puede realizar UNDO dos veces seguidas\n");
 		break;
+	case ERR_MEM_COMPU:
+		printf("\aError fatal: no hay memoria suficiente para continuar con el juego. Abortando");
+		break;
 	default:
 		printf("\aError desconocido\n");
 		break;

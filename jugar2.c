@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include "getnum.h"
 #include "fanorona.h"
@@ -25,6 +26,7 @@ int jugar(tTablero tablero, int modo, int jugador);
 int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador);
 tFlag leerSN(void);
 tCasilla ** generarMatrizTablero(int fils, int cols);
+int calcularMovCompu(tMovimiento * mov, tTablero * tablero, tFlag hayPaika, tFlag hayCadena);
 
 void limpiarTocadas(tTablero * tablero){
 	int i,j;
@@ -261,8 +263,6 @@ int main(void){
 
 }
 
-void calcularMovComp (tMovimiento *mov, tFlag hayCadena); /* DECLARACION PARA QUE COMPILE NOMAS, es temporal */
-
 void copiarTablero(tTablero * tablero, tCasilla ** tableroAuxiliar){
 	int i, j;
 	for(i=0; i<tablero->filas ; i++)
@@ -308,9 +308,14 @@ int jugar(tTablero tablero, int modo, int jugador){
 				pedirCadena(&mov);
 			else if (jugador == BLANCO || modo == PVP) 	/* si no es la computadora */
 				jugada = pedirJugada(&mov, nombre);
-			else						/* si es computadora */
-				;	/* aca va lo de la compu; se podría divdir en si hay cadena o no hay cadena */
-
+			else{
+				/*Mueve la computadora */
+				jugada=MOV;
+				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena) != 0){
+					imprimirError(ERR_MEM_COMPU);
+					exit(1);
+				}
+			}
 			if (jugada == MOV) {
 				if (jugador == BLANCO || modo == PVP) {
 					captura = validarMovimiento(jugador, &tablero, mov, &dir, hayPaika);
