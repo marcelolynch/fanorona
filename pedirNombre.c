@@ -1,39 +1,24 @@
-/* FRONT-END
-** pide una especificación de captura
-** devuelve APPROACH o WITHDRAWAL. 
-** mejor que reciba un puntero de tMovimiento y lo modifique ahi?
-*/
-
-#include <stdio.h>
 #include "fanorona.h"
+#include <stdio.h>
 
+tFlag leerSN(void);
+tFlag validarFmtNombre (char destino[], char origen[], int dimOrigen);
+void imprimirError(tFlag error);
 int getlinea(char str[], int dim);
-enum tCaptura leerCaptura (const char str[]);
+void imprimirError(tFlag error);
 
-enum tCaptura pedirCaptura (void) {
-	char str[5];
-	int tipoCaptura;
+void pedirNombre (char nombre[]) {
+	char str[STR_DIM];
+	int n;
+	tFlag esValido = 1;
 
-	printf("Especifique algún tipo de captura, pues el movimiento que quiere realizar admite tanto captura por acercamiento como por alejamiento.\n");
+	printf("Escriba el nombre con el que quiere guardar su juego. (Max %d caracteres)\n", MAX_NOM);
 
 	do {
-		printf("Ingrese [w] o [a] > ");
-		getlinea(str, 5);
-		tipoCaptura = leerCaptura(str);
-	} while (tipoCaptura == ERROR);
-	
-	return tipoCaptura;
-}
-/*
-int main(void) {
-	int algo = pedirCaptura();
+		imprimirError(esValido); /* en una primera instancia no imprime nada, pues esValido es mayor o igual a 0*/
+		n = getlinea(str, STR_DIM);
+		esValido = validarFmtNombre (nombre, str, n);
+	} while (esValido < 0);
 
-	switch(algo) {
-	case APPROACH: printf("buen approach\n"); break;
-	case WITHDRAWAL: printf("withdrawal es de cagon\n"); break;
-	default: printf("si se imprime hice algo mal\n"); break;
-	}
-
-	return 0;
+	return;
 }
-*/

@@ -75,7 +75,7 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 	printf("Ingrese una jugada\n");
 
 	do {
-		printf("> ");
+		printf(" > ");
 		n = getlinea(str, STR_DIM);
 		jugada = validarFormato (str, n, mov, nombre);
 		imprimirError(jugada); /* solo imprime en casos de error */

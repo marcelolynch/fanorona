@@ -105,7 +105,7 @@ tCasilla ** generarMatrizTablero(int fils, int cols){
 	if (matriz == NULL)
 		return NULL;
 		
-	for(i=0;  i< fils; i++)
+	for(i=0; i < fils; i++)
 	{	
 		matriz[i]= malloc(cols*sizeof(tCasilla));
 				
@@ -146,17 +146,17 @@ void imprimirTablero ( tTablero * tablero )
 	for(i=-1; i<tablero->filas; i++)
 		{	putchar('\n');
 			if(i<0)
-			printf("\t\t\t    ");
+				printf("\t\t\t     ");
 			else
-			printf("\t\t\t %c  ",i<0?' ':i+'1');
+				printf("\t\t\t %2d  ", i+1);
 			for(j=0; j<tablero->cols; j++)
 				if(i==-1)
-					printf("%d   ", j+1);
+					printf("%2d   ", j+1);
 				else
 				{	if (tablero->matriz[i][j].tipo==DEBIL)
-						printf("%c   ", tolower( idColor[ tablero->matriz[i][j].ocupante ] )); /*BLANCO=0, NEGRO=1, VACIO=2*/
+						printf("%2c   ", tolower( idColor[ tablero->matriz[i][j].ocupante ] )); /*BLANCO=0, NEGRO=1, VACIO=2*/
 					else 
-						printf("%c   ", idColor[ tablero->matriz[i][j].ocupante ]);
+						printf("%2c   ", idColor[ tablero->matriz[i][j].ocupante ]);
 				}
 		}
 		putchar('\n');
@@ -165,12 +165,13 @@ void imprimirTablero ( tTablero * tablero )
 
 
 /*main para probarlas */
-/*int main (void)
+/*
+int main (void)
 {	int c;
 	tTablero tablero;
 	int i,j;
 		
-//	PedirDimensiones(&tablero);
+	pedirDimensiones(&tablero);
 	
 
 	printf("Las dimensiones son : %d x %d \n", tablero.filas,tablero.cols);
@@ -178,11 +179,12 @@ void imprimirTablero ( tTablero * tablero )
 	printf("Las dimensiones son : %d x %d \n", tablero.filas, tablero.cols);
 
 	
-	tablero= GenerarTablero(tablero.filas,tablero.cols);
+	tablero= generarTablero(tablero.filas,tablero.cols);
 
-	tablero=cargarPartida(&i,"saved.bin"); 	
+	tablero=cargarPartida(&i,"saved.bin");
 	if (tablero.matriz != NULL)
-		ImprimirTablero(&tablero);
+		imprimirTablero(&tablero);
 	
 	return 0;
-}*/
+}
+*/
