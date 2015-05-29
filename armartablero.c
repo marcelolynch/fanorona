@@ -146,18 +146,26 @@ void imprimirTablero ( tTablero * tablero )
 	for(i=-1; i<tablero->filas; i++)
 		{	putchar('\n');
 			if(i<0)
-			printf("\t\t\t    ");
+				printf("\t\t\t");
 			else
-			printf("\t\t\t %c  ",i<0?' ':i+'1');
+				printf("\t\t\t%d\t",i<0?' ':i+1);
 			for(j=0; j<tablero->cols; j++)
-				if(i==-1)
-					printf("%d   ", j+1);
+			{	if(i==-1)
+				{	if(j==0)
+						putchar('\t');
+					printf("%-4d",j+1);
+
+					if( j== tablero->cols-1)
+						putchar('\n');
+
+				}
 				else
 				{	if (tablero->matriz[i][j].tipo==DEBIL)
-						printf("%c   ", tolower( idColor[ tablero->matriz[i][j].ocupante ] )); /*BLANCO=0, NEGRO=1, VACIO=2*/
+						printf("%-4c", tolower( idColor[ tablero->matriz[i][j].ocupante ] )); /*BLANCO=0, NEGRO=1, VACIO=2*/
 					else 
-						printf("%c   ", idColor[ tablero->matriz[i][j].ocupante ]);
+						printf("%-4c", idColor[ tablero->matriz[i][j].ocupante ]);
 				}
+			}
 		}
 		putchar('\n');
 	return;		
