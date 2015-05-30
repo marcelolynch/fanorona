@@ -440,8 +440,6 @@ void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimient
 		fini=mov.coordDest.fil + dirFil; /*De donde empieza a comer*/
 		cini=mov.coordDest.col + dirCol;
 		}
-	else if (mov.tipoMov != NINGUNO)
-		printf("ERROOOOOOOOOR\n\a\a\a\a");
 	printf("%d,%d -> %d,%d\n", mov.coordOrig.fil+1, mov.coordOrig.col+1, mov.coordDest.fil+1, mov.coordDest.col+1);
 	tablero->matriz[mov.coordDest.fil][mov.coordDest.col].ocupante = jugador;
 	tablero->matriz[mov.coordOrig.fil][mov.coordOrig.col].ocupante = VACIO;	/*Movi la ficha*/
