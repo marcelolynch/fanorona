@@ -465,6 +465,7 @@ int jugar2(tTablero tablero, int modo, int jugador){
 						intercambiarTableros(&tablero, &tableroAuxiliar);
 						imprimirTablero(&tablero);
 						primerUndo=0;
+						calcularGanador = 1; /*Tiene que volver a chequear el tablero */
 					}
 					else
 						imprimirError(ERR_UNDO_DOBLE);
@@ -550,7 +551,9 @@ void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimient
 	while((i<(tablero->filas) && i>=0 && j<(tablero->cols) && j>=0) && tablero->matriz[i][j].ocupante==enemigo){
 		/*Mientras no me vaya del tablero y siga habiendo enemigos en la linea de captura*/
 	
+		
 		tablero->matriz[i][j].ocupante = VACIO;
+		tablero->matriz[i][j].estado = LIBRE; /* Si vengo de cadena, estaba ACTIVA*/
 		
 		i+=dirFil;
 		j+=dirCol;

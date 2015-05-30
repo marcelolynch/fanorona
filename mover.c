@@ -23,7 +23,8 @@ int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador);
 tFlag leerSN(void);
 tCasilla ** generarMatrizTablero(int fils, int cols);
 int calcularMovCompu(tMovimiento * mov, tTablero * tablero, tFlag hayPaika, tFlag hayCadena);
-
+void copiarTablero(tTablero * tablero, tCasilla ** tableroAuxiliar);
+void limpiarTocadas(tTablero * tablero);
 
 int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxiliar, tMovimiento * movimiento, enum tDireccion * direccionPrevia, tFlag hayPaika, tFlag * hayCadena) {
 	int captura;
@@ -50,6 +51,7 @@ int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxili
 			/* al haber cadena, el orígen es el nuevo destino */
 			movimiento->coordOrig.fil = movimiento->coordDest.fil;
 			movimiento->coordOrig.col = movimiento->coordDest.col;
+			tablero->matriz[movimiento->coordOrig.fil][movimiento->coordOrig.col].estado = ACTIVA; /*La casilla esta en el medio de una cadena*/
 		}
 	}
 
@@ -59,5 +61,5 @@ int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxili
 void cambiarTurno (char *jugador, tTablero * tablero, enum tDireccion * direccionPrevia) {
 	*jugador = !(*jugador);
 	limpiarTocadas(tablero);
-	*direccionPrevia = NULA; /* Ninguna */
+	*direccionPrevia = NULA; /* Ninguna*/
 }
