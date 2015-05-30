@@ -19,7 +19,7 @@ int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento ,
 void imprimirError(tFlag error);
 enum tCaptura pedirCaptura (void);
 void pedirCadena(tMovimiento *mov);
-int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen);
+int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen, enum tDireccion dirAnterior);
 int paika(char jugador, tTablero * tablero);
 int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombre);
 tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
@@ -75,7 +75,7 @@ int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika){
 			if(ocupante==jugador){
 			origen.fil = i;
 			origen.col = j;
-			if(jugadaObligada(tablero, ocupante, origen)){
+			if(jugadaObligada(tablero, ocupante, origen, NULA)){
 				*hayPaika=0;
 				hayMovimientos=1;
 			}
@@ -156,7 +156,7 @@ int estadoPostJugada2(tTablero * tablero, int jugador, tFlag * hayPaika){
 			
 			origen.fil = i;
 			origen.col = j;
-			if(jugadaObligada(tablero, ocupante, origen)){
+			if(jugadaObligada(tablero, ocupante, origen, NULA)){
 				hayMovimientos=1;
 				if(ocupante==jugador)
 					*hayPaika=0;
@@ -339,7 +339,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 					hayCadena = 0;
 
 					if (captura != NINGUNO) /* si no fue PAIKA, busca una posible cadena */
-						hayCadena = jugadaObligada(&tablero, jugador, mov.coordDest);
+						hayCadena = jugadaObligada(&tablero, jugador, mov.coordDest, dir);
 
 					if (hayCadena) {
 						/* al haber cadena, el origen es el nuevo destino */
