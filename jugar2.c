@@ -4,6 +4,7 @@
 #include "getnum.h"
 #include "fanorona.h"
 
+int jugar2(tTablero tablero, int modo, int jugador);
 void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion);
 void pedirDimensiones(tTablero * tablero);
 tTablero generarTablero(int fils, int cols);
@@ -15,19 +16,25 @@ void pedirDimensiones(tTablero * tablero);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
 void pedirNombre(char nombre[]);
 void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag hayPaika);
+int validarMovimiento(int jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag hayPaika);
 void imprimirError(tFlag error);
 enum tCaptura pedirCaptura (void);
 void pedirCadena(tMovimiento *mov);
 int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen, enum tDireccion dirAnterior);
-int paika(char jugador, tTablero * tablero);
+int paika(int jugador, tTablero * tablero);
 int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombre);
 tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
 int jugar(tTablero tablero, int modo, int jugador);
-int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador);
+int meCapturan(tTablero *tablero, tCoordenada posicion, int jugador);
 tFlag leerSN(void);
 tCasilla ** generarMatrizTablero(int fils, int cols);
 int calcularMovCompu(tMovimiento * mov, tTablero * tablero, tFlag hayPaika, tFlag hayCadena);
+void limpiarTocadas(tTablero * tablero);
+int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika);
+void copiarTablero(tTablero * tablero, tCasilla ** tableroAuxiliar);
+void intercambiarTableros(tTablero * tablero, tCasilla *** tableroAuxiliar);
+int mover (int jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxiliar, tMovimiento * movimiento, enum tDireccion * direccionPrevia, tFlag hayPaika, tFlag * hayCadena);
+void cambiarTurno (int *jugador, tTablero * tablero, enum tDireccion * direccionPrevia);
 
 void limpiarTocadas(tTablero * tablero){
 	int i,j;
@@ -249,7 +256,7 @@ int main(void){
 	}
 
 
-	ganador = jugar(tablero, modo, jugador);		
+	ganador = jugar2(tablero, modo, jugador);		
 
 	switch(ganador) {
 		case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
@@ -367,6 +374,100 @@ int jugar(tTablero tablero, int modo, int jugador){
 					else
 						imprimirError(ERR_UNDO_DOBLE);
 				imprimirTablero(&tablero);
+				}
+				else
+					imprimirError(ERR_UNDO);
+				
+				/* aca va lo del error del undo */
+			}
+
+			else if (jugada == QUIT) {
+				printf("Desea guardar su juego antes de salir?\n");
+				quiereGuardar = leerSN();
+				if (quiereGuardar)
+					pedirNombre(nombre);
+			}
+
+			if (jugada == SAVE || quiereGuardar) {
+				do {
+					printf("Desea guardar su juego con el nombre '%s'?\n", nombre);
+					quiereCambiar = !leerSN();
+					if (quiereCambiar)
+						pedirNombre(nombre);
+				} while (quiereCambiar);
+				guardarPartida(&tablero, modo, jugador, nombre);
+				printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
+			}
+		}
+	}
+
+	return hayGanador; /* si se salió por QUIT, hayGanador vale 0 */
+}
+
+int jugar2(tTablero tablero, int modo, int jugador){
+
+	enum tDireccion dir=NULA;
+	tMovimiento mov;
+	char nombre[MAX_NOM];
+	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1, primerUndo=0;
+	int captura;
+	int a,b; /*TEMP*/
+	int estado = SEGUIR;
+	tFlag hayPaika;
+	tCasilla ** tableroAuxiliar;
+	
+	if(modo==PVE)
+		tableroAuxiliar = generarMatrizTablero(tablero.filas, tablero.cols);	
+	
+	imprimirTablero(&tablero);
+		
+
+	while (!hayGanador && jugada != QUIT) {
+		if (calcularGanador) {
+			hayGanador = estadoPostJugada(&tablero, jugador, &hayPaika);
+			calcularGanador = 0;
+		}
+
+		if (!hayGanador) {
+
+			if (hayCadena && (jugador == BLANCO || modo == PVP)) /* si hay cadena y no es la computadora */
+				pedirCadena(&mov);
+			else if (jugador == BLANCO || modo == PVP) 	/* si no es la computadora */
+				jugada = pedirJugada(&mov, nombre);
+			else{
+				/*Mueve la computadora */
+				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena) != 0){
+					imprimirError(ERR_MEM_COMPU);
+					exit(1);
+				}
+			}
+			if (jugada == MOV) {
+				captura = mover (jugador, modo, &tablero, tableroAuxiliar, &mov, &dir, hayPaika, &hayCadena);
+				if (captura == AMBOS) {
+					mov.tipoMov = pedirCaptura();
+					captura = mover (jugador, modo, &tablero, tableroAuxiliar, &mov, &dir, hayPaika, &hayCadena);
+				}
+				if (captura >= 0) { /* si el movimiento fue válido */
+					imprimirTablero(&tablero);
+					if (!hayCadena) { /* cambiamos de turno */
+						cambiarTurno (&jugador, &tablero, &dir);
+						primerUndo=1;
+						calcularGanador=1;
+						printf("Cambio!\nLe toca al jugador %s\n", jugador ? "negro" : "blanco");
+					}
+				}
+				else
+					imprimirError(captura);
+			}
+			else if (jugada == UNDO) {
+				if (modo == PVE) {
+					if(primerUndo){
+						intercambiarTableros(&tablero, &tableroAuxiliar);
+						imprimirTablero(&tablero);
+						primerUndo=0;
+					}
+					else
+						imprimirError(ERR_UNDO_DOBLE);
 				}
 				else
 					imprimirError(ERR_UNDO);

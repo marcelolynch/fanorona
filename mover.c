@@ -25,14 +25,20 @@ tCasilla ** generarMatrizTablero(int fils, int cols);
 int calcularMovCompu(tMovimiento * mov, tTablero * tablero, tFlag hayPaika, tFlag hayCadena);
 
 
-int mover (char jugador, tTablero * tablero, tMovimiento * movimiento, enum tDireccion * direccionPrevia, tFlag hayPaika, tFlag * hayCadena) {
+int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxiliar, tMovimiento * movimiento, enum tDireccion * direccionPrevia, tFlag hayPaika, tFlag * hayCadena) {
 	int captura;
 	
 	captura = validarMovimiento(jugador, tablero, *movimiento, direccionPrevia, hayPaika);
 
-	if (captura == AMBOS) /* si la jugada es ambigua, retorna para que el front pida la captura */
+	if (captura == AMBOS) { /* si la jugada es ambigua, retorna para que el front pida la captura */
+		*direccionPrevia = NULA;
 		return captura;
+	}
 	else if (captura >= 0) { /* si no fue error */
+		/*Copia el tablero al auxiliar antes en el comienzo del turno  del usuario y si juega vs Computadora*/
+		if (!(*hayCadena) && modo == PVE && jugador == BLANCO)
+			copiarTablero(tablero, tableroAuxiliar);
+		
 		movimiento->tipoMov = captura;
 		actualizarTablero(tablero, *direccionPrevia, *movimiento);
 		*hayCadena = 0;
@@ -50,10 +56,8 @@ int mover (char jugador, tTablero * tablero, tMovimiento * movimiento, enum tDir
 	return captura;
 }
 
-void cambiarTurno (char *jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxiliar, enum tDireccion * direccionPrevia) {
+void cambiarTurno (char *jugador, tTablero * tablero, enum tDireccion * direccionPrevia) {
 	*jugador = !(*jugador);
 	limpiarTocadas(tablero);
 	*direccionPrevia = NULA; /* Ninguna */
-	if (modo == PVE && *jugador == BLANCO) /* Copia el tablero al auxiliar antes de que juegue el usuario y si juega vs Computadora */
-		copiarTablero(tablero, tableroAuxiliar);
 }
