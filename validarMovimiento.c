@@ -46,7 +46,7 @@ static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino)
 }
 
 
-int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador){
+int meCapturan(tTablero *tablero, tCoordenada posicion, int jugador){
 
 	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
 	int dirsPosibles = tablero->matriz[posicion.fil][posicion.col].tipo == FUERTE ? 8:4;
@@ -90,7 +90,7 @@ int meCapturan(tTablero *tablero, tCoordenada posicion, char jugador){
 
 }
 
-enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { 
+enum tCaptura hayComida (int jugador, tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { 
 
 	/* Devuelve el tipo de captura posible segun el movimiento que quiera realizar el usuario
 	** (direccion del movimiento desde de casilla origen). Si no encuentra, devuelve NINGUNO. 
@@ -150,7 +150,7 @@ enum tCaptura hayComida (char jugador, tTablero *tablero, tCoordenada origen, en
 }
 
 /*
-int paika(char jugador, tTablero * tablero){
+int paika(int jugador, tTablero * tablero){
 	int i, j;
 	tCoordenada origen;
 	for(i=0; i < tablero->filas ; i++)
@@ -178,7 +178,7 @@ int paika(char jugador, tTablero * tablero){
 	return 1; 
 }
 */
-int validarMovimiento(char jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag hayPaika) {
+int validarMovimiento(int jugador, tTablero * tablero, tMovimiento movimiento , enum tDireccion * direccionPrevia, tFlag hayPaika) {
 	
 	int jugada, aux;
 
