@@ -227,7 +227,7 @@ int main(void){
 	printf("\t\t3. Cargar partida de archivo\n");
 	printf("\t\t4. Salir\n\n");
 	do{
-		opcion=getint("Ingrese un numero de opcion >") - 1; 
+		opcion=getint("Ingrese un numero de opcion > ") - 1; 
 	}while(opcion<0 || opcion>3);
 
 	if(opcion == PVP || opcion == PVE){
@@ -238,7 +238,7 @@ int main(void){
 
 	}
 	else if(opcion == CARGAR){
-		printf("Ingrese el nombre del archivo:\n   >");
+		printf("Ingrese el nombre del archivo:\n  > ");
 		getlinea(nombre, MAX_NOM);
 		tablero=cargarPartida(&modo, &jugador, nombre); /*modo cambia al correspondiente (0 o 1)*/
 	        if(tablero.matriz == NULL){
@@ -281,7 +281,6 @@ void intercambiarTableros(tTablero * tablero, tCasilla *** tableroAuxiliar){
 	aux = *tableroAuxiliar;
 	*tableroAuxiliar = tablero->matriz;
 	tablero->matriz = aux;
-
 }
 
 int jugar(tTablero tablero, int modo, int jugador){
@@ -490,8 +489,10 @@ int jugar2(tTablero tablero, int modo, int jugador){
 					if (quiereCambiar)
 						pedirNombre(nombre);
 				} while (quiereCambiar);
-				guardarPartida(&tablero, modo, jugador, nombre);
-				printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
+				if (guardarPartida(&tablero, modo, jugador, nombre) != ERROR)
+					printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
+				else
+					printf("Error: no se ha podido guardar su juego.\n");
 			}
 		}
 	}

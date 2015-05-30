@@ -30,8 +30,8 @@ void pedirDimensiones(tTablero * tablero)
 		do {
 			if (hayError)
 				printf("No ingresó dimensiones correctas. Ingrese nuevamente:\n");
-			cantfils= getint("Cantidad de Filas (impar entre %d y %d): ", MIN_DIM, MAX_DIM); 
-			cantcols= getint("Cantidad de Columnas (impar entre %d y %d, mayor o igual que las filas): ", MIN_DIM, MAX_DIM);
+			cantfils= getint("Cantidad de Filas (impar entre %d y %d) > ", MIN_DIM, MAX_DIM); 
+			cantcols= getint("Cantidad de Columnas (impar entre %d y %d, mayor o igual que las filas) > ", MIN_DIM, MAX_DIM);
 			putchar('\n');
 			hayError = 1;
 		} while ( !ES_IMPAR(cantfils) || !ES_IMPAR(cantcols) || !ES_DIM_VALIDA(cantfils, cantcols) || cantfils > cantcols);
