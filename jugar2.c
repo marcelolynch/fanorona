@@ -28,7 +28,7 @@ int jugar(tTablero tablero, int modo, int jugador);
 int meCapturan(tTablero *tablero, tCoordenada posicion, int jugador);
 tFlag leerSN(void);
 tCasilla ** generarMatrizTablero(int fils, int cols);
-int calcularMovCompu(tMovimiento * mov, tTablero * tablero, tFlag hayPaika, tFlag hayCadena);
+int calcularMovCompu(tMovimiento * mov, tTablero * tablero, tFlag hayPaika, tFlag hayCadena, enum tDireccion direccionPrevia);
 void limpiarTocadas(tTablero * tablero);
 int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika);
 void copiarTablero(tTablero * tablero, tCasilla ** tableroAuxiliar);
@@ -317,7 +317,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 			else{
 				/*Mueve la computadora */
 				jugada=MOV;
-				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena) != 0){
+				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena, dir) != 0){
 					imprimirError(ERR_MEM_COMPU);
 					exit(1);
 				}
@@ -409,16 +409,18 @@ int jugar2(tTablero tablero, int modo, int jugador){
 	enum tDireccion dir=NULA;
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1, primerUndo=0;
+	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1, primerUndo=1;
 	int captura;
 	int a,b; /*TEMP*/
 	int estado = SEGUIR;
 	tFlag hayPaika;
 	tCasilla ** tableroAuxiliar;
-	
-	if(modo==PVE)
+
+	if(modo==PVE){
 		tableroAuxiliar = generarMatrizTablero(tablero.filas, tablero.cols);	
-	
+		copiarTablero(&tablero, tableroAuxiliar);
+		}
+
 	imprimirTablero(&tablero);
 		
 
@@ -436,14 +438,17 @@ int jugar2(tTablero tablero, int modo, int jugador){
 				jugada = pedirJugada(&mov, nombre);
 			else{
 				/*Mueve la computadora */
-				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena) != 0){
+				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena, dir) != 0){
 					imprimirError(ERR_MEM_COMPU);
 					exit(1);
 				}
 			}
 			if (jugada == MOV) {
-				captura = mover (jugador, modo, &tablero, tableroAuxiliar, &mov, &dir, hayPaika, &hayCadena);
+			
+				captura = mover(jugador, modo, &tablero, tableroAuxiliar, &mov, &dir, hayPaika, &hayCadena);
+			
 				if (captura == AMBOS) {
+					/*Hay que pedirle que especifique*/
 					mov.tipoMov = pedirCaptura();
 					captura = mover (jugador, modo, &tablero, tableroAuxiliar, &mov, &dir, hayPaika, &hayCadena);
 				}
