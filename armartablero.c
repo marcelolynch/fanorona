@@ -136,6 +136,7 @@ tTablero generarTablero(int fils, int cols){
 
 }
 
+
 /* FIN BACK END*/
 
 /*LAS FUNCIONES QUE SIGUEN SON DE FRONT END*/
