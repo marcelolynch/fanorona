@@ -173,7 +173,7 @@ int jugar2(tTablero tablero, int modo, int jugador){
 					if (quiereCambiar)
 						pedirNombre(nombre);
 				} while (quiereCambiar);
-				if (guardarPartida(&tablero, modo, jugador, nombre) != ERROR);
+				if (guardarPartida(&tablero, modo, jugador, nombre) != ERROR)
 					printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
 				else
 					imprimirError(ERR_SAVE);
