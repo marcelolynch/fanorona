@@ -53,7 +53,7 @@ void imprimirError(tFlag error) {
 		printf("\aError: no puede realizar UNDO si el juego es entre dos jugadores\n");
 		break;
 	case ERR_UNDO_DOBLE:
-		printf("\aError: no puede realizar UNDO dos veces seguidas o en el primer turno\n");
+		printf("\aError: no puede realizar UNDO dos veces seguidas\n");
 		break;
 	case ERR_MEM_COMPU:
 		printf("\aError fatal: no hay memoria suficiente para continuar con el juego. Abortando");

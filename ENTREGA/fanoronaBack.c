@@ -119,7 +119,6 @@ int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika){
 		estado = GANADOR_BLANCO;
 	else if(!hayMovimientos)
 		estado = EMPATE;
-	
 	else
 		estado = SEGUIR;
 
