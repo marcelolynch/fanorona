@@ -88,7 +88,6 @@ int main(void){
 
 int jugar2(tTablero tablero, int modo, int jugador){
 
-	enum tDireccion dir=NULA;
 	tMovimiento mov;
 	char nombre[MAX_NOM];
 	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularEstado=1, primerUndo=1;
@@ -118,24 +117,24 @@ int jugar2(tTablero tablero, int modo, int jugador){
 				jugada = pedirJugada(&mov, nombre);
 			else{
 				/*Mueve la computadora */
-				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena, dir) != 0){
+				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena) != 0){
 					imprimirError(ERR_MEM_COMPU);
 					exit(1);
 				}
 			}
 			if (jugada == MOV) {
 			
-				captura = mover(jugador, modo, &tablero, tableroAuxiliar, &mov, &dir, hayPaika, &hayCadena);
+				captura = mover(jugador, modo, &tablero, tableroAuxiliar, &mov, hayPaika, &hayCadena);
 			
 				if (captura == AMBOS) {
 					/*Hay que pedirle que especifique*/
 					mov.tipoMov = pedirCaptura();
-					captura = mover (jugador, modo, &tablero, tableroAuxiliar, &mov, &dir, hayPaika, &hayCadena);
+					captura = mover (jugador, modo, &tablero, tableroAuxiliar, &mov, hayPaika, &hayCadena);
 				}
 				if (captura >= 0) { /* si el movimiento fue válido */
 					imprimirTablero(&tablero);
 					if (!hayCadena) { /* cambiamos de turno */
-						cambiarTurno (&jugador, &tablero, &dir);
+						cambiarTurno (&jugador, &tablero);
 						primerUndo=1;
 						calcularEstado=1;
 						printf("Cambio!\nLe toca al jugador %s\n", jugador ? "negro" : "blanco");

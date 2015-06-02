@@ -83,10 +83,10 @@ typedef signed char tFlag;
 
 
 int leerLinea(char str[], int dim);
-int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxiliar, tMovimiento * movimiento, enum tDireccion * direccionPrevia, tFlag hayPaika, tFlag * hayCadena);
+int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxiliar, tMovimiento * movimiento, tFlag hayPaika, tFlag * hayCadena);
 int estadoJuego(tTablero * tablero, int jugador, tFlag * hayPaika);
-void cambiarTurno (int *jugador, tTablero * tablero, enum tDireccion * direccionPrevia);
-int calcularMovCompu(tMovimiento * mov, tTablero * tablero, tFlag hayPaika, tFlag hayCadena, enum tDireccion direccionPrevia);
+void cambiarTurno (int *jugador, tTablero * tablero);
+int calcularMovCompu(tMovimiento * mov, tTablero * tablero, tFlag hayPaika, tFlag hayCadena);
 int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombre);
 tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
 tTablero generarTablero(int fils, int cols);
