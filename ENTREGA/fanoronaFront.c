@@ -90,9 +90,8 @@ int jugar2(tTablero tablero, int modo, int jugador){
 
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularEstado=1, primerUndo=1;
+	tFlag jugada=START, quiereGuardar=0, quiereCambiar, hayGanador=0, calcularEstado=1, primerUndo=1;
 	int captura;
-	tFlag hayPaika;
 	tCasilla ** tableroAuxiliar;
 
 	if(modo==PVE){
@@ -105,35 +104,35 @@ int jugar2(tTablero tablero, int modo, int jugador){
 
 	while (!hayGanador && jugada != QUIT) {
 		if (calcularEstado) {
-			hayGanador = estadoJuego(&tablero, jugador, &hayPaika);
+			hayGanador = estadoJuego(&tablero, jugador);
 			calcularEstado = 0;
 		}
 
 		if (!hayGanador) {
 
-			if (hayCadena && (jugador == BLANCO || modo == PVP)) /* si hay cadena y no es la computadora */
+			if (puedeEncadenar() && (jugador == BLANCO || modo == PVP)) /* si hay cadena y no es la computadora */
 				pedirCadena(&mov);
 			else if (jugador == BLANCO || modo == PVP) 	/* si no es la computadora */
 				jugada = pedirJugada(&mov, nombre);
 			else{
 				/*Mueve la computadora */
-				if(calcularMovCompu(&mov, &tablero, hayPaika, hayCadena) != 0){
+				if(calcularMovCompu(&mov, &tablero) != 0){
 					imprimirError(ERR_MEM_COMPU);
 					exit(1);
 				}
 			}
 			if (jugada == MOV) {
 			
-				captura = mover(jugador, modo, &tablero, tableroAuxiliar, &mov, hayPaika, &hayCadena);
+				captura = mover(jugador, modo, &tablero, tableroAuxiliar, &mov);
 			
 				if (captura == AMBOS) {
 					/*Hay que pedirle que especifique*/
 					mov.tipoMov = pedirCaptura();
-					captura = mover (jugador, modo, &tablero, tableroAuxiliar, &mov, hayPaika, &hayCadena);
+					captura = mover (jugador, modo, &tablero, tableroAuxiliar, &mov);
 				}
 				if (captura >= 0) { /* si el movimiento fue válido */
 					imprimirTablero(&tablero);
-					if (!hayCadena) { /* cambiamos de turno */
+					if (!puedeEncadenar()) { /* cambiamos de turno */
 						cambiarTurno (&jugador, &tablero);
 						primerUndo=1;
 						calcularEstado=1;
