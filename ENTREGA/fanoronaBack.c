@@ -9,7 +9,7 @@ typedef struct {
 static void rellenarTablero(tTablero * tablero);
 static void liberarTodo(tCasilla ** matriz, int n);
 static void limpiarTocadas(tTablero * tablero);
-static void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov);
+static void actualizarTablero(tTablero * tablero, tMovimiento mov);
 static void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion);
 static int aumentarPosibles(tTablero * tablero, tVecMovs * movsPosibles, tCoordenada casillaOrig);
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino);
@@ -44,7 +44,7 @@ int mover (char jugador, int modo, tTablero * tablero,tMovimiento * movimiento) 
 			copiarTablero(tablero);
 		
 		movimiento->tipoMov = captura;
-		actualizarTablero(tablero, direccionPrevia, *movimiento);
+		actualizarTablero(tablero, *movimiento);
 		hayCadena = 0;
 
 		if (captura != NINGUNO) /* si no fue PAIKA, busca una posible cadena */
@@ -380,13 +380,16 @@ static void limpiarTocadas(tTablero * tablero){
 				tablero->matriz[i][j].estado = VACIO;
 }
 
-static void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov){
+static void actualizarTablero(tTablero * tablero, tMovimiento mov){
 	int i, j;
 	int dirFil, dirCol;
 	int fini, cini;
 	int jugador = tablero->matriz[mov.coordOrig.fil][mov.coordOrig.col].ocupante;
 	int enemigo = !jugador;
-	incrementoSegunDir(&dirFil, &dirCol, direccionPrevia);
+	/* la direccion del movimiento a realizar se guardó en direccionPrevia cuando se llamó a validarMovimiento */
+	enum tDireccion direccion = direccionPrevia;
+
+	incrementoSegunDir(&dirFil, &dirCol, direccion);
 	
 	if(mov.tipoMov==WITHDRAWAL){
 		fini=mov.coordOrig.fil - dirFil; /*De donde empieza a comer*/
@@ -399,7 +402,7 @@ static void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMo
 		fini=mov.coordDest.fil + dirFil; /*De donde empieza a comer*/
 		cini=mov.coordDest.col + dirCol;
 		}
-	printf("%d,%d -> %d,%d\n, DIRECCION: %d\n", mov.coordOrig.fil+1, mov.coordOrig.col+1, mov.coordDest.fil+1, mov.coordDest.col+1, direccionPrevia);
+	printf("%d,%d -> %d,%d\n, DIRECCION: %d\n", mov.coordOrig.fil+1, mov.coordOrig.col+1, mov.coordDest.fil+1, mov.coordDest.col+1, direccion);
 	tablero->matriz[mov.coordDest.fil][mov.coordDest.col].ocupante = jugador;
 	tablero->matriz[mov.coordOrig.fil][mov.coordOrig.col].ocupante = VACIO;	/*Movi la ficha*/
 
