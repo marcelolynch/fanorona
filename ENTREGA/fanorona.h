@@ -91,9 +91,9 @@ int calcularMovCompu(tMovimiento * mov, tTablero * tablero);
 int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombre);
 tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
 tTablero generarTablero(int fils, int cols);
-tCasilla ** generarMatrizTablero(int fils, int cols);
+int generarAuxiliar(tTablero * tablero);
 tFlag puedeEncadenar(void);
-
+int undo(tTablero * tablero);
 
 
 #endif

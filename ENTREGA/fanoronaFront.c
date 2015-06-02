@@ -51,6 +51,11 @@ int main(void){
 		jugador=BLANCO;
 		pedirDimensiones(&tablero);
 		tablero=generarTablero(tablero.filas,tablero.cols);
+		
+		if(tablero.matriz == NULL){
+			imprimirError(ERR_MEM_COMPU);
+			return 1;
+		}
 	}
 	else if(opcion == CARGAR){
 		printf("Ingrese el nombre del archivo:\n > ");
@@ -73,8 +78,11 @@ int main(void){
 
 	if(modo==PVE){
 		/*Inicializo el tablero auxiliar para los UNDO*/
-		tablero.tableroAuxiliar = generarMatrizTablero(tablero.filas, tablero.cols);	
-		printf("INI\n");
+		if(generarAuxiliar(&tablero) == ERROR){
+			imprimirError(ERR_MEM_COMPU);
+			return 1;		
+		}	
+	
 	}
 	
 	ganador = jugar(tablero, modo, jugador);		

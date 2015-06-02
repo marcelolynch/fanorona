@@ -19,6 +19,7 @@ static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento movimi
 static int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen);
 static void copiarTablero(tTablero * tablero);
 static void intercambiarTableros(tTablero * tablero);
+static tCasilla ** generarMatrizTablero(int fils, int cols);
 
 static enum tDireccion direccionPrevia=NULA;
 static tFlag hayCadena=0;
@@ -287,7 +288,16 @@ tTablero generarTablero(int fils, int cols){
 
 }
 
-tCasilla ** generarMatrizTablero(int fils, int cols){
+int generarAuxiliar(tTablero * tablero){
+	
+	tablero->tableroAuxiliar = generarMatrizTablero(tablero->filas, tablero->cols);
+	if(tablero->tableroAuxiliar == NULL)
+		return ERROR;
+	else
+		return OK;
+}
+
+static tCasilla ** generarMatrizTablero(int fils, int cols){
 
 	tCasilla ** matriz;
 	int i;
