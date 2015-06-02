@@ -140,7 +140,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 			}
 			else if (jugada == UNDO) {
 				if (modo == PVE) {
-					if(undo(&tablero) != 0){
+					if( undo(&tablero) != ERROR){
 						imprimirTablero(&tablero);
 						calcularEstado = 1; /*Tiene que volver a chequear el tablero */
 					}
@@ -150,7 +150,6 @@ int jugar(tTablero tablero, int modo, int jugador){
 				else
 					imprimirError(ERR_UNDO);
 				
-				/* aca va lo del error del undo */
 			}
 
 			else if (jugada == QUIT) {

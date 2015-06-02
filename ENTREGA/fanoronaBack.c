@@ -142,18 +142,18 @@ void cambiarTurno (int *jugador, tTablero * tablero) {
 
 
 int undo(tTablero * tablero){
-	int correcto;
+	int estado;
 
 	if(primerUndo){
 		intercambiarTableros(tablero);
 		primerUndo=0;
-		correcto = 1;
+		estado = OK;
 	}
 
 	else
-		correcto = 0;
+		estado = ERROR;
 
-	return correcto;
+	return estado;
 }
 
 int calcularMovCompu(tMovimiento * mov, tTablero * tablero){

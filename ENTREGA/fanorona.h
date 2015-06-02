@@ -48,6 +48,7 @@ typedef struct{
 typedef signed char tFlag;
 
 #define ERROR -1
+#define OK 1
 
 #define BLANCO 0
 #define NEGRO  1
@@ -80,7 +81,6 @@ typedef signed char tFlag;
 					  
 #define ES_IMPAR(a) ((a) % 2 == 1)
 #define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
-#define OK 1
 
 
 int leerLinea(char str[], int dim);
