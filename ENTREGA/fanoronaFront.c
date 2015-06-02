@@ -51,7 +51,6 @@ int main(void){
 		jugador=BLANCO;
 		pedirDimensiones(&tablero);
 		tablero=generarTablero(tablero.filas,tablero.cols);
-
 	}
 	else if(opcion == CARGAR){
 		printf("Ingrese el nombre del archivo:\n > ");
@@ -72,16 +71,20 @@ int main(void){
 	}
 
 
+	if(modo==PVE){
+		/*Inicializo el tablero auxiliar para los UNDO*/
+		tablero.tableroAuxiliar = generarMatrizTablero(tablero.filas, tablero.cols);	
+		printf("INI\n");
+	}
+	
 	ganador = jugar2(tablero, modo, jugador);		
 
 	switch(ganador) {
 		case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
-		case EMPATE: printf("EMPATE\n\n"); break;
+		case EMPATE: printf("\t\tEMPATE\n\n"); break;
 		case GANADOR_NEGRO: printf("GANA NEGRO\n\n"); break;
 	}
 
-	printf("\n\t\tAdios! Enter para salir\n\n");
-	while(getchar()!='\n');
 	return 0;
 
 }
@@ -90,14 +93,8 @@ int jugar2(tTablero tablero, int modo, int jugador){
 
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada=START, quiereGuardar=0, quiereCambiar, hayGanador=0, calcularEstado=1, primerUndo=1;
+	tFlag jugada=START, quiereGuardar=0, quiereCambiar, hayGanador=0, calcularEstado=1;
 	int captura;
-	tCasilla ** tableroAuxiliar;
-
-	if(modo==PVE){
-		tableroAuxiliar = generarMatrizTablero(tablero.filas, tablero.cols);	
-		copiarTablero(&tablero, tableroAuxiliar);
-		}
 
 	imprimirTablero(&tablero);
 		
@@ -123,18 +120,17 @@ int jugar2(tTablero tablero, int modo, int jugador){
 			}
 			if (jugada == MOV) {
 			
-				captura = mover(jugador, modo, &tablero, tableroAuxiliar, &mov);
+				captura = mover(jugador, modo, &tablero, &mov);
 			
 				if (captura == AMBOS) {
 					/*Hay que pedirle que especifique*/
 					mov.tipoMov = pedirCaptura();
-					captura = mover (jugador, modo, &tablero, tableroAuxiliar, &mov);
+					captura = mover (jugador, modo, &tablero, &mov);
 				}
 				if (captura >= 0) { /* si el movimiento fue válido */
 					imprimirTablero(&tablero);
 					if (!puedeEncadenar()) { /* cambiamos de turno */
 						cambiarTurno (&jugador, &tablero);
-						primerUndo=1;
 						calcularEstado=1;
 						printf("Cambio!\nLe toca al jugador %s\n", jugador ? "negro" : "blanco");
 					}
@@ -144,10 +140,8 @@ int jugar2(tTablero tablero, int modo, int jugador){
 			}
 			else if (jugada == UNDO) {
 				if (modo == PVE) {
-					if(primerUndo){
-						intercambiarTableros(&tablero, &tableroAuxiliar);
+					if(undo(&tablero) != 0){
 						imprimirTablero(&tablero);
-						primerUndo=0;
 						calcularEstado = 1; /*Tiene que volver a chequear el tablero */
 					}
 					else
@@ -510,7 +504,7 @@ void imprimirError(tFlag error) {
 		printf("\aError: no puede realizar UNDO si el juego es entre dos jugadores\n");
 		break;
 	case ERR_UNDO_DOBLE:
-		printf("\aError: no puede realizar UNDO dos veces seguidas o en el primer turno\n");
+		printf("\aError: no puede realizar UNDO dos veces seguidas o en el primer turno (¡no hay nada para deshacer!)\n");
 		break;
 	case ERR_MEM_COMPU:
 		printf("\aError fatal: no hay memoria suficiente para continuar con el juego. Abortando\n");

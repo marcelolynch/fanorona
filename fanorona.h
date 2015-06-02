@@ -32,6 +32,7 @@ typedef struct {
 
 typedef struct{
 	tCasilla ** matriz;
+	tCasilla ** tableroAuxiliar;
 	int filas;
 	int cols;
 }tTablero;

@@ -40,6 +40,7 @@ typedef struct {
 
 typedef struct{
 	tCasilla ** matriz;
+	tCasilla ** tableroAuxiliar;
 	int filas;
 	int cols;
 }tTablero;
@@ -83,7 +84,7 @@ typedef signed char tFlag;
 
 
 int leerLinea(char str[], int dim);
-int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxiliar, tMovimiento * movimiento);
+int mover (char jugador, int modo, tTablero * tablero, tMovimiento * movimiento);
 int estadoJuego(tTablero * tablero, int jugador);
 void cambiarTurno (int *jugador, tTablero * tablero);
 int calcularMovCompu(tMovimiento * mov, tTablero * tablero);
@@ -91,8 +92,6 @@ int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombr
 tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
 tTablero generarTablero(int fils, int cols);
 tCasilla ** generarMatrizTablero(int fils, int cols);
-void intercambiarTableros(tTablero * tablero, tCasilla *** tableroAuxiliar);
-void copiarTablero(tTablero * tablero, tCasilla ** tableroAuxiliar);
 
 
 

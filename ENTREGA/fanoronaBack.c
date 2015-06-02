@@ -17,16 +17,19 @@ static int meCapturan(tTablero *tablero, tCoordenada posicion, int jugador);
 static enum tCaptura hayComida (int jugador, tTablero *tablero, tCoordenada origen, enum tDireccion direccion);
 static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento movimiento);
 static int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen);
+static void copiarTablero(tTablero * tablero);
+static void intercambiarTableros(tTablero * tablero);
 
 static enum tDireccion direccionPrevia=NULA;
 static tFlag hayCadena=0;
 static tFlag hayPaika=0;
+static tFlag primerUndo=0;
 
 tFlag puedeEncadenar(void){
 	return hayCadena;
 }
 
-int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxiliar, tMovimiento * movimiento) {
+int mover (char jugador, int modo, tTablero * tablero,tMovimiento * movimiento) {
 	int captura;
 	
 	captura = validarMovimiento(jugador, tablero, *movimiento);
@@ -38,7 +41,7 @@ int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxili
 	else if (captura >= 0) { /* si no fue error */
 		/*Copia el tablero al auxiliar antes en el comienzo del turno  del usuario y si juega vs Computadora*/
 		if (!(hayCadena) && modo == PVE && jugador == BLANCO)
-			copiarTablero(tablero, tableroAuxiliar);
+			copiarTablero(tablero);
 		
 		movimiento->tipoMov = captura;
 		actualizarTablero(tablero, direccionPrevia, *movimiento);
@@ -134,6 +137,23 @@ void cambiarTurno (int *jugador, tTablero * tablero) {
 	*jugador = !(*jugador);
 	limpiarTocadas(tablero);
 	direccionPrevia = NULA; /* Ninguna*/
+	primerUndo=1;
+}
+
+
+int undo(tTablero * tablero){
+	int correcto;
+
+	if(primerUndo){
+		intercambiarTableros(tablero);
+		primerUndo=0;
+		correcto = 1;
+	}
+
+	else
+		correcto = 0;
+
+	return correcto;
 }
 
 int calcularMovCompu(tMovimiento * mov, tTablero * tablero){
@@ -290,17 +310,19 @@ tCasilla ** generarMatrizTablero(int fils, int cols){
 	return matriz;
 }
 
-void copiarTablero(tTablero * tablero, tCasilla ** tableroAuxiliar){
+static void copiarTablero(tTablero * tablero){
 	int i, j;
 	for(i=0; i<tablero->filas ; i++)
-		for(j=0 ; j<tablero->cols ; j++)
-			tableroAuxiliar[i][j] = tablero->matriz[i][j];
+		for(j=0; j<tablero->cols ; j++)
+			tablero->tableroAuxiliar[i][j] = tablero->matriz[i][j];
+
 }	
 
-void intercambiarTableros(tTablero * tablero, tCasilla *** tableroAuxiliar){
+void intercambiarTableros(tTablero * tablero){
+	/*Intercambia el tablero en uso por el auxiliar*/
 	tCasilla ** aux;
-	aux = *tableroAuxiliar;
-	*tableroAuxiliar = tablero->matriz;
+	aux = tablero->tableroAuxiliar;
+	tablero->tableroAuxiliar = tablero->matriz;
 	tablero->matriz = aux;
 
 }
