@@ -92,6 +92,7 @@ int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombr
 tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
 tTablero generarTablero(int fils, int cols);
 tCasilla ** generarMatrizTablero(int fils, int cols);
+tFlag puedeEncadenar(void);
 
 
 
