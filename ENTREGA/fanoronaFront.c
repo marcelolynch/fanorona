@@ -1,7 +1,7 @@
 #include "fanorona.h"
 #include "getnum.h"
 
-int jugar2(tTablero tablero, int modo, int jugador);
+int jugar(tTablero tablero, int modo, int jugador);
 void pedirDimensiones(tTablero * tablero);
 int leerLinea(char str[], int dim);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
@@ -77,7 +77,7 @@ int main(void){
 		printf("INI\n");
 	}
 	
-	ganador = jugar2(tablero, modo, jugador);		
+	ganador = jugar(tablero, modo, jugador);		
 
 	switch(ganador) {
 		case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
@@ -89,7 +89,7 @@ int main(void){
 
 }
 
-int jugar2(tTablero tablero, int modo, int jugador){
+int jugar(tTablero tablero, int modo, int jugador){
 
 	tMovimiento mov;
 	char nombre[MAX_NOM];
@@ -140,7 +140,7 @@ int jugar2(tTablero tablero, int modo, int jugador){
 			}
 			else if (jugada == UNDO) {
 				if (modo == PVE) {
-					if(undo(&tablero) != 0){
+					if( undo(&tablero) != ERROR){
 						imprimirTablero(&tablero);
 						calcularEstado = 1; /*Tiene que volver a chequear el tablero */
 					}
@@ -150,7 +150,6 @@ int jugar2(tTablero tablero, int modo, int jugador){
 				else
 					imprimirError(ERR_UNDO);
 				
-				/* aca va lo del error del undo */
 			}
 
 			else if (jugada == QUIT) {
