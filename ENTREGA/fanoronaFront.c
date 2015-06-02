@@ -3,7 +3,7 @@
 
 int jugar2(tTablero tablero, int modo, int jugador);
 void pedirDimensiones(tTablero * tablero);
-int getlinea(char str[], int dim);
+int leerLinea(char str[], int dim);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
 static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre);
 static const char *salteaEspacios (const char str[], int *cantEspacios);
@@ -39,11 +39,11 @@ int main(void){
 	printf("\t\t=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=\n\n");
 	printf("\tElija una opcion:\n\n");
 	printf("\t\t1. Juego nuevo: vs PC\n");
-	printf("\t\t2. Juego nuevo: dos jugadores \n");
+	printf("\t\t2. Juego nuevo: dos jugadores\n");
 	printf("\t\t3. Cargar partida de archivo\n");
 	printf("\t\t4. Salir\n\n");
 	do{
-		opcion=getint("Ingrese un numero de opcion >") - 1; 
+		opcion=getint("Ingrese un numero de opcion > ") - 1; 
 	}while(opcion<0 || opcion>3);
 
 	if(opcion == PVP || opcion == PVE){
@@ -54,8 +54,8 @@ int main(void){
 
 	}
 	else if(opcion == CARGAR){
-		printf("Ingrese el nombre del archivo:\n   >");
-		getlinea(nombre, MAX_NOM);
+		printf("Ingrese el nombre del archivo:\n > ");
+		leerLinea(nombre, MAX_NOM);
 		tablero=cargarPartida(&modo, &jugador, nombre); /*modo cambia al correspondiente (0 o 1)*/
 	        if(tablero.matriz == NULL){
 			printf("\nError al intentar abrir el archivo \"%s\". Abortando...\n\n", nombre);
@@ -91,7 +91,7 @@ int jugar2(tTablero tablero, int modo, int jugador){
 	enum tDireccion dir=NULA;
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularGanador=1, primerUndo=1;
+	tFlag jugada=START, quiereGuardar=0, hayCadena=0, quiereCambiar, hayGanador=0, calcularEstado=1, primerUndo=1;
 	int captura;
 	tFlag hayPaika;
 	tCasilla ** tableroAuxiliar;
@@ -105,9 +105,9 @@ int jugar2(tTablero tablero, int modo, int jugador){
 		
 
 	while (!hayGanador && jugada != QUIT) {
-		if (calcularGanador) {
-			hayGanador = estadoPostJugada(&tablero, jugador, &hayPaika);
-			calcularGanador = 0;
+		if (calcularEstado) {
+			hayGanador = estadoJuego(&tablero, jugador, &hayPaika);
+			calcularEstado = 0;
 		}
 
 		if (!hayGanador) {
@@ -137,7 +137,7 @@ int jugar2(tTablero tablero, int modo, int jugador){
 					if (!hayCadena) { /* cambiamos de turno */
 						cambiarTurno (&jugador, &tablero, &dir);
 						primerUndo=1;
-						calcularGanador=1;
+						calcularEstado=1;
 						printf("Cambio!\nLe toca al jugador %s\n", jugador ? "negro" : "blanco");
 					}
 				}
@@ -150,7 +150,7 @@ int jugar2(tTablero tablero, int modo, int jugador){
 						intercambiarTableros(&tablero, &tableroAuxiliar);
 						imprimirTablero(&tablero);
 						primerUndo=0;
-						calcularGanador = 1; /*Tiene que volver a chequear el tablero */
+						calcularEstado = 1; /*Tiene que volver a chequear el tablero */
 					}
 					else
 						imprimirError(ERR_UNDO_DOBLE);
@@ -175,8 +175,10 @@ int jugar2(tTablero tablero, int modo, int jugador){
 					if (quiereCambiar)
 						pedirNombre(nombre);
 				} while (quiereCambiar);
-				guardarPartida(&tablero, modo, jugador, nombre);
-				printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
+				if (guardarPartida(&tablero, modo, jugador, nombre) != ERROR)
+					printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
+				else
+					imprimirError(ERR_SAVE);
 			}
 		}
 	}
@@ -196,8 +198,8 @@ tFlag hayError;
 		do {
 			if (hayError)
 				printf("No ingresó dimensiones correctas. Ingrese nuevamente:\n");
-			cantfils= getint("Cantidad de Filas (impar entre %d y %d): ", MIN_DIM, MAX_DIM); 
-			cantcols= getint("Cantidad de Columnas (impar entre %d y %d, mayor o igual que las filas): ", MIN_DIM, MAX_DIM);
+			cantfils= getint("Cantidad de Filas (impar entre %d y %d) > ", MIN_DIM, MAX_DIM); 
+			cantcols= getint("Cantidad de Columnas (impar entre %d y %d, mayor o igual que las filas) > ", MIN_DIM, MAX_DIM);
 			putchar('\n');
 			hayError = 1;
 		} while ( !ES_IMPAR(cantfils) || !ES_IMPAR(cantcols) || !ES_DIM_VALIDA(cantfils, cantcols) || cantfils > cantcols);
@@ -214,7 +216,7 @@ tFlag hayError;
 	return;
 }
 
-int getlinea(char str[], int dim){
+int leerLinea(char str[], int dim){
 	int c, i;
 
 	for (i=0; i<dim-1 && (c=getchar())!='\n'; i++)
@@ -231,11 +233,11 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 	char str[STR_DIM];
 	tFlag jugada=OK;
 
-	printf("Ingrese una jugada\n");
+	printf("Ingrese una jugada:\n");
 
 	do {
 		printf(" > ");
-		n = getlinea(str, STR_DIM);
+		n = leerLinea(str, STR_DIM);
 		jugada = validarFormato (str, n, mov, nombre);
 		imprimirError(jugada); /* solo imprime en casos de error */
 	} while (jugada < 0); /* hay algún tipo de error en el formato */
@@ -372,7 +374,7 @@ tFlag leerSN(void) {
 	do {
 		printf("Ingrese S o N > ");
 
-		getlinea(str, 3); /* str de dimensión 3 así si se ingresa más de S o N str[1] será distinto de '\0' */
+		leerLinea(str, 3); /* str de dimensión 3 así si se ingresa más de S o N str[1] será distinto de '\0' */
 		c = toupper(str[0]);
 	} while( (c != 'S' && c!= 'N') || str[1] != '\0');
 	
@@ -387,8 +389,9 @@ void pedirNombre (char nombre[]) {
 	printf("Escriba el nombre con el que quiere guardar su juego. (Max %d caracteres)\n", MAX_NOM);
 
 	do {
+		printf(" > ");
 		imprimirError(esValido); /* en una primera instancia no imprime nada, pues esValido es mayor o igual a 0*/
-		n = getlinea(str, STR_DIM);
+		n = leerLinea(str, STR_DIM);
 		esValido = validarFmtNombre (nombre, str, n);
 	} while (esValido < 0);
 
@@ -413,7 +416,6 @@ void imprimirTablero ( tTablero * tablero ){
 
 					if( j== tablero->cols-1)
 						putchar('\n');
-
 				}
 				else
 				{	if (tablero->matriz[i][j].tipo==DEBIL)
@@ -446,7 +448,7 @@ void pedirCadena (tMovimiento *mov) {
 
 		printf("> M [%d,%d]", fo, co);
 
-		n = getlinea(nuevoStr, 15);
+		n = leerLinea(nuevoStr, 15);
 
 		if (n >= MIN_STR2 && n <= MAX_STR2) {
 			sprintf(str, "M [%d,%d]%s", fo, co, nuevoStr);
@@ -513,7 +515,10 @@ void imprimirError(tFlag error) {
 		printf("\aError: no puede realizar UNDO dos veces seguidas o en el primer turno\n");
 		break;
 	case ERR_MEM_COMPU:
-		printf("\aError fatal: no hay memoria suficiente para continuar con el juego. Abortando");
+		printf("\aError fatal: no hay memoria suficiente para continuar con el juego. Abortando\n");
+		break;
+	case ERR_SAVE:
+		printf("\aError: no se ha podido guardar su partida\n");
 		break;
 	default:
 		printf("\aError desconocido\n");
@@ -529,7 +534,7 @@ enum tCaptura pedirCaptura (void) {
 
 	do {
 		printf("Ingrese [w] o [a] > ");
-		getlinea(str, 5);
+		leerLinea(str, 5);
 		tipoCaptura = leerCaptura(str);
 	} while (tipoCaptura == ERROR);
 	

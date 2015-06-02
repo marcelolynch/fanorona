@@ -52,7 +52,7 @@ int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxili
 	return captura;
 }
 
-int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika){
+int estadoJuego(tTablero * tablero, int jugador, tFlag * hayPaika){
 	int hayBlancos=0, hayNegros=0;
 	int ocupante;
 	int i,j,n;
@@ -70,12 +70,10 @@ int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika){
 
 		if((ocupante = tablero->matriz[i][j].ocupante) != VACIO) {
 			if(ocupante==BLANCO){
-				/*printf("Hay un blanco en %d, %d\n", i,j);*/
 				hayBlancos=1;
 			}
 			else{
 				hayNegros=1;
-				/*printf("Hay un negro en %d, %d\n", i,j);*/
 			}
 
 
@@ -83,31 +81,31 @@ int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika){
 			** es decir, si no puede capturar nada en la siguiente movida que haga, y que no importa donde se mueva
 			** alguien lo captura. Si todas las piezas (de ambos jugadores) cumplen con esto, el juego termina en empate. */
 			if(ocupante==jugador){
-			origen.fil = i;
-			origen.col = j;
-			if(jugadaObligada(tablero, ocupante, origen, NULA)){
-				*hayPaika=0;
-				hayMovimientos=1;
-			}
-			/*Si puede comer en la jugada posterior, la casilla no esta bloqueada
-			** (esta obligada a comer aunque sea mala estrategia)
-			** si la jugada no es obligada, analizo para cada direccion si la captura es inminente en caso de dirigirse a ella*/
-			else{
-        	        	dirsPosibles = tablero->matriz[i][j].tipo == FUERTE ? 8:4;
-                		for(n=0; n<dirsPosibles ; n++){
-                        		dir = direcciones[n];
-                      	  		incrementoSegunDir(&dirFil, &dirCol, dir);
-														
-	              	 #define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols)
-			
-				if( !FDERANGO(i+dirFil, j+dirCol) ){
-					ady.fil=i+dirFil;
-					ady.col=j+dirCol;
-					if(tablero->matriz[ady.fil][ady.col].ocupante==VACIO && !meCapturan(tablero, ady, ocupante)) 
-						hayMovimientos=1; /* Existe un movimiento en el que no se ve amenazado en la jugada posterior */
+				origen.fil = i;
+				origen.col = j;
+				if(jugadaObligada(tablero, ocupante, origen, NULA)){
+					*hayPaika=0;
+					hayMovimientos=1;
 				}
-				}
-			}	
+				/*Si puede comer en la jugada posterior, la casilla no esta bloqueada
+				** (esta obligada a comer aunque sea mala estrategia)
+				** si la jugada no es obligada, analizo para cada direccion si la captura es inminente en caso de dirigirse a ella*/
+				else{
+					dirsPosibles = tablero->matriz[i][j].tipo == FUERTE ? 8:4;
+					for(n=0; n<dirsPosibles ; n++){
+						dir = direcciones[n];
+						incrementoSegunDir(&dirFil, &dirCol, dir);
+															
+				 #define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols)
+				
+					if( !FDERANGO(i+dirFil, j+dirCol) ){
+						ady.fil=i+dirFil;
+						ady.col=j+dirCol;
+						if(tablero->matriz[ady.fil][ady.col].ocupante==VACIO && !meCapturan(tablero, ady, ocupante)) 
+							hayMovimientos=1; /* Existe un movimiento en el que no se ve amenazado en la jugada posterior */
+					}
+					}
+				}	
 			#undef FDERANGO		
 	  		}
 		}			
@@ -189,7 +187,7 @@ int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombr
 			}
 		}	
 
-	return 0;
+	return 1;
 }
 
 tTablero cargarPartida(int * modo, int * jugador, const char * nombre){
@@ -301,87 +299,6 @@ void intercambiarTableros(tTablero * tablero, tCasilla *** tableroAuxiliar){
 
 }
 
-int estadoPostJugada2(tTablero * tablero, int jugador, tFlag * hayPaika){
-	int hayBlancos=0, hayNegros=0;
-	int ocupante;
-	int i,j,n;
-	int hayMovimientos=0;
-	tCoordenada origen;
-	tCoordenada ady;
-	enum tDireccion direcciones[]={N, S, E, O, NE, NO, SE, SO};
-	int dir, dirsPosibles, dirFil, dirCol;
-	int estado;
-
-	*hayPaika=1;
-
-	for(i=0; i<tablero->filas ; i++)
-	for(j=0; j<tablero->cols ; j++){
-
-		if((ocupante = tablero->matriz[i][j].ocupante) == VACIO){
-			/* Limpieza de las casillas tocadas */
-			if(tablero->matriz[i][j].estado == TOCADA) 
-                	      	tablero->matriz[i][j].estado = LIBRE;
-		}
-		else{ 
-			if(ocupante==BLANCO){
-				/*printf("Hay un blanco en %d, %d\n", i,j);*/
-				hayBlancos=1;
-			}
-			else{
-				hayNegros=1;
-				/*printf("Hay un negro en %d, %d\n", i,j);*/
-			}
-
-
-			/*Voy a analiar si esta casilla esta en una posicion desfavorable (bloqueada) en la proxima movida
-			** es decir, si no puede capturar nada en la siguiente movida que haga, y que no importa donde se mueva
-			** alguien lo captura. Si todas las piezas (de ambos jugadores) cumplen con esto, el juego termina en empate. */
-			
-			origen.fil = i;
-			origen.col = j;
-			if(jugadaObligada(tablero, ocupante, origen, NULA)){
-				hayMovimientos=1;
-				if(ocupante==jugador)
-					*hayPaika=0;
-			}
-			/*Si puede comer en la jugada posterior, la casilla no esta bloqueada
-			** (esta obligada a comer aunque sea mala estrategia)
-			** si la jugada no es obligada, analizo para cada direccion si la captura es inminente en caso de dirigirse a ella*/
-			else{
-        	        	dirsPosibles = tablero->matriz[i][j].tipo == FUERTE ? 8:4;
-                		for(n=0; n<dirsPosibles ; n++){
-                        		dir = direcciones[n];
-                      	  		incrementoSegunDir(&dirFil, &dirCol, dir);
-														
-	              	 #define FDERANGO(x,y) ((x) < 0 || (y) < 0 || (x) >= tablero->filas || (y) >= tablero->cols)
-			
-				if( !FDERANGO(i+dirFil, j+dirCol) ){
-					ady.fil=i+dirFil;
-					ady.col=j+dirCol;
-					if(tablero->matriz[ady.fil][ady.col].ocupante==VACIO && !meCapturan(tablero, ady, ocupante)) 
-						hayMovimientos=1; /* Existe un movimiento en el que no se ve amenazado en la jugada posterior */
-				}
-				}
-			}	
-			#undef FDERANGO		
-	  		
-		}			
-	}
-
-	if(!hayBlancos)
-		estado = GANADOR_NEGRO;
-	else if(!hayNegros)
-		estado = GANADOR_BLANCO;
-	else if(!hayMovimientos)
-		estado = EMPATE;
-	else
-		estado = SEGUIR;
-
-
-	return estado;
-}
-
-
 static void rellenarTablero(tTablero * tablero){
 	int i,j;
 	int postCentral=0;
@@ -430,10 +347,9 @@ static void liberarTodo(tCasilla ** matriz, int n){
 static void limpiarTocadas(tTablero * tablero){
 	int i,j;
 	for(i=0; i<tablero->filas ; i++)
-		for(j=0; j<tablero->cols ; j++){
+		for(j=0; j<tablero->cols ; j++)
 			if(tablero->matriz[i][j].estado == TOCADA)
 				tablero->matriz[i][j].estado = VACIO;
-		}
 }
 
 static void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMovimiento mov){
@@ -463,15 +379,12 @@ static void actualizarTablero(tTablero * tablero, enum tDireccion direccion, tMo
 	j=cini;
 	while((i<(tablero->filas) && i>=0 && j<(tablero->cols) && j>=0) && tablero->matriz[i][j].ocupante==enemigo){
 		/*Mientras no me vaya del tablero y siga habiendo enemigos en la linea de captura*/
-	
-		
 		tablero->matriz[i][j].ocupante = VACIO;
 		tablero->matriz[i][j].estado = LIBRE; /* Si vengo de cadena, estaba ACTIVA*/
 		
 		i+=dirFil;
 		j+=dirCol;
 	}
-	
 }
 
 static void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion){

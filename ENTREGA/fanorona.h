@@ -82,9 +82,9 @@ typedef signed char tFlag;
 #define OK 1
 
 
-int getlinea(char str[], int dim);
+int leerLinea(char str[], int dim);
 int mover (char jugador, int modo, tTablero * tablero, tCasilla ** tableroAuxiliar, tMovimiento * movimiento, enum tDireccion * direccionPrevia, tFlag hayPaika, tFlag * hayCadena);
-int estadoPostJugada(tTablero * tablero, int jugador, tFlag * hayPaika);
+int estadoJuego(tTablero * tablero, int jugador, tFlag * hayPaika);
 void cambiarTurno (int *jugador, tTablero * tablero, enum tDireccion * direccionPrevia);
 int calcularMovCompu(tMovimiento * mov, tTablero * tablero, tFlag hayPaika, tFlag hayCadena, enum tDireccion direccionPrevia);
 int guardarPartida(tTablero * tablero, int modo, int jugador, const char * nombre);
@@ -92,10 +92,8 @@ tTablero cargarPartida(int * modo, int * jugador, const char * nombre);
 tTablero generarTablero(int fils, int cols);
 tCasilla ** generarMatrizTablero(int fils, int cols);
 void intercambiarTableros(tTablero * tablero, tCasilla *** tableroAuxiliar);
-int estadoPostJugada2(tTablero * tablero, int jugador, tFlag * hayPaika);
 void copiarTablero(tTablero * tablero, tCasilla ** tableroAuxiliar);
 
-int estadoPostJugada2(tTablero * tablero, int jugador, tFlag * hayPaika);
 
 
 #endif
