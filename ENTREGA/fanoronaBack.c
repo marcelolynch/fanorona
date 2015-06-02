@@ -9,13 +9,13 @@ typedef struct {
 static void rellenarTablero(tTablero * tablero);
 static void liberarTodo(tCasilla ** matriz, int n);
 static void limpiarTocadas(tTablero * tablero);
-static void actualizarTablero(tTablero * tablero, tMovimiento mov);
+static void actualizarTablero(tTablero * tablero, tMovimiento * mov);
 static void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion);
 static int aumentarPosibles(tTablero * tablero, tVecMovs * movsPosibles, tCoordenada casillaOrig);
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino);
 static int meCapturan(tTablero *tablero, tCoordenada posicion, int jugador);
 static enum tCaptura hayComida (int jugador, tTablero *tablero, tCoordenada origen, enum tDireccion direccion);
-static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento movimiento);
+static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento *movimiento);
 static int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen);
 static void copiarTablero(tTablero * tablero);
 static void intercambiarTableros(tTablero * tablero);
@@ -33,7 +33,7 @@ tFlag puedeEncadenar(void){
 int mover (char jugador, int modo, tTablero * tablero,tMovimiento * movimiento) {
 	int captura;
 	
-	captura = validarMovimiento(jugador, tablero, *movimiento);
+	captura = validarMovimiento(jugador, tablero, movimiento);
 
 	if (captura == AMBOS) { /* si la jugada es ambigua, retorna para que el front pida la captura */
 		direccionPrevia = NULA;
@@ -45,7 +45,7 @@ int mover (char jugador, int modo, tTablero * tablero,tMovimiento * movimiento) 
 			copiarTablero(tablero);
 		
 		movimiento->tipoMov = captura;
-		actualizarTablero(tablero, *movimiento);
+		actualizarTablero(tablero, movimiento);
 		hayCadena = 0;
 
 		if (captura != NINGUNO) /* si no fue PAIKA, busca una posible cadena */
@@ -390,31 +390,31 @@ static void limpiarTocadas(tTablero * tablero){
 				tablero->matriz[i][j].estado = VACIO;
 }
 
-static void actualizarTablero(tTablero * tablero, tMovimiento mov){
+static void actualizarTablero(tTablero * tablero, tMovimiento * mov){
 	int i, j;
 	int dirFil, dirCol;
 	int fini, cini;
-	int jugador = tablero->matriz[mov.coordOrig.fil][mov.coordOrig.col].ocupante;
+	int jugador = tablero->matriz[mov->coordOrig.fil][mov->coordOrig.col].ocupante;
 	int enemigo = !jugador;
 	/* la direccion del movimiento a realizar se guardó en direccionPrevia cuando se llamó a validarMovimiento */
 	enum tDireccion direccion = direccionPrevia;
 
 	incrementoSegunDir(&dirFil, &dirCol, direccion);
 	
-	if(mov.tipoMov==WITHDRAWAL){
-		fini=mov.coordOrig.fil - dirFil; /*De donde empieza a comer*/
-		cini=mov.coordOrig.col - dirCol;
+	if(mov->tipoMov==WITHDRAWAL){
+		fini=mov->coordOrig.fil - dirFil; /*De donde empieza a comer*/
+		cini=mov->coordOrig.col - dirCol;
 		dirFil = -dirFil;	/*Se invierte la direccion a recorrer*/
 		dirCol = -dirCol;
 	}
 
-	else if(mov.tipoMov==APPROACH){
-		fini=mov.coordDest.fil + dirFil; /*De donde empieza a comer*/
-		cini=mov.coordDest.col + dirCol;
+	else if(mov->tipoMov==APPROACH){
+		fini=mov->coordDest.fil + dirFil; /*De donde empieza a comer*/
+		cini=mov->coordDest.col + dirCol;
 		}
-	printf("%d,%d -> %d,%d\n, DIRECCION: %d\n", mov.coordOrig.fil+1, mov.coordOrig.col+1, mov.coordDest.fil+1, mov.coordDest.col+1, direccion);
-	tablero->matriz[mov.coordDest.fil][mov.coordDest.col].ocupante = jugador;
-	tablero->matriz[mov.coordOrig.fil][mov.coordOrig.col].ocupante = VACIO;	/*Movi la ficha*/
+	printf("%d,%d -> %d,%d\n, DIRECCION: %d\n", mov->coordOrig.fil+1, mov->coordOrig.col+1, mov->coordDest.fil+1, mov->coordDest.col+1, direccion);
+	tablero->matriz[mov->coordDest.fil][mov->coordDest.col].ocupante = jugador;
+	tablero->matriz[mov->coordOrig.fil][mov->coordOrig.col].ocupante = VACIO;	/*Movi la ficha*/
 
 	i=fini;
 	j=cini;
@@ -644,14 +644,14 @@ static enum tCaptura hayComida (int jugador, tTablero *tablero, tCoordenada orig
 	return captura;
 }
 
-static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento movimiento) {
+static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento * movimiento) {
 	
 	int jugada, aux;
 
-	int fo=movimiento.coordOrig.fil;
-	int co=movimiento.coordOrig.col;
-	int fd=movimiento.coordDest.fil;
-	int cd=movimiento.coordDest.col;
+	int fo=movimiento->coordOrig.fil;
+	int co=movimiento->coordOrig.col;
+	int fd=movimiento->coordDest.fil;
+	int cd=movimiento->coordDest.col;
 	
 	enum tDireccion direccionMov;
 /*	int hayPaika; */
@@ -668,7 +668,7 @@ static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento movimi
 	if(tablero->matriz[fd][cd].estado==TOCADA)
 		return ERR_MOV_TOC;
 
-	direccionMov = direccionDestino(movimiento.coordOrig, movimiento.coordDest);
+	direccionMov = direccionDestino(movimiento->coordOrig, movimiento->coordDest);
 
 	if(direccionMov == ERROR)
 		return ERR_MOV_NO_ADY; /*No es una direccion valida*/
@@ -679,7 +679,7 @@ static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento movimi
 	if(direccionMov == direccionPrevia)
 		return ERR_MOV_DIR;		/*No puede moverse en la misma direccion en la que venia moviendose */	
 
-	if( (aux=hayComida(jugador, tablero, movimiento.coordOrig, direccionMov)) != NINGUNO || hayPaika )
+	if( (aux=hayComida(jugador, tablero, movimiento->coordOrig, direccionMov)) != NINGUNO || hayPaika )
 		/*Solamente chequeo la situacion de Paika si no selecciono un movimiento donde pueda comer */
 		jugada=aux;
 	else{
@@ -693,9 +693,9 @@ static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento movimi
 	
 	direccionPrevia = direccionMov;
 
-	if(jugada==AMBOS && movimiento.tipoMov!=NINGUNO)
+	if(jugada==AMBOS && movimiento->tipoMov!=NINGUNO)
 		/*Si el jugador puede hacer ambas cosas pero ya eligio*/
-		jugada=movimiento.tipoMov;
+		jugada=movimiento->tipoMov;
 
 	return jugada;
 }

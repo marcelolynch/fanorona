@@ -1,7 +1,7 @@
 #include "fanorona.h"
 #include "getnum.h"
 
-int jugar(tTablero tablero, int modo, int jugador);
+int jugar(tTablero *tablero, int modo, int jugador);
 void pedirDimensiones(tTablero * tablero);
 int leerLinea(char str[], int dim);
 tFlag pedirJugada(tMovimiento *mov, char *nombre);
@@ -85,7 +85,7 @@ int main(void){
 	
 	}
 	
-	ganador = jugar(tablero, modo, jugador);		
+	ganador = jugar(&tablero, modo, jugador);		
 
 	switch(ganador) {
 		case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
@@ -97,19 +97,18 @@ int main(void){
 
 }
 
-int jugar(tTablero tablero, int modo, int jugador){
+int jugar(tTablero *tablero, int modo, int jugador){
 
 	tMovimiento mov;
 	char nombre[MAX_NOM];
 	tFlag jugada=START, quiereGuardar=0, quiereCambiar, hayGanador=0, calcularEstado=1;
 	int captura;
 
-	imprimirTablero(&tablero);
+	imprimirTablero(tablero);
 		
-
 	while (!hayGanador && jugada != QUIT) {
 		if (calcularEstado) {
-			hayGanador = estadoJuego(&tablero, jugador);
+			hayGanador = estadoJuego(tablero, jugador);
 			calcularEstado = 0;
 		}
 
@@ -121,24 +120,24 @@ int jugar(tTablero tablero, int modo, int jugador){
 				jugada = pedirJugada(&mov, nombre);
 			else{
 				/*Mueve la computadora */
-				if(calcularMovCompu(&mov, &tablero) != 0){
+				if(calcularMovCompu(&mov, tablero) != 0){
 					imprimirError(ERR_MEM_COMPU);
 					exit(1);
 				}
 			}
 			if (jugada == MOV) {
 			
-				captura = mover(jugador, modo, &tablero, &mov);
+				captura = mover(jugador, modo, tablero, &mov);
 			
 				if (captura == AMBOS) {
 					/*Hay que pedirle que especifique*/
 					mov.tipoMov = pedirCaptura();
-					captura = mover (jugador, modo, &tablero, &mov);
+					captura = mover (jugador, modo, tablero, &mov);
 				}
 				if (captura >= 0) { /* si el movimiento fue válido */
-					imprimirTablero(&tablero);
+					imprimirTablero(tablero);
 					if (!puedeEncadenar()) { /* cambiamos de turno */
-						cambiarTurno (&jugador, &tablero);
+						cambiarTurno (&jugador, tablero);
 						calcularEstado=1;
 						printf("Cambio!\nLe toca al jugador %s\n", jugador ? "negro" : "blanco");
 					}
@@ -148,8 +147,8 @@ int jugar(tTablero tablero, int modo, int jugador){
 			}
 			else if (jugada == UNDO) {
 				if (modo == PVE) {
-					if( undo(&tablero) != ERROR){
-						imprimirTablero(&tablero);
+					if(undo(tablero) != ERROR){
+						imprimirTablero(tablero);
 						calcularEstado = 1; /*Tiene que volver a chequear el tablero */
 					}
 					else
@@ -157,7 +156,6 @@ int jugar(tTablero tablero, int modo, int jugador){
 				}
 				else
 					imprimirError(ERR_UNDO);
-				
 			}
 
 			else if (jugada == QUIT) {
@@ -174,7 +172,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 					if (quiereCambiar)
 						pedirNombre(nombre);
 				} while (quiereCambiar);
-				if (guardarPartida(&tablero, modo, jugador, nombre) != ERROR)
+				if (guardarPartida(tablero, modo, jugador, nombre) != ERROR)
 					printf("Se ha guardado su juego con el nombre '%s'\n", nombre);
 				else
 					imprimirError(ERR_SAVE);
@@ -186,7 +184,7 @@ int jugar(tTablero tablero, int modo, int jugador){
 }
 
 void pedirDimensiones(tTablero * tablero){	
-tFlag hayError;
+	tFlag hayError;
 	int decision;
 	int cantfils, cantcols;
 
@@ -202,7 +200,6 @@ tFlag hayError;
 			putchar('\n');
 			hayError = 1;
 		} while ( !ES_IMPAR(cantfils) || !ES_IMPAR(cantcols) || !ES_DIM_VALIDA(cantfils, cantcols) || cantfils > cantcols);
-		/* OJO si se ingresan mal las filas pide columnas igual. */
 
 		printf("Las dimensiones del tablero serán: %d x %d\n\n", cantfils,cantcols);
 		printf("¿Desea continuar?\nIngrese S si es así o N para ingresar nuevas dimensiones.\n");
@@ -333,7 +330,7 @@ static const char *leerCoord (const char str[], tCoordenada *coord) {
 			num = 0;
 			esPrimerComa = 0;
 			seEscribioNum = 0;
-			}
+		}
 		else
 			estado = ERROR;
 
