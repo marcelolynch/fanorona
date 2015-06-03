@@ -271,7 +271,7 @@ tTablero cargarPartida(int * modo, int * jugador, const char * nombre){
 	return tablero;
 }
 
-tTablero generarTablero(int fils, int cols){
+tTablero generarTablero(int fils, int cols, int modo){
 	
 	tTablero tablero;
 	
@@ -283,7 +283,14 @@ tTablero generarTablero(int fils, int cols){
 	tablero.cols=cols;
 	
 	rellenarTablero(&tablero);
-	
+
+	if(modo==PVE){
+		tablero.tableroAuxiliar = generarMatrizTablero(tablero.filas, tablero.cols);
+		if(tablero.tableroAuxiliar == NULL){
+			liberarTodo(tablero.matriz, tablero.filas);	
+			tablero.matriz = NULL; /*Tablero principal en NULL marca el error*/
+		}
+	}
 	return tablero;
 
 }

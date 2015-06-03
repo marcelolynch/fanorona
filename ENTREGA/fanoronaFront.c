@@ -50,8 +50,8 @@ int main(void){
 		modo = opcion; /* )1 para dos jugadores, 0 para juego contra la computadora*/	
 		jugador=BLANCO;
 		pedirDimensiones(&tablero);
-		tablero=generarTablero(tablero.filas,tablero.cols);
-		
+		tablero=generarTablero(tablero.filas,tablero.cols, modo);
+	
 		if(tablero.matriz == NULL){
 			imprimirError(ERR_MEM_COMPU);
 			return 1;
@@ -76,15 +76,6 @@ int main(void){
 	}
 
 
-	if(modo==PVE){
-		/*Inicializo el tablero auxiliar para los UNDO*/
-		if(generarAuxiliar(&tablero) == ERROR){
-			imprimirError(ERR_MEM_COMPU);
-			return 1;		
-		}	
-	
-	}
-	
 	ganador = jugar(&tablero, modo, jugador);		
 
 	switch(ganador) {
