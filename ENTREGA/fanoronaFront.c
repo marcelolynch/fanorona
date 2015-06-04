@@ -17,7 +17,7 @@ void imprimirTablero ( tTablero * tablero );
 void pedirCadena (tMovimiento *mov);
 void imprimirError(tFlag error);
 enum tCaptura pedirCaptura (void);
-
+void imprimirMov (tMovimiento * mov);
 
 int main(void){
 	
@@ -126,6 +126,7 @@ int jugar(tTablero *tablero, int modo, int jugador){
 					captura = mover (jugador, modo, tablero, &mov);
 				}
 				if (captura >= 0) { /* si el movimiento fue válido */
+					imprimirMov (&mov);
 					imprimirTablero(tablero);
 					if (!puedeEncadenar()) { /* cambiamos de turno */
 						cambiarTurno (&jugador, tablero);
@@ -416,6 +417,11 @@ void imprimirTablero ( tTablero * tablero ){
 		putchar('\n');
 	return;		
 }	
+
+void imprimirMov (tMovimiento * mov) {
+	printf("\n%d,%d -> %d,%d", mov->coordOrig.fil+1, mov->coordOrig.col+1, mov->coordDest.fil+1, mov->coordDest.col+1);
+	return;
+}
 
 void pedirCadena (tMovimiento *mov) {
 	tFlag esValido = 1;

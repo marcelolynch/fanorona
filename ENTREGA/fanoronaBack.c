@@ -419,7 +419,6 @@ static void actualizarTablero(tTablero * tablero, tMovimiento * mov){
 		fini=mov->coordDest.fil + dirFil; /*De donde empieza a comer*/
 		cini=mov->coordDest.col + dirCol;
 		}
-	printf("%d,%d -> %d,%d\n, DIRECCION: %d\n", mov->coordOrig.fil+1, mov->coordOrig.col+1, mov->coordDest.fil+1, mov->coordDest.col+1, direccion);
 	tablero->matriz[mov->coordDest.fil][mov->coordDest.col].ocupante = jugador;
 	tablero->matriz[mov->coordOrig.fil][mov->coordOrig.col].ocupante = VACIO;	/*Movi la ficha*/
 
@@ -573,20 +572,17 @@ static int meCapturan(tTablero *tablero, tCoordenada posicion, int jugador){
 			if(tablero->matriz[adyacente.fil][adyacente.col].ocupante == enemigo
 				&& tablero->matriz[siguienteAdy.fil][siguienteAdy.col].ocupante == VACIO){
 					/*Me comen por WITHDRAWAL en la proxima jugada en esa direcicon*/
-				printf("Si voy a %d, %d me capturan por withdrawal desde %d, %d\n",posicion.fil+1, posicion.col+1, adyacente.fil+1, adyacente.col+1);
 					return 1;
 			}	
 			if(tablero->matriz[adyacente.fil][adyacente.col].ocupante == VACIO
 				&& tablero->matriz[siguienteAdy.fil][siguienteAdy.col].ocupante == enemigo){
 					/*Me comen por APPROACH en la proxima jugada, desde esa direccion*/
-					printf("Si voy a %d, %d me capturan por approach desde %d, %d\n", posicion.fil+1, posicion.col+1, siguienteAdy.fil+1, siguienteAdy.col+1);
 					return 1;
 		}
 		#undef FDERANGO
 		}
 	}
 
-	printf("No me capturan desde %d, %d\n", posicion.fil, posicion.col);
 	return 0; /*Si llegue hasta aca, no hay manera de que me capturen*/	
 
 }
@@ -689,10 +685,8 @@ static int validarMovimiento(int jugador, tTablero * tablero, tMovimiento * movi
 	if( (aux=hayComida(jugador, tablero, movimiento->coordOrig, direccionMov)) != NINGUNO || hayPaika )
 		/*Solamente chequeo la situacion de Paika si no selecciono un movimiento donde pueda comer */
 		jugada=aux;
-	else{
-		printf("aux: %d, paika: %d", aux, hayPaika);
+	else
 		return ERR_MOV_PAIKA;
-	}
 	
 	/*Si llega hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
 	
@@ -724,16 +718,10 @@ static int jugadaObligada(tTablero * tablero, int jugador, tCoordenada origen){
 
 		if(tablero->matriz[destino.fil][destino.col].estado != TOCADA && direcciones[dir] != direccionPrevia)
 		 /*Solo chequeo si hay comida si no visite esa casilla antes y no debo ir en la misma dirección de antes */
-			{ /*printf("%d, %d no esta tocada\n", destino.fil+1, destino.col+1)*/;
 			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
-			{/*	printf("Hay comida yendo a %d, %d\n", destino.fil+1, destino.col+1);*/
-				return 1; /*Debe capturar esa pieza la proxima jugada */}
+				return 1; /*Debe capturar esa pieza la proxima jugada */
 		}
-			else
-			;/*	printf("%d, %d esta tocada\n", destino.fil+1, destino.col+1);*/
-		}
-		}	
+	}
 
 	return 0;
 }
-
