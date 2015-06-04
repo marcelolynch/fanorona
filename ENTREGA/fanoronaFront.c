@@ -329,8 +329,9 @@ static const char *leerCoord (const char str[], tCoordenada *coord) {
 	if (estado == ERROR || c == '\0' || esPrimerComa || !seEscribioNum)
 		return NULL;
 
-	coord->fil = filAux-1; /* se resta 1 porque en las demás funciones se empieza a contar desde 0 */
+	coord->fil = filAux-1; /* se resta 1 porque en las funciones del back se a cuenta desde 0 a fil-1*/
 	coord->col = num-1;
+
 	p = &p[++i]; /* direccion del carácter siguiente al ']' */
 	return p;
 }
@@ -361,7 +362,7 @@ tFlag leerSN(void) {
 	do {
 		printf("Ingrese S o N > ");
 
-		leerLinea(str, 3); /* str de dimensión 3 así si se ingresa más de S o N str[1] será distinto de '\0' */
+		leerLinea(str, 3); /* dimensión 3, pues si se ingresa más de S o N str[1] sería distinto de '\0' */
 		c = toupper(str[0]);
 	} while( (c != 'S' && c!= 'N') || str[1] != '\0');
 	
@@ -418,7 +419,7 @@ void imprimirTablero ( tTablero * tablero ){
 
 void pedirCadena (tMovimiento *mov) {
 	tFlag esValido = 1;
-	char str[STR_DIM2]; 
+	char str[STR_DIM]; 
 	char nuevoStr[15]; /* tamaño suficiente para evaluar si el usuario introdujo de más */
 	int fo, co;
 	int n;
@@ -437,7 +438,7 @@ void pedirCadena (tMovimiento *mov) {
 
 		n = leerLinea(nuevoStr, 15);
 
-		if (n >= MIN_STR2 && n <= MAX_STR2) {
+		if (n >= MIN_COORD && n <= MAX_COORD) {
 			sprintf(str, "M [%d,%d]%s", fo, co, nuevoStr);
 			esValido = validarMovFormato (str, mov); /* devuelve menor a 0 en caso de error */
 		}

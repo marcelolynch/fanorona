@@ -75,9 +75,8 @@ typedef signed char tFlag;
 #define MAX_NOM (STR_DIM - LONG_SAVE - 5) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -5 por el '\0' y para
 					  ** saber si el usuario escribió más que el límite permitido */
 
-#define STR_DIM2 30
-#define MIN_STR2 5 /* mínima longitud de string de coordenada válida que puede escribir el usuario */
-#define MAX_STR2 10  /* máxima longitud de string de coordenada válida que puede escribir el usuario */
+#define MIN_COORD 5 /* mínima longitud de string de coordenada válida que puede escribir el usuario */
+#define MAX_COORD 10  /* máxima longitud de string de coordenada válida que puede escribir el usuario */
 					  
 #define ES_IMPAR(a) ((a) % 2 == 1)
 #define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
