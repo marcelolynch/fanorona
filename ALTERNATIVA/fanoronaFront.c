@@ -16,10 +16,6 @@
 #define ES_IMPAR(a) ((a) % 2 == 1)
 #define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
 
-/* Ademas de PVE y PVP puedo tener estas opciones ingresadas en el menu*/
-#define CARGAR 3
-#define SALIR 4
-
 /* Tipos posibles de jugada ingresadas por el usuario. START es para inicializar */
 enum tJugada {START=-1, QUIT, SAVE, UNDO, MOV};
  
@@ -117,9 +113,9 @@ int main(void){
 	ganador = jugar(partida);		
 
 	switch(ganador) {
-		case GANADOR_BLANCO: printf("\a\t===========GANADOR: BLANCO==========\n\n"); break;
-		case EMPATE: printf("\a\t===========EMPATE===========\n\n"); break;
-		case GANADOR_NEGRO: printf("\a\t==========GANADOR: NEGRO===========\n\n"); break;
+		case GANADOR_BLANCO: printf("\a\n\n\t===========GANADOR: BLANCO==========\n\n"); break;
+		case EMPATE: printf("\a\n\n\t===========EMPATE===========\n\n"); break;
+		case GANADOR_NEGRO: printf("\a\n\n\t==========GANADOR: NEGRO===========\n\n"); break;
 	}
 
 	return 0;
@@ -143,12 +139,18 @@ int jugar(tPartida partida){
 
 		if (!hayGanador) {
 
-			if ( hayCadena(partida) && ( jugadorActual(partida) == BLANCO || modoJuego(partida) == PVP)) /* si hay cadena y no es la computadora */
+			if ( hayCadena(partida) && ( jugadorActual(partida) == BLANCO || modoJuego(partida) == PVP)) 
+				/* si hay cadena y no es la computadora */
 				mov = pedirCadena(partida);
-			else if (jugadorActual(partida) == BLANCO || modoJuego(partida) == PVP) 	/* si no es la computadora */
+
+			else if (jugadorActual(partida) == BLANCO || modoJuego(partida) == PVP){ 	
+				/* si no es la computadora */
+				printf("\nTurno del jugador %s\n", jugadorActual(partida) ? "negro" : "blanco");
 				jugada = pedirJugada(&mov, nombre);
+				}
 			else{
 				/*Mueve la computadora */
+				printf("\nMueve la computadora:");
 				if(calcularMovCompu(&mov, partida) != 0){
 					imprimirError(ERR_MEM_COMPU);
 					exit(1);
@@ -169,7 +171,6 @@ int jugar(tPartida partida){
 					if (!hayCadena(partida)) { /* cambiamos de turno */
 						cambiarTurno (partida);
 						calcularEstado=1;
-						printf("Cambio!\nLe toca al jugador %s\n", jugadorActual(partida) ? "negro" : "blanco");
 					}
 				}
 				else
@@ -472,7 +473,7 @@ tMovimiento pedirCadena (tPartida partida) {
 	co = origenCadena.col+1;
 	/* sumamos 1 a las coordenadas, pues origenCadena va de 0 fil/col-1, pero la función de validar formato lee de 1 a fil */ 
 	
-	printf("Puede encadenar una movimiento!\n");
+	printf("\n¡Puede encadenar una movimiento!\n");
 	printf("Ingrese solo la coordenada de la casilla a la que desea moverse y el tipo de captura si es necesario\n");
 	printf("Se imprimira su nueva casilla de origen.\n");
 
@@ -502,46 +503,46 @@ void imprimirError(int error) {
 
 	switch (error) {
 	case ERR_MOV_ORIG:
-		printf("\aError: la casilla elegida no contiene una ficha de su color.\n");
+		printf("\a\n\nError: la casilla elegida no contiene una ficha de su color.\nIntente nuevamente\n");
 		break;
 	case ERR_MOV_DEST:
-		printf("\aError: la casilla a la que quiere moverse no se encuentra vacía.\n");
+		printf("\a\n\nError: la casilla a la que quiere moverse no se encuentra vacía.\nIntente nuevamente\n");
 		break;
 	case ERR_MOV_TOC:
-		printf("\aError: no puede moverse a una casilla ya visitada en un mismo turno.\n");
+		printf("\a\n\nError: no puede moverse a una casilla ya visitada en un mismo turno.\nIntente nuevamente\n");
 		break;
 	case ERR_MOV_DIR:
-		printf("\aError: no puede moverse en la misma dirección del movimiento anterior.\n");
+		printf("\a\n\nError: no puede moverse en la misma dirección del movimiento anterior.\nIntente nuevamente\n");
 		break;
 	case ERR_MOV_PAIKA:
-		printf("\aError: no puede mover una ficha que no puede realizar una captura cuando existen otras que sí pueden.\n");
+		printf("\a\n\nError: no puede mover una ficha que no puede realizar una captura cuando existen otras que sí pueden.\nIntente nuevamente\n");
 		break;	
 	case ERR_MOV_RANGO:
-		printf("\aError: no puede moverse fuera del tablero\n");
+		printf("\a\n\nError: no puede moverse fuera del tablero\nIntente nuevamente\n");
 		break;
 	case ERR_MOV_NO_ADY:
-		printf("\aError: debe moverse a una casilla adyacente\n");
+		printf("\a\n\nError: debe moverse a una casilla adyacente\nIntente nuevamente\n");
 		break;
 	case ERR_MOV_DEBIL:
-		printf("\aError: desde una casilla debil solo puede moverse arriba, abajo, y a ambos costados\n");
+		printf("\a\n\nError: desde una casilla debil solo puede moverse arriba, abajo, y a ambos costados\nIntente nuevamente\n");
 		break;
 	case ERR_MOV_CAD:
-		printf("\aError: debe mover la ficha que se encuentra encadenando en esta jugada\n");
+		printf("\a\n\nError: debe mover la ficha que se encuentra encadenando en esta jugada\nIntente nuevamente\n");
 		break;
 	case ERR_UNDO:
-		printf("\aError: no puede realizar UNDO si el juego es entre dos jugadores\n");
+		printf("\a\n\nError: no puede realizar UNDO si el juego es entre dos jugadores\n");
 		break;
 	case ERR_UNDO_DOBLE:
-		printf("\aError: no puede realizar UNDO dos veces seguidas o en el primer turno (¡no hay nada para deshacer!)\n");
+		printf("\a\n\nError: no puede realizar UNDO dos veces seguidas o en el primer turno (¡no hay nada para deshacer!)\n");
 		break;
 	case ERR_MEM_COMPU:
-		printf("\aError fatal: no hay memoria suficiente para continuar con el juego. Abortando\n");
+		printf("\a\n\nError fatal: no hay memoria suficiente para continuar con el juego. Abortando\n");
 		break;
 	case ERR_SAVE:
-		printf("\aError: no se ha podido guardar su partida\n");
+		printf("\a\n\nError: no se ha podido guardar su partida\n");
 		break;
 	default:
-		printf("\aError desconocido\n");
+		printf("\a\n\nError desconocido\n");
 		break;
 	}
 }

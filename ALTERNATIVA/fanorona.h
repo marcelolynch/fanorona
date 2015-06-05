@@ -142,9 +142,9 @@ int consultarOcupante(tPartida partida, int f, int c);
 ** (f y c empiezan en 0) */
 int consultarTipo(tPartida partida, int f, int c);
 
-/* consultarOrigenCadena devuelve la coordenada de origen 
-** de un encadenamiento */
-tCoordenada consultarOrigenCadena (tPartida partida);
+/* ConsultarOrigenCadena devuelve la coordenada de origen 
+** luego de un encadenamiento */
+tCoordenada consultarOrigenCadena(tPartida partida);
 
 /* numFilas devuelve la cantidad de filas del tablero */
 int numFilas(tPartida partida);
@@ -170,10 +170,7 @@ int numCols(tPartida partida);
 ** Si la jugada es correcta, la ejecuta y actualiza el tablero
 ** con las nuevas casillas, y se devuelve un valor mayor a cero. 
 **
-** Si el movimiento permite un encadenamiento, hayCadena() devolvera verdadero despues de la llamada,
-** y ademas la coordenada de origen (movimiento.coordOrig) de la estructura <<movimiento>> se cambia 
-** por la que debe ser en el proximo paso de la cadena (que es la donde cayo la ficha, es decir, 
-** el movimiento.coordDest que se recibe). 
+** Si el movimiento permite un encadenamiento, hayCadena() devolvera verdadero despues de la llamada.
 */
 int mover (tPartida partida, tMovimiento * movimiento);
 

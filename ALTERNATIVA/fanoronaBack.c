@@ -106,7 +106,6 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 
 	if (captura == AMBIGUO) { 
 		/* si la jugada es ambigua, retorna hasta que se pase el movimiento completo */
-		partida->direccionPrevia = NULA;
 		return captura;
 	}
 	else if (captura >= 0) { /* si no fue error */
@@ -115,6 +114,7 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 			copiarTablero(&partida->tablero);
 		
 		partida->tablero.matriz[movimiento->coordOrig.fil][movimiento->coordOrig.col].estado=TOCADA;
+		partida->direccionPrevia = direccionDestino(movimiento->coordOrig, movimiento->coordDest); 
 		movimiento->tipoMov = captura;
 		actualizarTablero(partida, movimiento);
 		partida->hayCadena = 0;
@@ -833,13 +833,11 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 		return ERR_MOV_PAIKA;
 
 	
-	/*Si llega hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
-	partida->direccionPrevia = direccionMov;
-
 	if(jugada==AMBIGUO && movimiento->tipoMov!=NINGUNO)
 		/*Si el jugador puede hacer ambas cosas pero ya eligio*/
 		jugada=movimiento->tipoMov;
-	return jugada;
+	
+	return jugada; /* Devuelve WITHDRAW, APPROACH o AMBIGUO si no se entra al ultimo if*/
 }
 
 static int jugadaObligada(const tPartida partida, int jugador, tCoordenada origen){
