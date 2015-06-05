@@ -5,8 +5,6 @@
 #define STR_DIM 41 /* long del vector que se usará para guardar la entrada del usuario */
 #define LONG_SAVE 5 /* longitud del str "save " */
 #define MIN_STR 4
-#define MIN_MOV 12 /* no está en uso. borrar o revisar */
-#define MAX_MOV 19 /* no está en uso. borrar o revisar */
 #define MAX_NOM (STR_DIM - LONG_SAVE - 5) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -5 por el '\0' y para
                                           ** saber si el usuario escribió más que el límite permitido */
 
@@ -15,6 +13,11 @@
 
 #define ES_IMPAR(a) ((a) % 2 == 1)
 #define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
+
+
+
+/* Tipos posibles de jugada ingresadas por el usuario. START es para inicializar */
+enum tJugada {START=-1, QUIT, SAVE, UNDO, MOV};
  
 /* Se distinguen de los errores arrojados por el back-end, pero se usan de la misma manera */
 enum tErrorFmt {ERR_FMT=-120, ERR_FMT_SAVE1, ERR_FMT_SAVE2, ERR_FMT_MOV1,
@@ -267,7 +270,7 @@ static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre
 		jugada = validarFmtNombre (nombre, str+LONG_SAVE, dim-LONG_SAVE); /*str+LONG_SAVE es la dirección en donde comienza el nombre
 										  ** y dim-LONG_SAVE es la longitud de dicho nombre */
 
-	else if (dim <= MAX_MOV) /* es un posible movimiento */
+	else if (dim <= MAX_DIM) /* es un posible movimiento */
 		jugada = validarMovFormato (str, mov);
 
 	return jugada;

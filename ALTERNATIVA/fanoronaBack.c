@@ -35,6 +35,12 @@ typedef struct {
 	size_t dim;
  } tVecMovs;	
 
+
+enum tEstado {LIBRE=0, TOCADA, ACTIVA};
+enum tDireccion {N=1, S, E, O, NE, NO, SE, SO, NULA};
+
+
+
 static void rellenarTablero(tTablero * tablero);
 static void liberarTodo(tCasilla ** matriz, int n);
 static void limpiarTocadas(tTablero * tablero);
@@ -423,6 +429,13 @@ tPartida cargarPartida(const char * nombre){
 
 
 tPartida generarPartida(int fils, int cols, int modo){
+
+	/* Esta validacion deberia estar hecha por el front-end, pero 
+	** nunca se sabe */
+	if( fils < MIN_DIM || fils > MAX_DIM || cols < MIN_DIM || cols > MAX_DIM
+		 || cols%2==0 || fils%2 == 0 || fils<cols || (modo != PVE && modo != PVP))
+		return NULL;
+
 	tPartida partida = malloc(sizeof(*partida));	
 	if(partida != NULL){
 		partida->modo = modo;

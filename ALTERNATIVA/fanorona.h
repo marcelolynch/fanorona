@@ -9,24 +9,21 @@
 #include <stdlib.h>
 #include <time.h>
 
-/* 
-** empieza en -120 porque así comparamos si es menor a 0, ya es error.
-** imprimirError() imprime el error correspondiente. Ir actualizando-
-**/ 
 
 enum tOpcion {PVE=0, PVP, CARGAR, SALIR};
 
+/* 
+** Los codigos de error empiezan desde -100 y siempre seran negativos.
+**/
 enum tError {ERR_MOV_ORIG=-100, ERR_MOV_DEST, ERR_MOV_TOC, ERR_MOV_DIR, 
 	ERR_MOV_PAIKA, ERR_MOV_RANGO, ERR_MOV_NO_ADY,ERR_MOV_DEBIL, ERR_MOV_AMBIGUO, 
 	ERR_UNDO, ERR_UNDO_DOBLE, ERR_MEM_COMPU, ERR_SAVE};
 
-enum tEstado {LIBRE=0, TOCADA, ACTIVA};
 
-enum tJugada {START=-1, QUIT, SAVE, UNDO, MOV};
+
 
 enum tCaptura {NINGUNO=0, WITHDRAWAL, APPROACH, AMBOS}; 
 
-enum tDireccion {N=1, S, E, O, NE, NO, SE, SO, NULA};
 
 
 
@@ -64,8 +61,8 @@ typedef signed char tFlag;
 #define FUERTE 1 
 #define DEBIL 2
 
-#define MIN_DIM 3 /* minima dimensión de tablero permitida */
-#define MAX_DIM 19 /* máxima dimensión de tablero permitida */
+#define MIN_DIM 3 /* minima dimensión de tablero (fila o columna) permitida */
+#define MAX_DIM 19 /* máxima dimensión de tablero (fila o columna) permitida */
 
 typedef struct tJuego * tPartida;
 
