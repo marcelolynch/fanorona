@@ -137,10 +137,14 @@ int modoJuego(tPartida partida);
 int consultarOcupante(tPartida partida, int f, int c);
 
 
-/* consultarOcupante devuelve FUERTE o DEBIL
+/* consultarTipo devuelve FUERTE o DEBIL
 ** segun la casilla que este en la posicion  [f,c] del tablero
 ** (f y c empiezan en 0) */
 int consultarTipo(tPartida partida, int f, int c);
+
+/* consultarOrigenCadena devuelve la coordenada de origen 
+** de un encadenamiento */
+tCoordenada consultarOrigenCadena (tPartida partida);
 
 /* numFilas devuelve la cantidad de filas del tablero */
 int numFilas(tPartida partida);

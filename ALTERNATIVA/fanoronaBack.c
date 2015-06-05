@@ -64,8 +64,6 @@ tFlag hayCadena(tPartida partida){
 	return partida->hayCadena;
 }
 
-
-
 int jugadorActual(tPartida partida){
 	return partida->jugador;
 }
@@ -80,6 +78,10 @@ int consultarOcupante(tPartida partida, int f, int c){
 
 int consultarTipo(tPartida partida, int f, int c){
 	return partida->tablero.matriz[f][c].tipo; 
+}
+
+tCoordenada consultarOrigenCadena (tPartida partida) {
+	return partida->origenCadena;
 }
 
 int numFilas(tPartida partida){
@@ -112,6 +114,7 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 		if (!(partida->hayCadena) && partida->modo == PVE && partida->jugador == BLANCO)
 			copiarTablero(&partida->tablero);
 		
+		partida->tablero.matriz[movimiento->coordOrig.fil][movimiento->coordOrig.col].estado=TOCADA;
 		movimiento->tipoMov = captura;
 		actualizarTablero(partida, movimiento);
 		partida->hayCadena = 0;
@@ -120,15 +123,10 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 			partida->hayCadena = jugadaObligada(partida, jugador, movimiento->coordDest);
 
 		if (partida->hayCadena) {
-			/* al haber cadena, el orígen es el nuevo destino */
-			movimiento->coordOrig = movimiento->coordDest;
-
-			partida->tablero.matriz[movimiento->coordOrig.fil][movimiento->coordOrig.col].estado = ACTIVA; 
+			partida->tablero.matriz[movimiento->coordDest.fil][movimiento->coordDest.col].estado = ACTIVA; 
 				/*La nueva casilla origen (donde cae) esta en el medio de una cadena*/
-			if (partida->modo == PVE)
-				partida->origenCadena = movimiento->coordDest;
-				/* Coordenada origen utilizada por calcularMovCompu si hay cadena */
-			
+			partida->origenCadena = movimiento->coordDest;
+				/* Coordenada origen si hay cadena */
 		}
 	}
 
@@ -836,9 +834,6 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 
 	
 	/*Si llega hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
-	
-	tablero->matriz[fo][co].estado=TOCADA;
-	
 	partida->direccionPrevia = direccionMov;
 
 	if(jugada==AMBIGUO && movimiento->tipoMov!=NINGUNO)

@@ -44,7 +44,7 @@ int validarFmtNombre(char destino[], const char origen[], int longOrigen);
 tFlag leerSN(void);
 void pedirNombre (char nombre[]);
 void imprimirTablero ( tPartida partida );
-void pedirCadena (tMovimiento *mov);
+tMovimiento pedirCadena (tPartida partida);
 void imprimirError(int error);
 void imprimirErrorFmt(enum tErrorFmt error);
 tCaptura pedirCaptura (void);
@@ -144,7 +144,7 @@ int jugar(tPartida partida){
 		if (!hayGanador) {
 
 			if ( hayCadena(partida) && ( jugadorActual(partida) == BLANCO || modoJuego(partida) == PVP)) /* si hay cadena y no es la computadora */
-				pedirCadena(&mov);
+				mov = pedirCadena(partida);
 			else if (jugadorActual(partida) == BLANCO || modoJuego(partida) == PVP) 	/* si no es la computadora */
 				jugada = pedirJugada(&mov, nombre);
 			else{
@@ -454,20 +454,24 @@ void imprimirTablero ( tPartida partida ){
 }	
 
 void imprimirMov (tMovimiento * mov) {
-	printf("\n  -> %d,%d", mov->coordDest.fil+1, mov->coordDest.col+1);
+	printf("\n %d,%d -> %d,%d", mov->coordOrig.fil+1, mov->coordOrig.col+1, mov->coordDest.fil+1, mov->coordDest.col+1);
 	return;
 }
 
-void pedirCadena (tMovimiento *mov) {
+tMovimiento pedirCadena (tPartida partida) {
 	tFlag esValido = 1;
+	tCoordenada origenCadena;
+	tMovimiento nuevoMov;
 	char str[STR_DIM]; 
 	char nuevoStr[15]; /* tamaño suficiente para evaluar si el usuario introdujo de más */
 	int fo, co;
 	int n;
 
-	fo = ++(mov->coordOrig.fil); /* sumamos 1 a las coordenadas, pues leerCoord les resta 1 */
-	co = ++(mov->coordOrig.col);
-
+	origenCadena = consultarOrigenCadena(partida);
+	fo = origenCadena.fil+1;
+	co = origenCadena.col+1;
+	/* sumamos 1 a las coordenadas, pues origenCadena va de 0 fil/col-1, pero la función de validar formato lee de 1 a fil */ 
+	
 	printf("Puede encadenar una movimiento!\n");
 	printf("Ingrese solo la coordenada de la casilla a la que desea moverse y el tipo de captura si es necesario\n");
 	printf("Se imprimira su nueva casilla de origen.\n");
@@ -481,14 +485,14 @@ void pedirCadena (tMovimiento *mov) {
 
 		if (n >= MIN_COORD && n <= MAX_COORD) {
 			sprintf(str, "M [%d,%d]%s", fo, co, nuevoStr);
-			esValido = validarMovFormato (str, mov); /* devuelve menor a 0 en caso de error */
+			esValido = validarMovFormato (str, &nuevoMov); /* devuelve menor a 0 en caso de error */
 		}
 		else
 			esValido = ERR_FMT_MOV1;
 
 	} while (esValido < 0); /* si es menor a cero es error */
 
-	return; 
+	return nuevoMov;
 }
 
 void imprimirError(int error) {
