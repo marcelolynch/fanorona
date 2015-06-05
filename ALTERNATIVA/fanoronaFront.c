@@ -16,7 +16,9 @@
 #define ES_IMPAR(a) ((a) % 2 == 1)
 #define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
 
-
+/* Ademas de PVE y PVP puedo tener estas opciones ingresadas en el menu*/
+#define CARGAR 3
+#define SALIR 4
 
 /* Tipos posibles de jugada ingresadas por el usuario. START es para inicializar */
 enum tJugada {START=-1, QUIT, SAVE, UNDO, MOV};
@@ -53,7 +55,7 @@ void imprimirMov (tMovimiento * mov);
 int main(void){
 	
 	
-	enum tOpcion opcion;
+	int opcion;
 	int modo;
 	tPartida partida;
 	char nombre[MAX_NOM];	
@@ -78,11 +80,11 @@ int main(void){
 	printf("\t\t3. Cargar partida de archivo\n");
 	printf("\t\t4. Salir\n\n");
 	do{
-		opcion=getint("Ingrese un numero de opcion > ") - 1; 
-	}while(opcion<0 || opcion>3);
+		opcion=getint("Ingrese un numero de opcion > "); 
+	}while(opcion<1 || opcion>4);
 
-	if(opcion == PVP || opcion == PVE){
-		modo = opcion; /* )1 para dos jugadores, 0 para juego contra la computadora*/	
+	if(opcion == 1 || opcion == 2){
+		modo = opcion == 1 ? PVE : PVP; /* 1 es juego contra la computadora, 2 es dos jugadores*/	
 		pedirDimensiones(&filas, &columnas);
 		partida=generarPartida(filas,columnas, modo);
 	
@@ -91,7 +93,8 @@ int main(void){
 			return 1;
 		}
 	}
-	else if(opcion == CARGAR){
+	else if(opcion == 3){
+		/*Cargar partida*/
 		printf("Ingrese el nombre del archivo:\n > ");
 		leerLinea(nombre, MAX_NOM);
 		partida=cargarPartida(nombre); /*modo cambia al correspondiente (0 o 1)*/
@@ -105,6 +108,7 @@ int main(void){
 	}
 			
 	else{
+		/* Salir */
 		printf("\n\t\t¡Adios!\n\n");
 		return 0;
 	}

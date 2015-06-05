@@ -5,7 +5,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-enum tOpcion {PVE=0, PVP, CARGAR, SALIR};
+/* 
+** MODOS DE JUEGO 
+** Debe especificarse un modo de juego al comenzar la partida
+*/
+
+#define PVE 0 /* JUGADOR vs COMPUTADORA */
+#define PVP 1 /* DOS JUGADORES */
+
 
 /*
 ** CODIGOS DE ERROR
@@ -69,16 +76,18 @@ typedef signed char tFlag;
 #define NEGRO  1
 #define VACIO  2
 
-/* Constantes que definen el estado del juego al inicio 
-** (final de la anterior) de una jugada */
+/* Constantes que definen el estado del juego 
+** Son los valores que devolvera estadoJuego() */
 #define SEGUIR 		0
 #define GANADOR_BLANCO 	1
 #define GANADOR_NEGRO 	2
 #define EMPATE 		3
 
-/* Constantes que determinan el tipo de casilla*/
+
+/* Constantes que determinan el tipo de casilla */
 #define FUERTE 	1 
 #define DEBIL	2
+
 
 #define MIN_DIM 3 /* minima dimensión de tablero (fila o columna) permitida */
 #define MAX_DIM 19 /* máxima dimensión de tablero (fila o columna) permitida */
@@ -89,7 +98,6 @@ typedef signed char tFlag;
 typedef struct tJuego * tPartida;
 
 /* FUNCIONES PARA EL TAD: */
-
 
 /* Funcion generarPartida:
 ** Crea una nueva partida con un tablero de fils x cols.
