@@ -69,21 +69,41 @@ typedef signed char tFlag;
 
 typedef struct tJuego * tPartida;
 
+/* FUNCIONES PARA EL TAD: */
+
+/* hayCadena: devuelve un booleano,
+** verdadero si la jugada debe continuar
+** con una cadena (es obligatorio hacerlo) */
 tFlag hayCadena(tPartida partida);
 
-tFlag hayPaika(tPartida partida);
-
+/* jugadorActual devuelve BLANCO o NEGRO, 
+** segun el jugador que este jugando en ese momento */
 int jugadorActual(tPartida partida);
 
+
+/* modoJuego devuelve PVE si el juego es contra la compuradora
+** o PVP si es de dos jugadores*/
 int modoJuego(tPartida partida);
 
+/* consultarOcupante devuelve BLANCO, NEGRO o VACIO
+** segun la ficha que ocupe la posicion [f,c] del tablero
+** (f y c empiezan en 0) */
 int consultarOcupante(tPartida partida, int f, int c);
 
+
+/* consultarOcupante devuelve FUERTE o DEBIL
+** segun la casilla que este en la posicion  [f,c] del tablero
+** (f y c empiezan en 0) */
 int consultarTipo(tPartida partida, int f, int c);
 
+/* numFilas devuelve la cantidad de filas del tablero */
 int numFilas(tPartida partida);
 
+/* numCols devuelve la cantidad de columnas del tablero*/
 int numCols(tPartida partida);
+
+
+
 /*
 ** Funcion mover: recibe un puntero a tMovimiento con las coordenadas (indices de 0 a N-1)
 ** de origen de la casilla de movimiento (ficha a mover) y destino (a donde moverse).
@@ -92,7 +112,7 @@ int numCols(tPartida partida);
 ** (ver enumerativos tError). Si la jugada es correcta, la ejecuta y actualiza el tablero
 ** con las nuevas casillas, y devuelve un valor mayor a cero. 
 **
-** Si el movimiento permite un encadenamiento, puedeEncadenar() devolvera verdadero despues de la llamada,
+** Si el movimiento permite un encadenamiento, hayCadena() devolvera verdadero despues de la llamada,
 ** y ademas la coordenada de origen de la estructura movimiento se cambia por la que 
 ** debe ser en el proximo paso de la cadena (donde cayo la ficha). 
 ** Esto no puede desestimarse en la jugada de la computadora. 
@@ -123,12 +143,6 @@ int estadoJuego(const tPartida partida);
 
 
 
-/* Funcion puedeEncadenar
-** Devuelve 1 si la siguiente jugada debe ser una cadena
-** (es obligatorio encadenar), o cero si no (debe cambiar el turno)
-*/
-
-
 /* Funcion undo:
 ** Si el undo corresponde, revierte el tablero principal al estado correspondiente
 ** y devuelve OK.
@@ -141,7 +155,7 @@ int undo(tPartida partida);
 
 
 /* Funcion cambiarTurno
-** A llamarse cuando puedeEncadenar() devuelva falso.
+** A llamarse cuando hayCadena() devuelva falso.
 ** Cambia el jugador y realiza la limpieza correspondiente
 ** al cambio de turno
 */
@@ -164,8 +178,8 @@ int guardarPartida(const tPartida partida, const char * nombre);
 tPartida cargarPartida(const char * nombre);
 
 
-/* Funcion generarTablero:
-** Crea un nuevo tablero de fils x cols.
+/* Funcion generarPartida:
+** Crea una nueva partida con un tablero de fils x cols.
 ** Si recibe el modo PVE inicialia el tablero auxiliar.
 ** Devuelve el tPartida correspondiente en su nombre
 */

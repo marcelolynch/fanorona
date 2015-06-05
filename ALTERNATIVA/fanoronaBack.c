@@ -270,6 +270,58 @@ int calcularMovCompu(tMovimiento * mov, const tPartida  partida){
 	return 0;
 }
 
+static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCoordenada casillaOrig){
+        
+	tTablero * tablero = &partida->tablero;
+
+	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
+	int dirsPosibles, dirFil, dirCol;	
+	int n;
+	tMovimiento * aux;
+	enum tCaptura tipoComida;
+	enum tDireccion dir;
+	
+	dirsPosibles = tablero->matriz[casillaOrig.fil][casillaOrig.col].tipo==FUERTE ? 8 : 4;
+	
+	for(n=0; n<dirsPosibles ; n++){
+		dir = direcciones[n];
+
+		if(dir != partida->direccionPrevia){
+			incrementoSegunDir(&dirFil, &dirCol, dir);
+							
+			if(!fueraDeRango(tablero, casillaOrig.fil + dirFil, casillaOrig.col + dirCol) 
+				&& tablero->matriz[casillaOrig.fil + dirFil][casillaOrig.col + dirCol].estado != TOCADA ){
+	
+				if( (tipoComida = hayComida(NEGRO, tablero, casillaOrig, dir)) != NINGUNO || partida->hayPaika ){
+
+					if(movsPosibles->dim % BLOQUE == 0){
+						aux=realloc(movsPosibles->elems, (movsPosibles->dim + BLOQUE)*sizeof(*aux));
+				
+						if(aux==NULL)
+							return 1;
+					
+						movsPosibles->elems = aux;
+						}
+		
+					movsPosibles->elems[movsPosibles->dim].coordOrig.fil = casillaOrig.fil;
+					movsPosibles->elems[movsPosibles->dim].coordOrig.col = casillaOrig.col;
+					movsPosibles->elems[movsPosibles->dim].coordDest.fil = casillaOrig.fil+dirFil;
+					movsPosibles->elems[movsPosibles->dim].coordDest.col = casillaOrig.col+dirCol;
+
+					if(tipoComida == AMBOS) /*Elijo una al azar*/
+						tipoComida = rand()%2?APPROACH:WITHDRAWAL;
+
+					movsPosibles->elems[movsPosibles->dim].tipoMov = tipoComida;
+		
+					movsPosibles->dim++;
+				}
+			}
+	}
+    }
+
+	return 0;
+}
+
 int guardarPartida(tPartida  partida, const char * nombre){
 	FILE *f;
 	int nfilas=partida->tablero.filas;
@@ -586,57 +638,6 @@ static void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direcc
         }
 }
 
-static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCoordenada casillaOrig){
-        
-	tTablero * tablero = &partida->tablero;
-
-	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
-	int dirsPosibles, dirFil, dirCol;	
-	int n;
-	tMovimiento * aux;
-	enum tCaptura tipoComida;
-	enum tDireccion dir;
-	
-	dirsPosibles = tablero->matriz[casillaOrig.fil][casillaOrig.col].tipo==FUERTE ? 8 : 4;
-	
-	for(n=0; n<dirsPosibles ; n++){
-		dir = direcciones[n];
-
-		if(dir != partida->direccionPrevia){
-			incrementoSegunDir(&dirFil, &dirCol, dir);
-							
-			if(!fueraDeRango(tablero, casillaOrig.fil + dirFil, casillaOrig.col + dirCol) 
-				&& tablero->matriz[casillaOrig.fil + dirFil][casillaOrig.col + dirCol].estado != TOCADA ){
-	
-				if( (tipoComida = hayComida(NEGRO, tablero, casillaOrig, dir)) != NINGUNO || partida->hayPaika ){
-
-					if(movsPosibles->dim % BLOQUE == 0){
-						aux=realloc(movsPosibles->elems, (movsPosibles->dim + BLOQUE)*sizeof(*aux));
-				
-						if(aux==NULL)
-							return 1;
-					
-						movsPosibles->elems = aux;
-						}
-		
-					movsPosibles->elems[movsPosibles->dim].coordOrig.fil = casillaOrig.fil;
-					movsPosibles->elems[movsPosibles->dim].coordOrig.col = casillaOrig.col;
-					movsPosibles->elems[movsPosibles->dim].coordDest.fil = casillaOrig.fil+dirFil;
-					movsPosibles->elems[movsPosibles->dim].coordDest.col = casillaOrig.col+dirCol;
-
-					if(tipoComida == AMBOS) /*Elijo una al azar*/
-						tipoComida = rand()%2?APPROACH:WITHDRAWAL;
-
-					movsPosibles->elems[movsPosibles->dim].tipoMov = tipoComida;
-		
-					movsPosibles->dim++;
-				}
-			}
-	}
-    }
-
-	return 0;
-}
 
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino){
 
