@@ -1,4 +1,5 @@
 #include "fanorona.h"
+#include <time.h>
 #define BLOQUE 20					  
 
 typedef struct {
@@ -22,9 +23,9 @@ struct tJuego{
         int jugador;
         int hayPaika;
         int hayCadena;
+	tCoordenada origenCadena;
         int primerUndo;
         int direccionPrevia;
-
 };
 
 
@@ -37,7 +38,6 @@ typedef struct {
 
 enum tEstado {LIBRE=0, TOCADA, ACTIVA};
 enum tDireccion {N=1, S, E, O, NE, NO, SE, SO, NULA};
-
 
 
 static void rellenarTablero(tTablero * tablero);
@@ -54,8 +54,10 @@ static int jugadaObligada(const tPartida partida, int jugador, tCoordenada orige
 static void copiarTablero(tTablero * tablero);
 static void intercambiarTableros(tTablero * tablero);
 static tCasilla ** generarMatrizTablero(int fils, int cols);
-int fueraDeRango(const tTablero * tablero, int f, int c);
-tTablero generarTablero(int fils, int cols, int modo);
+static int fueraDeRango(const tTablero * tablero, int f, int c);
+static tTablero generarTablero(int fils, int cols, int modo);
+
+static int haySeed=0;
 
 /*static enum tDireccion direccionPrevia=NULA;
 static tFlag hayCadena=0;
@@ -67,10 +69,6 @@ tFlag hayCadena(tPartida partida){
 	return partida->hayCadena;
 }
 
-
-tFlag hayPaika(tPartida partida){
-	return partida->hayPaika;
-}
 
 
 int jugadorActual(tPartida partida){
@@ -128,10 +126,14 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 
 		if (partida->hayCadena) {
 			/* al haber cadena, el orígen es el nuevo destino */
-			movimiento->coordOrig.fil = movimiento->coordDest.fil;
-			movimiento->coordOrig.col = movimiento->coordDest.col;
+			movimiento->coordOrig = movimiento->coordDest;
+
 			partida->tablero.matriz[movimiento->coordOrig.fil][movimiento->coordOrig.col].estado = ACTIVA; 
-				/*La casilla esta en el medio de una cadena*/
+				/*La nueva casilla origen (donde cae) esta en el medio de una cadena*/
+			if (partida->modo == PVE)
+				partida->origenCadena = movimiento->coordDest;
+				/* Coordenada origen utilizada por calcularMovCompu si hay cadena */
+			
 		}
 	}
 
@@ -192,7 +194,8 @@ int estadoJuego(const tPartida partida){
 					if( !fueraDeRango(&partida->tablero, i+dirFil, j+dirCol) ){
 						ady.fil=i+dirFil;
 						ady.col=j+dirCol;
-						if(partida->tablero.matriz[ady.fil][ady.col].ocupante==VACIO && !meCapturan(&partida->tablero, ady, ocupante)) 
+						if(partida->tablero.matriz[ady.fil][ady.col].ocupante==VACIO 
+							&& !meCapturan(&partida->tablero, ady, ocupante)) 
 							/* Existe un movimiento en el que no se ve amenazado en la jugada posterior */
 							hayMovimientos=1; 
 					}
@@ -265,9 +268,9 @@ int calcularMovCompu(tMovimiento * mov, const tPartida  partida){
 	}
 	else{
 		/* Si estoy encadenando, la coordenada de origen esta ya 
-		** determinada en mov, que me pasan como parametro.
-		** Asi, se usa mov->coordOrig como origen. */
-		aumentarPosibles(partida, &movsPosibles, mov->coordOrig);
+		** determinada en partida->origenCadena. 
+		** Asi, se usa como origen. */
+		aumentarPosibles(partida, &movsPosibles, partida->origenCadena);
 	}
 
 	eleccion = rand()%movsPosibles.dim;
@@ -448,6 +451,12 @@ cols<fils || (modo != PVE && modo != PVP))
 		partida->tablero = generarTablero(fils, cols, modo);
 	}
 	
+	if(!haySeed){
+		/*La semilla se planta solo con la inicializacion
+		** de la primera partida */
+		srand(time(NULL));
+		haySeed=1;
+	}
 	return partida;		
 }
 
@@ -794,7 +803,6 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 	int cd=movimiento->coordDest.col;
 	
 	enum tDireccion direccionMov;
-/*	int hayPaika; */
 
 	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >= tablero->filas || fd >= tablero->filas || co >= tablero->cols || cd >= tablero->cols)
 		return ERR_MOV_RANGO; /*Fuera de limites del tablero*/
@@ -807,6 +815,9 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 
 	if(tablero->matriz[fd][cd].estado==TOCADA)
 		return ERR_MOV_TOC;
+
+	if (partida->hayCadena && tablero->matriz[fo][co].estado != ACTIVA)
+		return ERR_MOV_CAD;
 
 	direccionMov = direccionDestino(movimiento->coordOrig, movimiento->coordDest);
 

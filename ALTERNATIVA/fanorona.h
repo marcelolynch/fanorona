@@ -2,13 +2,8 @@
 
 #define __fanorona_header
 
-#include <stdio.h>
-#include "getnum.h"
-#include <string.h>
-#include <ctype.h>
 #include <stdlib.h>
-#include <time.h>
-
+#include <stdio.h>
 
 enum tOpcion {PVE=0, PVP, CARGAR, SALIR};
 
@@ -16,15 +11,13 @@ enum tOpcion {PVE=0, PVP, CARGAR, SALIR};
 ** Los codigos de error empiezan desde -100 y siempre seran negativos.
 **/
 enum tError {ERR_MOV_ORIG=-100, ERR_MOV_DEST, ERR_MOV_TOC, ERR_MOV_DIR, 
-	ERR_MOV_PAIKA, ERR_MOV_RANGO, ERR_MOV_NO_ADY,ERR_MOV_DEBIL, ERR_MOV_AMBIGUO, 
-	ERR_UNDO, ERR_UNDO_DOBLE, ERR_MEM_COMPU, ERR_SAVE};
+	ERR_MOV_PAIKA, ERR_MOV_RANGO, ERR_MOV_NO_ADY,ERR_MOV_DEBIL, ERR_MOV_AMBIGUO,
+	ERR_MOV_CAD, ERR_UNDO, ERR_UNDO_DOBLE, ERR_MEM_COMPU, ERR_SAVE};
 
 
 
 
 enum tCaptura {NINGUNO=0, WITHDRAWAL, APPROACH, AMBOS}; 
-
-
 
 
 typedef struct {

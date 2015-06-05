@@ -1,5 +1,7 @@
 #include "fanorona.h"
 #include "getnum.h"
+#include <ctype.h>
+#include <string.h>
 
 #define BORRA_BUFFER while (getchar() != '\n')
 #define STR_DIM 41 /* long del vector que se usará para guardar la entrada del usuario */
@@ -53,8 +55,6 @@ int main(void){
 	tFlag ganador;
 	int filas, columnas;
 	
-	srand(time(0));
-
 	printf("\n\t\t=*=*=*=*=*=*=*=*=*==FANORONA==*=*=*=*=*=*=*=*=*=*=");
 	printf("\n\t\t=*=*=*=*=*=*=*=*=FUTURAMA EDITION=*=*=*=*=*=*=*=*=\n\n");
 
@@ -523,6 +523,9 @@ void imprimirError(int error) {
 		break;
 	case ERR_MOV_DEBIL:
 		printf("\aError: desde una casilla debil solo puede moverse arriba, abajo, y a ambos costados\n");
+		break;
+	case ERR_MOV_CAD:
+		printf("\aError: debe mover la ficha que se encuentra encadenando en esta jugada\n");
 		break;
 	case ERR_UNDO:
 		printf("\aError: no puede realizar UNDO si el juego es entre dos jugadores\n");
