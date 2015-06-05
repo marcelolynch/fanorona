@@ -1,6 +1,25 @@
 #include "fanorona.h"
 #include "getnum.h"
 
+#define BORRA_BUFFER while (getchar() != '\n')
+#define STR_DIM 41 /* long del vector que se usará para guardar la entrada del usuario */
+#define LONG_SAVE 5 /* longitud del str "save " */
+#define MIN_STR 4
+#define MIN_MOV 12 /* no está en uso. borrar o revisar */
+#define MAX_MOV 19 /* no está en uso. borrar o revisar */
+#define MAX_NOM (STR_DIM - LONG_SAVE - 5) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -5 por el '\0' y para
+                                          ** saber si el usuario escribió más que el límite permitido */
+
+#define MIN_COORD 5 /* mínima longitud de string de coordenada válida que puede escribir el usuario */
+#define MAX_COORD 10  /* máxima longitud de string de coordenada válida que puede escribir el usuario */
+
+#define ES_IMPAR(a) ((a) % 2 == 1)
+#define ES_DIM_VALIDA(a, b) ( (a) >= MIN_DIM && (a) <= MAX_DIM && (b) >= MIN_DIM && (b) <= MAX_DIM )
+ 
+/* Se distinguen de los errores arrojados por el back-end, pero se usan de la misma manera */
+enum tErrorFmt {ERR_FMT=-120, ERR_FMT_SAVE1, ERR_FMT_SAVE2, ERR_FMT_MOV1,
+        ERR_FMT_MOV2};
+
 int jugar(tTablero *tablero, int modo, int jugador);
 void pedirDimensiones(tTablero * tablero);
 int leerLinea(char str[], int dim);
@@ -15,9 +34,11 @@ tFlag leerSN(void);
 void pedirNombre (char nombre[]);
 void imprimirTablero ( tTablero * tablero );
 void pedirCadena (tMovimiento *mov);
-void imprimirError(tFlag error);
+void imprimirError(int error);
 enum tCaptura pedirCaptura (void);
 void imprimirMov (tMovimiento * mov);
+
+
 
 int main(void){
 	
@@ -92,7 +113,7 @@ int jugar(tTablero *tablero, int modo, int jugador){
 
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada=START, quiereGuardar=0, quiereCambiar, hayGanador=0, calcularEstado=1;
+	tFlag jugada=START, quiereGuardar=0, quiereCambiar, quiereUndo, hayGanador=0, calcularEstado=1;
 	int captura;
 
 	imprimirTablero(tablero);
@@ -138,16 +159,13 @@ int jugar(tTablero *tablero, int modo, int jugador){
 					imprimirError(captura);
 			}
 			else if (jugada == UNDO) {
-				if (modo == PVE) {
-					if(undo(tablero) != ERROR){
+					quiereUndo = undo(tablero, modo);
+					if( quiereUndo == OK ){
 						imprimirTablero(tablero);
 						calcularEstado = 1; /*Tiene que volver a chequear el tablero */
 					}
 					else
-						imprimirError(ERR_UNDO_DOBLE);
-				}
-				else
-					imprimirError(ERR_UNDO);
+						imprimirError(quiereUndo);
 			}
 
 			else if (jugada == QUIT) {
@@ -456,7 +474,9 @@ void pedirCadena (tMovimiento *mov) {
 	return; 
 }
 
-void imprimirError(tFlag error) {
+void imprimirError(int error) {
+	/*Recibe tFlag, tError, tErrorFmt */
+
 	if (error >= 0) /* no hay error */
 		return;
 
