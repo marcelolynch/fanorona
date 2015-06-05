@@ -334,18 +334,24 @@ static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCo
 	return 0;
 }
 
-int guardarPartida(tPartida  partida, const char * nombre){
+int guardarPartida(tPartida partida, const char * nombre){
 	FILE *f;
-	int nfilas=partida->tablero.filas;
-	int ncols=partida->tablero.cols;
-	int i,j;
+	int nfilas, ncols, jugador, modo;
+	int i, j;
+
+	if(partida == NULL)
+		return ERR_PARAMS;
+
+	nfilas=partida->tablero.filas;
+	ncols=partida->tablero.cols;
 	
-	int jugador = partida->jugador + 1; 
-	int modo = partida->modo;
+	jugador = partida->jugador + 1; 
+	modo = partida->modo;
 	/* Debe ser 1 para el jugador 1 (que esta alojado como 0), y 2 para el jugador 2 */
 
 	if((f=fopen(nombre, "wb")) == NULL)
-		return ERROR;
+		return ERR_SAVE;
+
 	fwrite(&modo, sizeof(int),1,f);
 	fwrite(&jugador,sizeof(int),1,f);
 	fwrite(&nfilas, sizeof(int),1,f);
@@ -361,13 +367,13 @@ int guardarPartida(tPartida  partida, const char * nombre){
 				fputc('0', f); break;
 			}
 		}	
-
+	fclose(f);
 	return 1;
 }
 
 tPartida cargarPartida(const char * nombre){
 	/*asumo que los datos estan validados, el archivo no esta corrputo*/
-	int i,j;
+	int i,j,c;
 	int fils, cols;
 	FILE * f;
 	tPartida partida=malloc(sizeof(*partida));
@@ -376,15 +382,19 @@ tPartida cargarPartida(const char * nombre){
 		return NULL;
 	
 	
-
 	if((f=fopen(nombre,"rb"))==NULL)
-		{partida->tablero.matriz=NULL;
-		return partida;
+		{free(partida);
+		return NULL;
 		}
-	fread(&partida->modo, sizeof(int),1, f);
-	fread(&partida->jugador, sizeof(int),1,f);
-	fread(&fils, sizeof(int), 1, f);
-	fread(&cols, sizeof(int), 1, f);
+	c=0;
+
+	c+= fread(&partida->modo, sizeof(int),1, f);
+	c+= fread(&partida->jugador, sizeof(int),1,f);
+	c+= fread(&fils, sizeof(int), 1, f);
+	c+= fread(&cols, sizeof(int), 1, f);
+	
+	if(c<4)
+		return NULL;
 
 	partida->tablero.filas = fils;
 	partida->tablero.cols = cols;
@@ -403,7 +413,7 @@ tPartida cargarPartida(const char * nombre){
 		return NULL;
 
 
-	for(i=0; i<partida->tablero.filas ; i++)
+	for(i=0, c=0; i<partida->tablero.filas ; i++)
 		for(j=0 ; j<partida->tablero.cols ; j++){
 			if (i%2 == j%2)
                         	partida->tablero.matriz[i][j].tipo= FUERTE;
@@ -429,7 +439,7 @@ tPartida cargarPartida(const char * nombre){
 				break;
  			}
 		}
-
+	fclose(f);
 	return partida;
 }
 
@@ -437,12 +447,11 @@ tPartida cargarPartida(const char * nombre){
 tPartida generarPartida(int fils, int cols, int modo){
 
 	tPartida partida = malloc(sizeof(*partida));	
+
 	/* Esta validacion deberia estar hecha por el front-end, pero 
 	** nunca se sabe */
 	if( fils < MIN_DIM || fils > MAX_DIM || cols < MIN_DIM || cols > MAX_DIM
-		 || cols%2==0 || fils%2 == 0 || 
-
-cols<fils || (modo != PVE && modo != PVP))
+		 || cols%2==0 || fils%2 == 0 || cols<fils || (modo != PVE && modo != PVP))
 		return NULL;
 
 	if(partida != NULL){
