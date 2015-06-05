@@ -48,7 +48,7 @@ static void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direcc
 static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCoordenada casillaOrig);
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino);
 static int meCapturan(const tTablero *tablero, tCoordenada posicion, int jugador);
-static enum tCaptura hayComida (int jugador, const tTablero *tablero, tCoordenada origen, enum tDireccion direccion);
+static int hayComida (int jugador, const tTablero *tablero, tCoordenada origen, enum tDireccion direccion);
 static int validarMovimiento(tPartida partida, tMovimiento * movimiento);
 static int jugadaObligada(const tPartida partida, int jugador, tCoordenada origen);
 static void copiarTablero(tTablero * tablero);
@@ -59,11 +59,6 @@ static tTablero generarTablero(int fils, int cols, int modo);
 
 static int haySeed=0;
 
-/*static enum tDireccion direccionPrevia=NULA;
-static tFlag hayCadena=0;
-static tFlag hayPaika=0;
-static tFlag primerUndo=0;
-*/
 
 tFlag hayCadena(tPartida partida){
 	return partida->hayCadena;
@@ -107,8 +102,8 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 
 	captura = validarMovimiento(partida, movimiento);
 
-	if (captura == AMBOS) { 
-	/* si la jugada es ambigua, retorna para que el front pida la captura */
+	if (captura == AMBIGUO) { 
+		/* si la jugada es ambigua, retorna hasta que se pase el movimiento completo */
 		partida->direccionPrevia = NULA;
 		return captura;
 	}
@@ -279,14 +274,15 @@ int calcularMovCompu(tMovimiento * mov, const tPartida  partida){
 }
 
 static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCoordenada casillaOrig){
-        
+       	/* Rellena el vector movsPosibles con los posibles movimientos que puede
+	** realizar la computadora desde la casillaOrig  */
+ 
 	tTablero * tablero = &partida->tablero;
-
 	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
 	int dirsPosibles, dirFil, dirCol;	
 	int n;
 	tMovimiento * aux;
-	enum tCaptura tipoComida;
+	int tipoComida;
 	enum tDireccion dir;
 	
 	dirsPosibles = tablero->matriz[casillaOrig.fil][casillaOrig.col].tipo==FUERTE ? 8 : 4;
@@ -296,11 +292,12 @@ static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCo
 
 		if(dir != partida->direccionPrevia){
 			incrementoSegunDir(&dirFil, &dirCol, dir);
-							
+						
 			if(!fueraDeRango(tablero, casillaOrig.fil + dirFil, casillaOrig.col + dirCol) 
 				&& tablero->matriz[casillaOrig.fil + dirFil][casillaOrig.col + dirCol].estado != TOCADA ){
-	
-				if( (tipoComida = hayComida(NEGRO, tablero, casillaOrig, dir)) != NINGUNO || partida->hayPaika ){
+
+				if( (tipoComida = hayComida(NEGRO, tablero, casillaOrig, dir)) != NINGUNO
+					 || partida->hayPaika ){
 
 					if(movsPosibles->dim % BLOQUE == 0){
 						aux=realloc(movsPosibles->elems, (movsPosibles->dim + BLOQUE)*sizeof(*aux));
@@ -316,7 +313,7 @@ static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCo
 					movsPosibles->elems[movsPosibles->dim].coordDest.fil = casillaOrig.fil+dirFil;
 					movsPosibles->elems[movsPosibles->dim].coordDest.col = casillaOrig.col+dirCol;
 
-					if(tipoComida == AMBOS) /*Elijo una al azar*/
+					if(tipoComida == AMBIGUO) /*Elijo una al azar*/
 						tipoComida = rand()%2?APPROACH:WITHDRAWAL;
 
 					movsPosibles->elems[movsPosibles->dim].tipoMov = tipoComida;
@@ -556,7 +553,8 @@ static void rellenarTablero(tTablero * tablero){
 		else if (i == tablero->filas/2 && j != tablero->cols/2) /*Fila central (menos casilla central) */
 		{	
 			if (j%2==0)
-				/*No hay simetria con respecto a la central; se invierte la paridad luego de la misma*/
+				/*No hay simetria con respecto a la central; se invierte
+				**  la paridad del blanco/negro luego de la misma (postCentral) */
 				tablero->matriz[i][j].ocupante = postCentral ? BLANCO:NEGRO; 
 			else
 				tablero->matriz[i][j].ocupante = postCentral ? NEGRO:BLANCO;
@@ -733,7 +731,7 @@ static int meCapturan(const tTablero *tablero, tCoordenada posicion, int jugador
 
 }
 
-static enum tCaptura hayComida (int jugador, const tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { 
+static int hayComida (int jugador, const tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { 
 
 	/* Devuelve el tipo de captura posible segun el movimiento que quiera realizar el usuario
 	** (direccion del movimiento desde de casilla origen). Si no encuentra, devuelve NINGUNO. 
@@ -747,7 +745,7 @@ static enum tCaptura hayComida (int jugador, const tTablero *tablero, tCoordenad
 	char fo = origen.fil;
         char co=origen.col;
         char enemigo = !jugador;
-	enum tCaptura captura;
+	int captura;
 
         int dirFil, dirCol;
         tFlag hayAppr=0, hayWithdr=0;
@@ -780,7 +778,7 @@ static enum tCaptura hayComida (int jugador, const tTablero *tablero, tCoordenad
 		}
 
         if (hayAppr && hayWithdr)
-                captura=AMBOS;
+                captura=AMBIGUO;
         else if (hayAppr)
                 captura=APPROACH;
         else if (hayWithdr)
@@ -835,6 +833,7 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 		jugada=aux;
 	else
 		return ERR_MOV_PAIKA;
+
 	
 	/*Si llega hasta aca, no hay ningun error; actualizo el estado luego de que se efectue el movimiento*/
 	
@@ -842,10 +841,9 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 	
 	partida->direccionPrevia = direccionMov;
 
-	if(jugada==AMBOS && movimiento->tipoMov!=NINGUNO)
+	if(jugada==AMBIGUO && movimiento->tipoMov!=NINGUNO)
 		/*Si el jugador puede hacer ambas cosas pero ya eligio*/
 		jugada=movimiento->tipoMov;
-
 	return jugada;
 }
 

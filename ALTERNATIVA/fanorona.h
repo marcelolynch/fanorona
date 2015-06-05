@@ -7,18 +7,46 @@
 
 enum tOpcion {PVE=0, PVP, CARGAR, SALIR};
 
-/* 
-** Los codigos de error empiezan desde -100 y siempre seran negativos.
-**/
-enum tError {ERR_MOV_ORIG=-100, ERR_MOV_DEST, ERR_MOV_TOC, ERR_MOV_DIR, 
-	ERR_MOV_PAIKA, ERR_MOV_RANGO, ERR_MOV_NO_ADY,ERR_MOV_DEBIL, ERR_MOV_AMBIGUO,
-	ERR_MOV_CAD, ERR_UNDO, ERR_UNDO_DOBLE, ERR_MEM_COMPU, ERR_SAVE};
+/*
+** CODIGOS DE ERROR
+** Los codigos de error empiezan desde -100 y <<siempre>> seran negativos.
+** Son devueltos por mover e indican algun error en la jugada que se paso
+** excepto ERR_SAVE que es devuelto por guardarPartida en caso de error
+*/
 
+#define ERR_MOV_ORIG 	-100 	/* La casilla elegida no es del color correcto*/
+#define	ERR_MOV_DEST 	-99 	/* La casilla destino esta ocupada */
+#define	ERR_MOV_TOC 	-98	/* La casilla destino ya fue ocupada en la cadena actual*/
+#define	ERR_MOV_DIR 	-97	/* La direccion de movimiento no cambio en movidas sucecivas */
+#define	ERR_MOV_PAIKA 	-96	/* Quiere mover una ficha sin capturar habiendo otras que pueden hacerlo*/
+#define	ERR_MOV_RANGO 	-95 	/* Quiere moverse fuera del tablero */
+#define	ERR_MOV_NO_ADY	-94 	/* Quiere mover a una casilla no adyacente */
+#define	ERR_MOV_DEBIL 	-93 	/* Quiere mover en diagonal desde una casilla debil */
+#define	ERR_MOV_CAD 	-92	/* En el medio de una cadena, quiere mover otra ficha */
+#define	ERR_UNDO	-91	/* Quiere realizar UNDO en un juego de dos jugadores */
+#define	ERR_UNDO_DOBLE	-90	/* Quiere realizar un segundo undo consecutivo */
+#define	ERR_MEM_COMPU	-89	/* No hay memoria suficiente para continuar */
 
+#define	ERR_SAVE	-87	/* No se pudo guardar la partida */
+#define ERROR		 -1	/* Error generico */
 
+/* Fin codigos de error */
+#define OK 1
 
-enum tCaptura {NINGUNO=0, WITHDRAWAL, APPROACH, AMBOS}; 
+/*
+** TIPOS DE CAPTURA
+** Para especificar en la estructura tMovimiento
+** se utiliza APPROACH, WITHDRAWAL, o NINGUNO si
+** no esta especificado. 
+** AMBIGUO es devuelto por mover() cuando la jugada es ambigua
+*/
+#define NINGUNO		0
+#define WITHDRAWAL 	1
+#define APPROACH 	2
 
+#define AMBIGUO		3
+
+typedef int tCaptura;
 
 typedef struct {
 	int fil;
@@ -28,15 +56,13 @@ typedef struct {
 typedef struct {
 	tCoordenada coordOrig;
 	tCoordenada coordDest;
-	char tipoMov; /* approach, withdrawal o ninguno */
+	tCaptura tipoMov; /* Algun TIPO DE CAPTURA */
 } tMovimiento;
 
 
 typedef signed char tFlag;
 
 /* Error generico: para especificos, tError*/ 
-#define ERROR -1
-#define OK 1
 
 /* Constantes que determinan el ocupante de una casilla */
 #define BLANCO 0
@@ -45,21 +71,43 @@ typedef signed char tFlag;
 
 /* Constantes que definen el estado del juego al inicio 
 ** (final de la anterior) de una jugada */
-#define SEGUIR 0
-#define GANADOR_BLANCO 1
-#define GANADOR_NEGRO 2
-#define EMPATE 3
+#define SEGUIR 		0
+#define GANADOR_BLANCO 	1
+#define GANADOR_NEGRO 	2
+#define EMPATE 		3
 
 /* Constantes que determinan el tipo de casilla*/
-#define FUERTE 1 
-#define DEBIL 2
+#define FUERTE 	1 
+#define DEBIL	2
 
 #define MIN_DIM 3 /* minima dimensión de tablero (fila o columna) permitida */
 #define MAX_DIM 19 /* máxima dimensión de tablero (fila o columna) permitida */
 
+
+
+/* Tipo Abstracto de Datos: tPartida */
 typedef struct tJuego * tPartida;
 
 /* FUNCIONES PARA EL TAD: */
+
+
+/* Funcion generarPartida:
+** Crea una nueva partida con un tablero de fils x cols.
+** Si recibe el modo PVE inicialia el tablero auxiliar.
+** Devuelve el tPartida correspondiente en su nombre
+*/
+tPartida generarPartida(int fils, int cols, int modo);
+
+
+/* Funcion cargarPartida:
+** Carga una partida guardada en el directorio actual con
+** el nombre especificado en el string que se recibe como parametro,
+** devuelve el tPartida correspondiente a la partida
+*/
+tPartida cargarPartida(const char * nombre);
+
+
+
 
 /* hayCadena: devuelve un booleano,
 ** verdadero si la jugada debe continuar
@@ -94,18 +142,26 @@ int numCols(tPartida partida);
 
 
 
+
+/* FUNCIONES PARA EL DESARROLLOS DEL JUEGO */
+
 /*
 ** Funcion mover: recibe un puntero a tMovimiento con las coordenadas (indices de 0 a N-1)
 ** de origen de la casilla de movimiento (ficha a mover) y destino (a donde moverse).
 **
 ** Si la jugada es incorrecta, devuelve un codigo de error con un valor menor que cero 
-** (ver enumerativos tError). Si la jugada es correcta, la ejecuta y actualiza el tablero
-** con las nuevas casillas, y devuelve un valor mayor a cero. 
+** (ver CODIGOS DE ERROR). 
+**
+** Si la jugada no es incorrecta pero admite ambos tipos de captura, la funcion retorna AMBIGUO
+** y no cambia el tablero.
+**
+** Si la jugada es correcta, la ejecuta y actualiza el tablero
+** con las nuevas casillas, y se devuelve un valor mayor a cero. 
 **
 ** Si el movimiento permite un encadenamiento, hayCadena() devolvera verdadero despues de la llamada,
-** y ademas la coordenada de origen de la estructura movimiento se cambia por la que 
-** debe ser en el proximo paso de la cadena (donde cayo la ficha). 
-** Esto no puede desestimarse en la jugada de la computadora. 
+** y ademas la coordenada de origen (movimiento.coordOrig) de la estructura <<movimiento>> se cambia 
+** por la que debe ser en el proximo paso de la cadena (que es la donde cayo la ficha, es decir, 
+** el movimiento.coordDest que se recibe). 
 */
 int mover (tPartida partida, tMovimiento * movimiento);
 
@@ -114,10 +170,6 @@ int mover (tPartida partida, tMovimiento * movimiento);
 ** Funcion calcularMovCompu: Recibe un puntero a un tMovimiento, que 
 ** sera rellenado con el movimiento escogido por la computadora para
 ** luego ser recibido por mover()
-**
-** Si la jugada esta en el medio de un encadenamiento, debe recibir
-** en movimiento->coordOrig la coordenada de origen 
-** (mover() ya la coloco ahi en la llamada anterior)
 */
 int calcularMovCompu(tMovimiento * mov, const tPartida partida); 
 
@@ -145,9 +197,11 @@ int undo(tPartida partida);
 
 
 /* Funcion cambiarTurno
-** A llamarse cuando hayCadena() devuelva falso.
+** A llamarse cuando hayCadena() devuelva falso, es decir, 
+** cuando hay cambio de turno.
+**
 ** Cambia el jugador y realiza la limpieza correspondiente
-** al cambio de turno
+** al cambio de turno.
 */
 void cambiarTurno (tPartida partida);
 
@@ -160,20 +214,6 @@ void cambiarTurno (tPartida partida);
 int guardarPartida(const tPartida partida, const char * nombre);
 
 
-/* Funcion cargarPartida:
-** Carga una partida guardada en el directorio actual con
-** el nombre especificado en el string que se recibe como parametro,
-** devuelve el tPartida correspondiente a la partida
-*/
-tPartida cargarPartida(const char * nombre);
-
-
-/* Funcion generarPartida:
-** Crea una nueva partida con un tablero de fils x cols.
-** Si recibe el modo PVE inicialia el tablero auxiliar.
-** Devuelve el tPartida correspondiente en su nombre
-*/
-tPartida generarPartida(int fils, int cols, int modo);
 
 
 #endif

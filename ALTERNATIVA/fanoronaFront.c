@@ -22,8 +22,12 @@
 enum tJugada {START=-1, QUIT, SAVE, UNDO, MOV};
  
 /* Se distinguen de los errores arrojados por el back-end, pero se usan de la misma manera */
-enum tErrorFmt {ERR_FMT=-120, ERR_FMT_SAVE1, ERR_FMT_SAVE2, ERR_FMT_MOV1,
-        ERR_FMT_MOV2};
+enum tErrorFmt {ERR_FMT=-120, /*Error de formato*/
+		ERR_FMT_SAVE1, /* Error sobre el nombre de savefile */
+		ERR_FMT_SAVE2, /* Error sobre longitud de nombre de savefile */
+		ERR_FMT_MOV1,  /* Error de formato en el comando de movimiento */
+        	ERR_FMT_MOV2}; /* Error en el formato al especificar captura */
+
 
 int jugar(tPartida partida);
 void pedirDimensiones(int * filas, int * columnas);
@@ -32,7 +36,7 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre);
 static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre);
 static const char *salteaEspacios (const char str[], int *cantEspacios);
 tFlag validarMovFormato (const char str[], tMovimiento *mov);
-enum tCaptura leerCaptura (const char str[]);
+tCaptura leerCaptura (const char str[]);
 static const char *leerCoord (const char str[], tCoordenada *coord);
 int validarFmtNombre(char destino[], const char origen[], int longOrigen); 
 tFlag leerSN(void);
@@ -40,7 +44,8 @@ void pedirNombre (char nombre[]);
 void imprimirTablero ( tPartida partida );
 void pedirCadena (tMovimiento *mov);
 void imprimirError(int error);
-enum tCaptura pedirCaptura (void);
+void imprimirErrorFmt(enum tErrorFmt error);
+tCaptura pedirCaptura (void);
 void imprimirMov (tMovimiento * mov);
 
 
@@ -58,8 +63,14 @@ int main(void){
 	printf("\n\t\t=*=*=*=*=*=*=*=*=*==FANORONA==*=*=*=*=*=*=*=*=*=*=");
 	printf("\n\t\t=*=*=*=*=*=*=*=*=FUTURAMA EDITION=*=*=*=*=*=*=*=*=\n\n");
 
-	printf("\n\t\t=*=*=*=*=*=*=*=*=REGLAS DE JUEGO==*=*=*=*=*=*=*=*=\n");
-	printf("\n\t\t    Hay bastantes reglas, Wikipedialo, ni idea\n\t\t    Ah, salvo que hay que capturar si o si\n\n\t\tEl formato de movida es\"M [Fo,Co][Fd,Cd][w]\"\n\t\to \"M [Fo,Co][Fd,Cd][a]\", \n\t\t siendo Fo,Co Fd,Cd las coordenadas de origen y destino, \n\t\ty w/a el tipo de movida (WITHDRAWAL o APPROACH)\n\n");
+	printf("\n\t\t=*=*=*=*=*=*=*==NOTAS SOBRE EL JUEGO=*=*=*=*=*=*=*=\n");
+	printf("\n\t\t\t\tLa captura es obligatoria\n");
+	printf("\n\t\tLas casillas fuertes se marcan con letras mayusculas\n");
+	printf("\t\ty las debiles oon minuscula");
+	printf("\n\n\t\tEl formato de movida es \"M [Fo,Co][Fd,Cd][w]\", o bien\n");
+	printf("\t\t\"M [Fo,Co][Fd,Cd][a]\", siendo Fo,Co Fd,Cd las coordenadas\n");
+	printf("\t\tde origen y destino, y w/a el tipo de movida (WITHDRAWAL \n");
+	printf("\t\t o APPROACH)\n\n");
 	printf("\t\t=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=\n\n");
 	printf("\tElija una opcion:\n\n");
 	printf("\t\t1. Juego nuevo: vs PC\n");
@@ -89,7 +100,7 @@ int main(void){
 			return 1;
 		}
 		printf("\nMODO DE JUEGO: %s\n", modoJuego(partida)?"DOS JUGADORES":"JUGADOR VS COMPUTADORA");
-		printf("TURNO DEL JUGARDOR %s\n", jugadorActual(partida)?"NEGRO":"BLANCO");
+		printf("TURNO DEL JUGADOR %s\n", jugadorActual(partida)?"NEGRO":"BLANCO");
 		printf("DIMENSIONES DEL TABLERO: %dx%d\n\n", numFilas(partida),numCols(partida));
 	}
 			
@@ -102,9 +113,9 @@ int main(void){
 	ganador = jugar(partida);		
 
 	switch(ganador) {
-		case GANADOR_BLANCO: printf("GANA BLANCO\n\n"); break;
-		case EMPATE: printf("\t\tEMPATE\n\n"); break;
-		case GANADOR_NEGRO: printf("GANA NEGRO\n\n"); break;
+		case GANADOR_BLANCO: printf("\a\t===========GANADOR: BLANCO==========\n\n"); break;
+		case EMPATE: printf("\a\t===========EMPATE===========\n\n"); break;
+		case GANADOR_NEGRO: printf("\a\t==========GANADOR: NEGRO===========\n\n"); break;
 	}
 
 	return 0;
@@ -143,7 +154,7 @@ int jugar(tPartida partida){
 			
 				captura = mover(partida, &mov);
 			
-				if (captura == AMBOS) {
+				if (captura == AMBIGUO) {
 					/*Hay que pedirle que especifique*/
 					mov.tipoMov = pedirCaptura();
 					captura = mover (partida, &mov);
@@ -247,7 +258,7 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 		printf(" > ");
 		n = leerLinea(str, STR_DIM);
 		jugada = validarFormato (str, n, mov, nombre);
-		imprimirError(jugada); /* solo imprime en casos de error */
+		imprimirErrorFmt(jugada); /* solo imprime en casos de error */
 	} while (jugada < 0); /* hay algún tipo de error en el formato */
 
 	return jugada;
@@ -287,7 +298,7 @@ static const char *salteaEspacios (const char str[], int *cantEspacios) {
 
 tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	const char *p;
-	enum tCaptura captura;
+	tCaptura captura;
 
 	if (str[0] != 'M' || str[1] != ' ')
 		return ERR_FMT;
@@ -314,7 +325,7 @@ tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	return ERR_FMT_MOV2; /* se introdujo mal el tipo de captura unicamente */
 }
 
-enum tCaptura leerCaptura (const char str[]) {
+tCaptura leerCaptura (const char str[]) {
 	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' ) || str[2] != ']' || str[3] != '\0')
 		return ERROR;
 	return tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;
@@ -399,7 +410,7 @@ void pedirNombre (char nombre[]) {
 
 	do {
 		printf(" > ");
-		imprimirError(esValido); /* en una primera instancia no imprime nada, pues esValido es mayor o igual a 0*/
+		imprimirErrorFmt(esValido); /* en una primera instancia no imprime nada, pues esValido es mayor o igual a 0*/
 		n = leerLinea(str, STR_DIM);
 		esValido = validarFmtNombre (nombre, str, n);
 	} while (esValido < 0);
@@ -439,7 +450,7 @@ void imprimirTablero ( tPartida partida ){
 }	
 
 void imprimirMov (tMovimiento * mov) {
-	printf("\n%d,%d -> %d,%d", mov->coordOrig.fil+1, mov->coordOrig.col+1, mov->coordDest.fil+1, mov->coordDest.col+1);
+	printf("\n  -> %d,%d", mov->coordDest.fil+1, mov->coordDest.col+1);
 	return;
 }
 
@@ -458,7 +469,7 @@ void pedirCadena (tMovimiento *mov) {
 	printf("Se imprimira su nueva casilla de origen.\n");
 
 	do {
-		imprimirError(esValido); /* en una primer instancia no imprimirá nada, pues esValido es mayor a 0 */
+		imprimirErrorFmt(esValido); /* en una primer instancia no imprimirá nada, pues esValido es mayor a 0 */
 
 		printf(" > M [%d,%d]", fo, co);
 
@@ -477,29 +488,11 @@ void pedirCadena (tMovimiento *mov) {
 }
 
 void imprimirError(int error) {
-	/*Recibe tFlag, tError, tErrorFmt */
 
 	if (error >= 0) /* no hay error */
 		return;
 
 	switch (error) {
-	case ERR_FMT: 
-		printf("\aError: no se introdujo un tipo de jugada válido.\n"); 
-		break;
-	case ERR_FMT_SAVE1: 
-		printf("\aError: no se introdujo un nombre válido; debe contener al menos un carácter distinto de espacio.\n"); 
-		break;
-	case ERR_FMT_SAVE2:
-		printf("\aError: se introdujo un nombre más largo de lo permitido.\n");
-		break;
-	case ERR_FMT_MOV1: 
-		printf("\aError: no se introdujo un movimiento con el formato adecuado o algúna coordenada es mayor de lo permitido.\n");
-		printf("El formato debe ser: M [Fo,Co][Fd,Cd][a/w] siendo la especificación de captura opcional en casos donde ésta no sea ambigua.\n");
-		break;
-	case ERR_FMT_MOV2: 
-		printf("\aError: no se especificó la captura correctamente.\n");
-		printf("La misma debe añadirse como [a] para approach o [w] para withdrawal inmediatamente seguido de la coordenada destino.\n");
-		break;
 	case ERR_MOV_ORIG:
 		printf("\aError: la casilla elegida no contiene una ficha de su color.\n");
 		break;
@@ -545,7 +538,38 @@ void imprimirError(int error) {
 	}
 }
 
-enum tCaptura pedirCaptura (void) {
+
+void imprimirErrorFmt(enum tErrorFmt error){
+	
+	if (error >= 0) /* no hay error */
+		return;
+
+	switch(error) {
+	case ERR_FMT: 
+		printf("\aError: no se introdujo un tipo de jugada válido.\n"); 
+		break;
+	case ERR_FMT_SAVE1: 
+		printf("\aError: no se introdujo un nombre válido; debe contener al menos un carácter distinto de espacio.\n"); 
+		break;
+	case ERR_FMT_SAVE2:
+		printf("\aError: se introdujo un nombre más largo de lo permitido.\n");
+		break;
+	case ERR_FMT_MOV1: 
+		printf("\aError: no se introdujo un movimiento con el formato adecuado o algúna coordenada es mayor de lo permitido.\n");
+		printf("El formato debe ser: M [Fo,Co][Fd,Cd][a/w] siendo la especificación de captura opcional en casos donde ésta no sea ambigua.\n");
+		break;
+	case ERR_FMT_MOV2: 
+		printf("\aError: no se especificó la captura correctamente.\n");
+		printf("La misma debe añadirse como [a] para approach o [w] para withdrawal inmediatamente seguido de la coordenada destino.\n");
+		break;
+	default: 
+		printf("\aError desconocido\n");
+		break;	
+
+	}
+}
+
+tCaptura pedirCaptura (void) {
 	char str[5];
 	int tipoCaptura;
 
