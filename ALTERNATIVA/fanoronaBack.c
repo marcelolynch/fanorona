@@ -1,7 +1,6 @@
 #include "fanorona.h"
 #define BLOQUE 20					  
 
-
 typedef struct {
         char tipo; /* debil o fuerte */
         unsigned char ocupante; /* blanco, negro o vacio*/
@@ -430,13 +429,15 @@ tPartida cargarPartida(const char * nombre){
 
 tPartida generarPartida(int fils, int cols, int modo){
 
+	tPartida partida = malloc(sizeof(*partida));	
 	/* Esta validacion deberia estar hecha por el front-end, pero 
 	** nunca se sabe */
 	if( fils < MIN_DIM || fils > MAX_DIM || cols < MIN_DIM || cols > MAX_DIM
-		 || cols%2==0 || fils%2 == 0 || fils<cols || (modo != PVE && modo != PVP))
+		 || cols%2==0 || fils%2 == 0 || 
+
+cols<fils || (modo != PVE && modo != PVP))
 		return NULL;
 
-	tPartida partida = malloc(sizeof(*partida));	
 	if(partida != NULL){
 		partida->modo = modo;
 		partida->direccionPrevia=NULA;
