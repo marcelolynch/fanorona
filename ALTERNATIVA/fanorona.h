@@ -32,8 +32,9 @@
 #define	ERR_MOV_CAD 	-92	/* En el medio de una cadena, quiere mover otra ficha */
 #define	ERR_UNDO	-91	/* Quiere realizar UNDO en un juego de dos jugadores */
 #define	ERR_UNDO_DOBLE	-90	/* Quiere realizar un segundo undo consecutivo */
-#define	ERR_MEM_COMPU	-89	/* No hay memoria suficiente para continuar */
 
+#define	ERR_MEM_COMPU	-89	/* No hay memoria suficiente para continuar */
+#define ERR_PARAMS	-88	/* Los parametros pasados no se corresponden con lo que recibe la funcion*/
 #define	ERR_SAVE	-87	/* No se pudo guardar la partida */
 #define ERROR		 -1	/* Error generico */
 

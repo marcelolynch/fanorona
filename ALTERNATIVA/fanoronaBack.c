@@ -36,7 +36,7 @@ typedef struct {
  } tVecMovs;	
 
 
-enum tEstado {LIBRE=0, TOCADA, ACTIVA};
+enum tEstado {LIBRE=0, TOCADA};
 enum tDireccion {N=1, S, E, O, NE, NO, SE, SO, NULA};
 
 
@@ -56,6 +56,7 @@ static void intercambiarTableros(tTablero * tablero);
 static tCasilla ** generarMatrizTablero(int fils, int cols);
 static int fueraDeRango(const tTablero * tablero, int f, int c);
 static tTablero generarTablero(int fils, int cols, int modo);
+
 
 static int haySeed=0;
 
@@ -93,7 +94,7 @@ int numCols(tPartida partida){
 }
 
 
-int fueraDeRango(const tTablero * tablero, int f, int c){
+static int fueraDeRango(const tTablero * tablero, int f, int c){
 
 	return  (f < 0 || c < 0 || f >= tablero->filas || c  >= tablero->cols);
 }
@@ -102,31 +103,35 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 	int captura;
 	int jugador = partida->jugador;
 
+	if(partida == NULL)
+		return ERROR;
+
 	captura = validarMovimiento(partida, movimiento);
 
 	if (captura == AMBIGUO) { 
 		/* si la jugada es ambigua, retorna hasta que se pase el movimiento completo */
 		return captura;
 	}
-	else if (captura >= 0) { /* si no fue error */
+	else if (captura == WITHDRAWAL || captura == APPROACH || captura == NINGUNO) { /* si no fue error */
 		/*Copia el tablero al auxiliar antes en el comienzo del turno  del usuario y si juega vs Computadora*/
 		if (!(partida->hayCadena) && partida->modo == PVE && partida->jugador == BLANCO)
 			copiarTablero(&partida->tablero);
 		
 		partida->tablero.matriz[movimiento->coordOrig.fil][movimiento->coordOrig.col].estado=TOCADA;
 		partida->direccionPrevia = direccionDestino(movimiento->coordOrig, movimiento->coordDest); 
-		movimiento->tipoMov = captura;
-		actualizarTablero(partida, movimiento);
-		partida->hayCadena = 0;
 
-		if (captura != NINGUNO) /* si no fue PAIKA, busca una posible cadena */
+		movimiento->tipoMov = captura; /* captura vale WITHDRAW o APPROACH */
+
+		actualizarTablero(partida, movimiento);
+
+		partida->hayCadena = 0; /* En principio se asume que no hay */
+
+		if (captura != NINGUNO) /* si no fue una movida PAIKA, busca una posible cadena */
 			partida->hayCadena = jugadaObligada(partida, jugador, movimiento->coordDest);
 
 		if (partida->hayCadena) {
-			partida->tablero.matriz[movimiento->coordDest.fil][movimiento->coordDest.col].estado = ACTIVA; 
-				/*La nueva casilla origen (donde cae) esta en el medio de una cadena*/
 			partida->origenCadena = movimiento->coordDest;
-				/* Coordenada origen si hay cadena */
+				/* Coordenada origen del proximo movimiento en la cadena */
 		}
 	}
 
@@ -134,9 +139,9 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 }
 
 int estadoJuego(const tPartida partida){
+
 	
-	int jugador = partida->jugador;
-	
+	int jugador;
 	int hayBlancos=0, hayNegros=0;
 	int ocupante;
 	int i,j,n;
@@ -147,6 +152,10 @@ int estadoJuego(const tPartida partida){
 	int dir, dirsPosibles, dirFil, dirCol;
 	int estado;
 
+	if(partida == NULL)
+		return ERR_PARAMS; /* Antes que segfault... */		
+
+	jugador = partida->jugador;
 	partida->hayPaika = 1; /* Asumo que hay */
 
 	for(i=0; i< partida->tablero.filas ; i++)
@@ -455,7 +464,7 @@ cols<fils || (modo != PVE && modo != PVP))
 	return partida;		
 }
 
-tTablero generarTablero(int fils, int cols, int modo){
+static tTablero generarTablero(int fils, int cols, int modo){
 	
 	tTablero tablero;
 	
@@ -478,15 +487,6 @@ tTablero generarTablero(int fils, int cols, int modo){
 	}
 	return tablero;
 
-}
-
-int generarAuxiliar(tTablero * tablero){
-	
-	tablero->matrizAuxiliar = generarMatrizTablero(tablero->filas, tablero->cols);
-	if(tablero->matrizAuxiliar == NULL)
-		return ERROR;
-	else
-		return OK;
 }
 
 static tCasilla ** generarMatrizTablero(int fils, int cols){
@@ -520,7 +520,7 @@ static void copiarTablero(tTablero * tablero){
 
 }	
 
-void intercambiarTableros(tTablero * tablero){
+static void intercambiarTableros(tTablero * tablero){
 	/*Intercambia el tablero en uso por el auxiliar,
 	** mediante el intercambio de a que zona de memoria apunta 
 	** el puntero al tablero principal con el auxiliar*/
@@ -618,7 +618,6 @@ static void actualizarTablero(tPartida partida, tMovimiento * mov){
 	while((i<(tablero->filas) && i>=0 && j<(tablero->cols) && j>=0) && tablero->matriz[i][j].ocupante==enemigo){
 		/*Mientras no me vaya del tablero y siga habiendo enemigos en la linea de captura*/
 		tablero->matriz[i][j].ocupante = VACIO;
-		tablero->matriz[i][j].estado = LIBRE; /* Si vengo de cadena, estaba ACTIVA*/
 		
 		i+=dirFil;
 		j+=dirCol;
@@ -800,6 +799,11 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 	
 	enum tDireccion direccionMov;
 
+	int mov = movimiento->tipoMov;
+	if ( ! (mov == APPROACH || mov == WITHDRAWAL || mov == NINGUNO || mov == AMBIGUO) )
+		/* No es valido el dato */
+		return ERR_PARAMS;
+	
 	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >= tablero->filas || fd >= tablero->filas || co >= tablero->cols || cd >= tablero->cols)
 		return ERR_MOV_RANGO; /*Fuera de limites del tablero*/
 
@@ -812,7 +816,8 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 	if(tablero->matriz[fd][cd].estado==TOCADA)
 		return ERR_MOV_TOC;
 
-	if (partida->hayCadena && tablero->matriz[fo][co].estado != ACTIVA)
+	if (partida->hayCadena && (fo != partida->origenCadena.fil || co != partida->origenCadena.col) )
+		/* Estamos en medio de un encadenamiento y pide mover una ficha que no debe */
 		return ERR_MOV_CAD;
 
 	direccionMov = direccionDestino(movimiento->coordOrig, movimiento->coordDest);
