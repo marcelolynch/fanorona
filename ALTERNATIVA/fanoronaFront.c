@@ -7,7 +7,7 @@
 #define STR_DIM 41 /* long del vector que se usará para guardar la entrada del usuario */
 #define LONG_SAVE 5 /* longitud del str "save " */
 #define MIN_STR 4
-#define MAX_NOM (STR_DIM - LONG_SAVE - 5) /* Maxima logitud para <filename>: se resta la lonngitud de "save " y -5 por el '\0' y para
+#define MAX_NOM (STR_DIM - LONG_SAVE - 5) /* Maxima logitud para <filename>: se resta la longitud de "save " y -5 por el '\0' y para
                                           ** saber si el usuario escribió más que el límite permitido */
 
 #define MIN_COORD 5 /* mínima longitud de string de coordenada válida que puede escribir el usuario */
@@ -28,28 +28,85 @@ enum tErrorFmt {ERR_FMT=-120, /*Error de formato*/
 
 
 int jugar(tPartida partida);
-void pedirDimensiones(int * filas, int * columnas);
-int leerLinea(char str[], int dim);
-tFlag pedirJugada(tMovimiento *mov, char *nombre);
-static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre);
-static const char *salteaEspacios (const char str[], int *cantEspacios);
-tFlag validarMovFormato (const char str[], tMovimiento *mov);
-tCaptura leerCaptura (const char str[]);
-static const char *leerCoord (const char str[], tCoordenada *coord);
-int validarFmtNombre(char destino[], const char origen[], int longOrigen); 
-tFlag leerSN(void);
+
+/* FUNCIONES QUE LEEN ENTRADA */
+
 void pedirNombre (char nombre[]);
-void imprimirTablero ( tPartida partida );
+void pedirDimensiones(int * filas, int * columnas);
+
+/* leerLinea guarda los dim-1 primeros caracteres 
+** ingresados por el usuario o hasta \n en str[]. Coloca '\0' al final.
+** Borra el buffer y devuelve lo mismo que devolvería strlen.
+** Es por esto que se usan vectores de tamaño mayor de lo 
+** necesario, a la hora de validar para así poder 
+** evaluar si el usuario ingresó más información de la requerida */
+int leerLinea(char str[], int dim);
+
+/* pedirJugada llama a leerLinea y validarFmtLinea.
+** En caso de error en el formato, imprime el error correspondiente 
+** y sigue pidiendo jugadas hasta que una sea valida. 
+** Devuelve dicha jugada. */
+enum tJugada pedirJugada(tMovimiento *mov, char *nombre);
+
+/* pedirCaptura pide al usuario ingresar [w] o [a].
+** Utilizada en casos donde el movimiento sea ambiguo */
+tCaptura pedirCaptura (void);
+
+/* pedirCadena pide al usuario las coordenadas de destino,
+** imprimiendo las de origen anteriormente en caso de que 
+** éste se encuentre en medio de un encadenamiento. 
+** Llama a sprintf para así poder llamar a validarFmtMov 
+** pasandole string con formato adecuado al de un 
+** movimiento regular */
 tMovimiento pedirCadena (tPartida partida);
+
+/* leerSN pide al usuario ingresar S (si) o N (no).
+** Devuelve 1 o 0 respectivamente. */
+tFlag leerSN(void);
+
+/* validarFmtLinea valida si se ingresó una jugada 
+** con formato valido. Llama a validarFmtMov en caso de que
+** el str pueda ser un movimiento o a validarFmtNombre
+** en caso de que pueda ser un nombre. Undo y quit se validan
+** en validarFmtLinea directamente.
+** Devuelve el tipo de jugada o el error correspondiente.
+** mov y nombre se usan únicamente como parámetros de salida */
+int validarFmtLinea (char str[], int dim, tMovimiento *mov, char *nombre);
+
+/* validarFmtCaptura valida que el string sea de la forma 
+** [c] siendo c = 'w', 'W', 'a' o 'A' y que además haya un '\0'
+** inmediatamente luego del ']' */
+tCaptura validarFmtCaptura (const char str[]);
+
+/* validarFmtMov valida que str[] tenga un formato de movimiento válido
+** y guarda en mov dichos valores. Devuelve MOV o el error correspondiente. */
+int validarFmtMov (const char str[], tMovimiento *mov);
+
+/* validarFmtNombre guarda en destino[] el nombre recibido en origen[] 
+** y devuelve SAVE si es válido o el error correspondiente. 
+** Se considera válido a todo nombre que no esté compuesto únicamente
+** por espacios y que no exceda el límite de longitud de nombre permitido MAX_NOM
+** longOrigen es la longitud del str origen[] (strlen de origen). */
+int validarFmtNombre(char destino[], const char origen[], int longOrigen); 
+
+/* validarFmtCoord valida que str[] sea de la forma [f,c] siendo f y c 
+** números que representan una fila y una columna del tablero respectivamente.
+** Devuelve la dirección al caracter siguiente al corchete que cierra 
+** o NULL en caso de un error de formato o que las coordenadas no se encuentren 
+** entre MIN_DIM y MAX_DIM */
+const char *validarFmtCoord (const char str[], tCoordenada *coord);
+
+/* salteaEspacios devuelve la dirección del primer caracter distinto de espacio
+** en str[] y la cantidad de espacios salteados en cantEspacios */
+const char *salteaEspacios (const char str[], int *cantEspacios);
+
+void imprimirTablero ( tPartida partida );
 void imprimirError(int error);
 void imprimirErrorFmt(enum tErrorFmt error);
-tCaptura pedirCaptura (void);
 void imprimirMov (tMovimiento * mov);
 
 
-
 int main(void){
-	
 	
 	int opcion;
 	int modo;
@@ -126,7 +183,8 @@ int jugar(tPartida partida){
 
 	tMovimiento mov;
 	char nombre[MAX_NOM];
-	tFlag jugada=START, quiereGuardar=0, quiereCambiar, quiereUndo, hayGanador=0, calcularEstado=1;
+	tFlag quiereGuardar=0, quiereCambiar, quiereUndo, hayGanador=0, calcularEstado=1;
+	enum tJugada jugada = START;
 	int captura;
 
 	imprimirTablero(partida);
@@ -252,7 +310,7 @@ int leerLinea(char str[], int dim){
 	return i;
 }
 
-tFlag pedirJugada(tMovimiento *mov, char *nombre) {
+enum tJugada pedirJugada(tMovimiento *mov, char *nombre) {
 	int n;
 	char str[STR_DIM];
 	tFlag jugada=OK;
@@ -262,14 +320,14 @@ tFlag pedirJugada(tMovimiento *mov, char *nombre) {
 	do {
 		printf(" > ");
 		n = leerLinea(str, STR_DIM);
-		jugada = validarFormato (str, n, mov, nombre);
+		jugada = validarFmtLinea (str, n, mov, nombre);
 		imprimirErrorFmt(jugada); /* solo imprime en casos de error */
 	} while (jugada < 0); /* hay algún tipo de error en el formato */
 
 	return jugada;
 }
 
-static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre) {
+int validarFmtLinea (char str[], int dim, tMovimiento *mov, char *nombre) {
 	tFlag jugada = ERR_FMT;
 
 	if (str[0] != 'M') /* ignora si la primer letra es mayúscula o minúscula excepto si es M, pues el movimiento se llama con M */
@@ -287,12 +345,12 @@ static tFlag validarFormato (char str[], int dim, tMovimiento *mov, char *nombre
 										  ** y dim-LONG_SAVE es la longitud de dicho nombre */
 
 	else if (dim <= MAX_DIM) /* es un posible movimiento */
-		jugada = validarMovFormato (str, mov);
+		jugada = validarFmtMov (str, mov);
 
 	return jugada;
 }
 
-static const char *salteaEspacios (const char str[], int *cantEspacios) {
+const char *salteaEspacios (const char str[], int *cantEspacios) {
 	*cantEspacios = 0;
 	while (isspace(*str)) {
 		str++;
@@ -301,7 +359,7 @@ static const char *salteaEspacios (const char str[], int *cantEspacios) {
 	return str;
 }
 
-tFlag validarMovFormato (const char str[], tMovimiento *mov) {
+int validarFmtMov (const char str[], tMovimiento *mov) {
 	const char *p;
 	tCaptura captura;
 
@@ -310,8 +368,8 @@ tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 
 	p = &str[2]; /* direccion del supuesto primer corchete '[' */
 
-	p = leerCoord(p, &(mov->coordOrig));
-	p = leerCoord(p, &(mov->coordDest));
+	p = validarFmtCoord(p, &(mov->coordOrig));
+	p = validarFmtCoord(p, &(mov->coordDest));
 
 	if (p == NULL)
 		return ERR_FMT_MOV1;
@@ -321,7 +379,7 @@ tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 		mov->tipoMov = captura;
 	}
 
-	else if ( (captura = leerCaptura(p)) != ERROR ) /* en esValido se guarda APPROACH WITHDRAWAL o ERROR */
+	else if ( (captura = validarFmtCaptura(p)) != ERROR ) /* en esValido se guarda APPROACH WITHDRAWAL o ERROR */
 		mov->tipoMov = captura;
 
 	if (captura != ERROR)
@@ -330,13 +388,13 @@ tFlag validarMovFormato (const char str[], tMovimiento *mov) {
 	return ERR_FMT_MOV2; /* se introdujo mal el tipo de captura unicamente */
 }
 
-tCaptura leerCaptura (const char str[]) {
+tCaptura validarFmtCaptura (const char str[]) {
 	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' ) || str[2] != ']' || str[3] != '\0')
 		return ERROR;
 	return tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;
 }
 
-static const char *leerCoord (const char str[], tCoordenada *coord) {
+const char *validarFmtCoord (const char str[], tCoordenada *coord) {
 	/* devuelve la dirección siguiente al último carácter leído o NULL en caso de error. Modifica coord */
 	int num=0;
 	int i, c, filAux;
@@ -474,8 +532,8 @@ tMovimiento pedirCadena (tPartida partida) {
 	/* sumamos 1 a las coordenadas, pues origenCadena va de 0 fil/col-1, pero la función de validar formato lee de 1 a fil */ 
 	
 	printf("\n¡Puede encadenar una movimiento!\n");
-	printf("Ingrese solo la coordenada de la casilla a la que desea moverse y el tipo de captura si es necesario\n");
-	printf("Se imprimira su nueva casilla de origen.\n");
+	printf("Ingrese solo la coordenada de la casilla a la que desea moverse y el tipo de captura si es necesario.\n");
+	printf("Se imprimirá su actual casilla de origen.\n");
 
 	do {
 		imprimirErrorFmt(esValido); /* en una primer instancia no imprimirá nada, pues esValido es mayor a 0 */
@@ -486,7 +544,7 @@ tMovimiento pedirCadena (tPartida partida) {
 
 		if (n >= MIN_COORD && n <= MAX_COORD) {
 			sprintf(str, "M [%d,%d]%s", fo, co, nuevoStr);
-			esValido = validarMovFormato (str, &nuevoMov); /* devuelve menor a 0 en caso de error */
+			esValido = validarFmtMov (str, &nuevoMov); /* devuelve menor a 0 en caso de error */
 		}
 		else
 			esValido = ERR_FMT_MOV1;
@@ -587,7 +645,7 @@ tCaptura pedirCaptura (void) {
 	do {
 		printf("Ingrese [w] o [a] > ");
 		leerLinea(str, 5);
-		tipoCaptura = leerCaptura(str);
+		tipoCaptura = validarFmtCaptura (str);
 	} while (tipoCaptura == ERROR);
 	
 	return tipoCaptura;
