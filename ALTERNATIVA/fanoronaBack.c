@@ -151,10 +151,11 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 }
 
 int estadoJuego(const tPartida partida){
-	/* Controla el tablero para ver si quedan fichas de ambos jugadores,
+	/* Controla el tablero para ver si algun jugador quedo sin fichas,
 	** si existen movimientos obligados (si no los hay, se habilita el paika)
-	** y si para el jugador que va a jugar todas las jugadas estan bloqueadas,
-	** en cuyo caso el juego debe terminar en empate.
+	** y si el jugador que esta por jugar tiene todas movidas bloqueadas (mover
+	** sin comer, quedando en una posicion vulnerable), en cuyo caso el juego debe 
+	** terminar en empate.
 	** Devuelve SEGUIR, GANADOR_BLANCO, GANADOR_NEGRO o EMPATE segun corresponda */
 	
 	int jugador;
