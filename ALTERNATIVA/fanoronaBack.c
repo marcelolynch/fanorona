@@ -60,6 +60,8 @@ static tTablero generarTablero(int fils, int cols, int modo);
 
 static int haySeed=0;
 
+/* Funciones que devuelven informacion
+** sobre la partida actual (campos de la estructura)*/
 
 tFlag hayCadena(tPartida partida){
 	return partida->hayCadena;
@@ -95,11 +97,20 @@ int numCols(tPartida partida){
 
 
 static int fueraDeRango(const tTablero * tablero, int f, int c){
-
+	/* Booleano: verdadero si la coordenada (f,c) esta 
+	** dentro del tablero, */
 	return  (f < 0 || c < 0 || f >= tablero->filas || c  >= tablero->cols);
 }
 
 int mover (tPartida partida, tMovimiento * movimiento) {
+	/* Mover recibe una estructura de movimiento y la valida.
+	** Si la validacion devuelve un error, mover lo devuelve en su nombre.
+	** Si hay ambiguedad en el movimiento, se devuelve AMBIGUO y no se hace nada.
+	** Si no se encuentran errores, se ejecuta la movida y se actualiza el tablero
+	** controlando al mismo tiempo si se entro en una cadena (se actualiza el campo
+	** hayCadena. Luego de ejecutar la movida, se devuelve el tipo de captura realizada
+	** (WITHDRAWAL, APPROACH, NINGUNO).
+	*/
 	int captura;
 	int jugador = partida->jugador;
 
@@ -139,7 +150,11 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 }
 
 int estadoJuego(const tPartida partida){
-
+	/* Controla el tablero para ver si quedan fichas de ambos jugadores,
+	** si existen movimientos obligados (si no los hay, se habilita el paika)
+	** y si para el jugador que va a jugar todas las jugadas estan bloqueadas,
+	** en cuyo caso el juego debe terminar en empate.
+	** Devuelve SEGUIR, GANADOR_BLANCO, GANADOR_NEGRO o EMPATE segun corresponda */
 	
 	int jugador;
 	int hayBlancos=0, hayNegros=0;
@@ -221,6 +236,11 @@ int estadoJuego(const tPartida partida){
 }
 
 void cambiarTurno (tPartida  partida) {
+	/* Realiza las tareas de limpieza correspondientes
+	** al cambio de turno: se cambia el jugador actual
+	** se limpian las casillas tocadas en la cadena
+	** se reseta la direccion a NULA y se habilita undo */
+
 	partida->jugador = !(partida->jugador);
 	limpiarTocadas(&partida->tablero);
 	partida->direccionPrevia = NULA; /* Ninguna*/
@@ -229,10 +249,13 @@ void cambiarTurno (tPartida  partida) {
 
 
 int undo(tPartida  partida){
+	/* Si el undo es posible, lo realiza intercambiando los tableros
+	** si no es posible, devuelve el error correspondiente */
 	int estado;
 
 	if(partida->modo != PVE)
-		return ERR_UNDO;
+		/* No puede hacer undo si estan jugando dos jugadores*/
+		return ERR_UNDO; 
 
 	if(partida->primerUndo){
 		intercambiarTableros(&partida->tablero);
@@ -241,13 +264,18 @@ int undo(tPartida  partida){
 	}
 
 	else
-		estado = ERR_UNDO_DOBLE;
+		estado = ERR_UNDO_DOBLE; /* Es el segundo undo consecutivo */
 
 	return estado;
 }
 
 int calcularMovCompu(tMovimiento * mov, const tPartida  partida){
-	
+
+	/* Genera un vector dinamico de tipo tVecMovs con todos 
+	** los movimientos que puede realizar la computadora en este turno
+	** elige uno al azar, y lo devuelve en el parametro de salida mov.
+	*/	
+
 	tTablero * tablero = &partida->tablero;
 	tVecMovs movsPosibles;
 	int i,j;
@@ -335,6 +363,10 @@ static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCo
 }
 
 int guardarPartida(tPartida partida, const char * nombre){
+
+	/* Guarda la partida en el directorio actual con el nombre
+	** que se recibe en el string nombre */
+
 	FILE *f;
 	int nfilas, ncols, jugador, modo;
 	int i, j;
@@ -372,7 +404,13 @@ int guardarPartida(tPartida partida, const char * nombre){
 }
 
 tPartida cargarPartida(const char * nombre){
-	/*asumo que los datos estan validados, el archivo no esta corrputo*/
+	/* Abre el archivo con el nombre pasado (del directorio local),
+	** y genera una estructura de juego a partir del archivo. Devuelve en su nombre
+	** el puntero a dicha estructura. 
+	** Se asume que los datos estan validados y el archivo no esta corrupto, aunque
+	** si se controla la aparicion de caracteres incorrectos a la hora del llenado del
+	** tablero. En caso de cualquier error, devuelve NULL*/
+
 	int i,j,c;
 	int fils, cols;
 	FILE * f;
@@ -445,6 +483,8 @@ tPartida cargarPartida(const char * nombre){
 
 
 tPartida generarPartida(int fils, int cols, int modo){
+	/* Reserva memoria para la estructura y devuelve
+	** el puntero a la misma en su nombre */
 
 	tPartida partida = malloc(sizeof(*partida));	
 
@@ -473,8 +513,23 @@ tPartida generarPartida(int fils, int cols, int modo){
 	return partida;		
 }
 
+
+void eliminarPartida(tPartida partida){
+	/* Libera la memoria de la partida*/
+
+	liberarTodo(partida->tablero.matriz, partida->tablero.filas);
+
+	if(partida->modo == PVE) /*Modo vs Computadora: libero la auxiliar */
+		liberarTodo(partida->tablero.matrizAuxiliar, partida->tablero.filas);
+
+	free(partida);
+	return;
+}
+
 static tTablero generarTablero(int fils, int cols, int modo){
-	
+	/* Inicializa una estructura tablero y la devuelve en su nombre
+	** Si modo es PVE, ademas del tablero principal genera el auxiliar */	
+
 	tTablero tablero;
 	
 	tablero.matriz=generarMatrizTablero(fils, cols);
@@ -499,6 +554,8 @@ static tTablero generarTablero(int fils, int cols, int modo){
 }
 
 static tCasilla ** generarMatrizTablero(int fils, int cols){
+	/* Reserva la memoria para una matriz de casillas
+	** (tablero de fils x cols) y la devuelve en su nombre */
 
 	tCasilla ** matriz;
 	int i;
@@ -522,6 +579,8 @@ static tCasilla ** generarMatrizTablero(int fils, int cols){
 }
 
 static void copiarTablero(tTablero * tablero){
+	/* Copia el contenido del tablero principal
+	** al auxiliar 	*/
 	int i, j;
 	for(i=0; i<tablero->filas ; i++)
 		for(j=0; j<tablero->cols ; j++)
@@ -541,6 +600,8 @@ static void intercambiarTableros(tTablero * tablero){
 }
 
 static void rellenarTablero(tTablero * tablero){
+	/* Rellena el tablero con la disposicion inicial */
+
 	int i,j;
 	int postCentral=0;
 	for(i=0; i<tablero->filas ; i++){
@@ -578,7 +639,9 @@ static void rellenarTablero(tTablero * tablero){
 }
 
 static void liberarTodo(tCasilla ** matriz, int n){
-	
+	/* Libera la memoria reservada para una matriz 
+	** de casillas (tablero) */	
+
 	int i;
 	for(i=0; i<n ; i++)
 		free(matriz[i]);
@@ -588,16 +651,27 @@ static void liberarTodo(tCasilla ** matriz, int n){
 }
 
 static void limpiarTocadas(tTablero * tablero){
+	/* Las casillas tocadas en una cadena
+	** deben ser puestas en LIBRE antes de hacer
+	** el chequeo general sobre el tablero, ya que la
+	** condicion de TOCADA afecta al algoritmo de jugadaObligada,
+	** que se utiliza para controlar si hay jugadas obligadas 
+	** en el siguiente turno, o si se entra al estado de Paika */
+
 	int i,j;
 	for(i=0; i<tablero->filas ; i++)
 		for(j=0; j<tablero->cols ; j++)
 			if(tablero->matriz[i][j].estado == TOCADA)
-				tablero->matriz[i][j].estado = VACIO;
+				tablero->matriz[i][j].estado = LIBRE;
 }
 
 static void actualizarTablero(tPartida partida, tMovimiento * mov){
+	/* Recorre el tablero en la direccion del movimiento
+	** y cambia las casillas del enemigo por VACIO hasta encontrar
+	** una que tenga un ocupante distinto del enemigo, o se vaya del 
+	** rango del tablero */
 
-	tTablero * tablero = &partida->tablero;
+	tTablero * tablero = &partida->tablero; 
 	int i, j;
 	int dirFil, dirCol;
 	int fini, cini;
@@ -634,7 +708,8 @@ static void actualizarTablero(tPartida partida, tMovimiento * mov){
 }
 
 static void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direccion){
-
+	/* Devuelve el incremento en fila y columna para una iteracion
+	** que quiera recorrer el tablero en una direccion determinada*/
  switch(direccion){
                 case N: *dirFil=-1;
                         *dirCol=0;
@@ -668,6 +743,10 @@ static void incrementoSegunDir(int * dirFil, int *dirCol, enum tDireccion direcc
 
 static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino){
 
+	/* Devuelve la direccion que lleva un movimiento
+	** con las coordenadas de origen y destino que se pasan 
+	** como parametro  */
+
 	enum tDireccion direccion;
 	char fo=origen.fil;
 	char co=origen.col;
@@ -698,8 +777,13 @@ static enum tDireccion direccionDestino(tCoordenada origen, tCoordenada destino)
 }
 
 static int meCapturan(const tTablero *tablero, tCoordenada posicion, int jugador){
+	/* Devuelve un booleano indicando si una ficha del color <<jugador>> 
+	** esta amenazada desde la coordenada <<posicion>>, es decir, que es
+	** capturada en el turno del oponente estando alli */
 
 	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
+	/* dirsPosibles marca hasta donde se recorrera el vector de direcciones i
+	** para el chequeo. Si la casilla es debil, no se chequean las diagonales*/
 	int dirsPosibles = tablero->matriz[posicion.fil][posicion.col].tipo == FUERTE ? 8:4;
 	int i, dirFil, dirCol;
 	enum tDireccion dir;
@@ -710,13 +794,20 @@ static int meCapturan(const tTablero *tablero, tCoordenada posicion, int jugador
 		dir = direcciones[i];
 		incrementoSegunDir(&dirFil, &dirCol, dir);
 		
-		/*Las casillas que pueden comerme por approach o widthraw en el proximo turno*/
-		adyacente.fil = posicion.fil + dirFil;
-		adyacente.col= posicion.col + dirCol;
-		siguienteAdy.fil = adyacente.fil + dirFil;
+		/*Las casillas que pueden comerme por approach o widthrawal en el proximo turno,
+		** en la direccion dir */
+		adyacente.fil = posicion.fil + dirFil; /* Amenaza por widthdrawal */
+		adyacente.col= posicion.col + dirCol; 
+
+		siguienteAdy.fil = adyacente.fil + dirFil; /* Amenaza por approach */
 		siguienteAdy.col = adyacente.col + dirCol;
 
-		
+		 /* Se chequean adyacente y siguienteAdy para comprobar  que esten dentro del tablero.
+		 ** La captura por withdrawal moveria de adyacente a siguienteAdy, por lo
+		 ** tanto para el widthdrawal ambos deben estar en el tablero.
+		 ** Para el approach, siguienteAdy debe ser una casilla valida, y por lo tanto
+		 ** adyacente tambien.
+		 */
 		if(!fueraDeRango(tablero, adyacente.fil, adyacente.col) 
 			&& !fueraDeRango(tablero, siguienteAdy.fil, siguienteAdy.col)){
 
@@ -741,11 +832,10 @@ static int hayComida (int jugador, const tTablero *tablero, tCoordenada origen, 
 
 	/* Devuelve el tipo de captura posible segun el movimiento que quiera realizar el usuario
 	** (direccion del movimiento desde de casilla origen). Si no encuentra, devuelve NINGUNO. 
-	** Si la casilla a la que se quiere mover esta ocupada, devuelve NINGUNO (no devuelve error)
- 	** Esto es porque si se me llama de validarMovimiento() esto ya esta validado,
- 	** y si se me llama de paika() me interesa solo si se puede o no hacer el movimiento, 
-	** no si el usuario ingreso algo valido */
-	
+	** Si la casilla a la que se quiere mover esta ocupada, devuelve NINGUNO (no devuelve error);
+	** en definitiva no puede comer moviendose alli, y eso ya viene validado desde validarMovimiento
+	*/	
+
 	int fdA, fdW, cdA, cdW;
 	int fueraDeRangoA, fueraDeRangoW;
 	char fo = origen.fil;
@@ -758,9 +848,9 @@ static int hayComida (int jugador, const tTablero *tablero, tCoordenada origen, 
 	
 	incrementoSegunDir(&dirFil, &dirCol, direccion);
 	
-	fdA=fo+2*dirFil; /*Fila de la casilla a capturar por approach */
+	fdA=fo+2*dirFil; /*Fila de la casilla a capturar por approach (target) */
 	cdA=co+2*dirCol; /*Columna*/
-	fdW=fo-dirFil; /*Fila de la casilla a capturar por withdrawal */
+	fdW=fo-dirFil; /*Fila de la casilla a capturar por withdrawal (target)*/
 	cdW=co-dirCol; /*Columna*/
 
 	/* Reviso si los casilleros que tienen las fichas a capturar existen, y si la casilla a moverse esta vacia.
@@ -784,7 +874,7 @@ static int hayComida (int jugador, const tTablero *tablero, tCoordenada origen, 
 		}
 
         if (hayAppr && hayWithdr)
-                captura=AMBIGUO;
+                captura=AMBIGUO; /* Podrian ser las dos */
         else if (hayAppr)
                 captura=APPROACH;
         else if (hayWithdr)
@@ -796,7 +886,12 @@ static int hayComida (int jugador, const tTablero *tablero, tCoordenada origen, 
 }
 
 static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
-	
+	/* Valida todos los errores posibles de la jugada que le pasan
+	** En caso de error, lo devuelve. En caso de que no haya error,
+	** devuelve en movimiento->tipoMov el tipo de captura posibile 
+	** (resuelve la ambiguedad en el caso que pueda). Si no puede
+	** resolver la ambiguedad, devuelve AMBIGUO */
+		
 	int jugador = partida->jugador;
 	tTablero * tablero = &partida->tablero;
 	int jugada, aux;
@@ -854,7 +949,10 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 	return jugada; /* Devuelve WITHDRAW, APPROACH o AMBIGUO si no se entra al ultimo if*/
 }
 
+
 static int jugadaObligada(const tPartida partida, int jugador, tCoordenada origen){
+	/* Devuelve un booleano, verdadero si desde la coordenada origen 
+	** el jugador puede (y por lo tanto debe) realizar una captura */
 
 	tTablero * tablero = &partida->tablero;
 	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
@@ -871,7 +969,7 @@ static int jugadaObligada(const tPartida partida, int jugador, tCoordenada orige
 		if(destino.fil<(tablero->filas) && destino.fil>=0 && destino.col<(tablero->cols) && destino.col>=0){
 
 		if(tablero->matriz[destino.fil][destino.col].estado != TOCADA && direcciones[dir] != partida->direccionPrevia)
-		 /*Solo chequeo si hay comida si no visite esa casilla antes y no debo ir en la misma dirección de antes */
+		 /*Solo chequeo si hay comida si no visite esa casilla antes y no es la misma dirección de antes */
 			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
 				return 1; /*Debe capturar esa pieza la proxima jugada */
 		}

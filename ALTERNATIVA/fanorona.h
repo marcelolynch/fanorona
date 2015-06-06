@@ -48,6 +48,7 @@
 ** no esta especificado. 
 ** AMBIGUO es devuelto por mover() cuando la jugada es ambigua
 */
+
 #define NINGUNO		0
 #define WITHDRAWAL 	1
 #define APPROACH 	2
@@ -56,6 +57,14 @@
 
 typedef int tCaptura;
 
+
+/* 
+** ESTRUCTURAS PARA MOVIMIENTO
+**
+** La funcion mover recibira 
+** las coordenadas de movimiento 
+** en una estructura tMovimiento 
+*/
 typedef struct {
 	int fil;
 	int col;
@@ -68,11 +77,11 @@ typedef struct {
 } tMovimiento;
 
 
+/* tFlag para flags puntuales */
 typedef signed char tFlag;
 
-/* Error generico: para especificos, tError*/ 
 
-/* Constantes que determinan el ocupante de una casilla */
+/* Constantes que determinan el ocupante (ficha) de una casilla */
 #define BLANCO 0
 #define NEGRO  1
 #define VACIO  2
@@ -116,7 +125,9 @@ tPartida generarPartida(int fils, int cols, int modo);
 tPartida cargarPartida(const char * nombre);
 
 
-
+/* Funcion eliminarPartida: 
+** libera toda la memoria reservada para la partida recibida */
+void eliminarPartida(tPartida partida);
 
 /* hayCadena: devuelve un booleano,
 ** verdadero si la jugada debe continuar
@@ -222,8 +233,6 @@ void cambiarTurno (tPartida partida);
 ** especificado en el string nombre que se recibe como paramentro
 */
 int guardarPartida(const tPartida partida, const char * nombre);
-
-
 
 
 #endif
