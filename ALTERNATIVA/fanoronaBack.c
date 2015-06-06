@@ -472,10 +472,7 @@ tPartida cargarPartida(const char * nombre){
 				partida->tablero.matriz[i][j].ocupante=NEGRO;
 				break;	
 				default:
-				liberarTodo(partida->tablero.matriz, partida->tablero.filas);
-				if(partida->modo == PVE)
-					liberarTodo(partida->tablero.matrizAuxiliar, partida->tablero.filas);
-
+				eliminarPartida(partida);	
 				return NULL;
 				break;
  			}

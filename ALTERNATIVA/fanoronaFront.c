@@ -281,6 +281,7 @@ int jugar(tPartida partida){
 		}
 	}
 
+	eliminarPartida(partida);
 	return hayGanador; /* si se salió por QUIT, hayGanador vale 0 */
 }
 
