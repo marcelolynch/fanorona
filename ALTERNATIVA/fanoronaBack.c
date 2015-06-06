@@ -188,9 +188,9 @@ int estadoJuego(const tPartida partida){
 
 
 			/* Voy a analiar si esta casilla esta en una posicion desfavorable 
-			** (bloqueada) en la proxima movida  es decir, si no puede capturar 
+			** (bloqueada) en la proxima movida: es decir, si no puede capturar 
 			** nada en la siguiente movida que haga, y que no importa donde se mueva
-			** alguien lo captura. Si todas las piezas (de ambos jugadores) cumplen 
+			** alguien lo captura. Si todas las piezas del jugador que va a jugar cumplen 
 			** con esto, el juego termina en empate. */
 			if(ocupante==jugador){
 				origen.fil = i;
