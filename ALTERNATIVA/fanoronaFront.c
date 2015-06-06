@@ -7,8 +7,9 @@
 #define STR_DIM 41 /* long del vector que se usará para guardar la entrada del usuario */
 #define LONG_SAVE 5 /* longitud del str "save " */
 #define MIN_STR 4
-#define MAX_NOM (STR_DIM - LONG_SAVE - 5) /* Maxima logitud para <filename>: se resta la longitud de "save " y -5 por el '\0' y para
-                                          ** saber si el usuario escribió más que el límite permitido */
+#define MAX_NOM (STR_DIM - LONG_SAVE - 5) 
+	/* Maxima logitud para <filename>: se resta la longitud de "save " y -5 por el '\0' y para
+	** saber si el usuario escribió más que el límite permitido */
 
 #define MIN_COORD 5 /* mínima longitud de string de coordenada válida que puede escribir el usuario */
 #define MAX_COORD 10  /* máxima longitud de string de coordenada válida que puede escribir el usuario */
@@ -379,7 +380,8 @@ int validarFmtMov (const char str[], tMovimiento *mov) {
 		mov->tipoMov = captura;
 	}
 
-	else if ( (captura = validarFmtCaptura(p)) != ERROR ) /* en esValido se guarda APPROACH WITHDRAWAL o ERROR */
+	else if ( (captura = validarFmtCaptura(p)) != ERROR )
+		 /* en captura se guarda APPROACH WITHDRAWAL o ERROR */
 		mov->tipoMov = captura;
 
 	if (captura != ERROR)
@@ -389,7 +391,8 @@ int validarFmtMov (const char str[], tMovimiento *mov) {
 }
 
 tCaptura validarFmtCaptura (const char str[]) {
-	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' ) || str[2] != ']' || str[3] != '\0')
+	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' )
+	    || str[2] != ']' || str[3] != '\0')
 		return ERROR;
 	return tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;
 }
@@ -436,9 +439,11 @@ int validarFmtNombre(char destino[], const char origen[], int longOrigen) {
 	int cantEspacios;
 	int longNombre;
 
-	nuevoNombre = salteaEspacios(origen, &cantEspacios); /* nuevoNombre apunta el primer caracter distinto de espacio */
+	nuevoNombre = salteaEspacios(origen, &cantEspacios); 
+	/* nuevoNombre apunta el primer caracter distinto de espacio */
 
-	longNombre = longOrigen - cantEspacios; /* longitud del nombre; los espacios iniciales se desestiman */
+	longNombre = longOrigen - cantEspacios; 
+	/* longitud del nombre; los espacios iniciales se desestiman */
 
 	if (longNombre >= 1 && longNombre <= MAX_NOM) {
 		strcpy(destino, nuevoNombre);
@@ -457,7 +462,9 @@ tFlag leerSN(void) {
 	do {
 		printf("Ingrese S o N > ");
 
-		leerLinea(str, 3); /* dimensión 3, pues si se ingresa más de S o N str[1] sería distinto de '\0' */
+		leerLinea(str, 3); 
+		/* dimensión 3, pues si se ingresa más de S o N str[1] sería distinto de '\0' */
+		
 		c = toupper(str[0]);
 	} while( (c != 'S' && c!= 'N') || str[1] != '\0');
 	
@@ -473,7 +480,9 @@ void pedirNombre (char nombre[]) {
 
 	do {
 		printf(" > ");
-		imprimirErrorFmt(esValido); /* en una primera instancia no imprime nada, pues esValido es mayor o igual a 0*/
+		imprimirErrorFmt(esValido);
+		 /* en una primera instancia no imprime nada, pues esValido es mayor o igual a 0*/
+		
 		n = leerLinea(str, STR_DIM);
 		esValido = validarFmtNombre (nombre, str, n);
 	} while (esValido < 0);
@@ -502,7 +511,8 @@ void imprimirTablero ( tPartida partida ){
 				}
 				else
 				{	if ( consultarTipo(partida, i, j)==DEBIL)
-						printf("%-4c", tolower( idColor[ consultarOcupante(partida,i,j) ] )); /*BLANCO=0, NEGRO=1, VACIO=2*/
+					   printf("%-4c", tolower( idColor[ consultarOcupante(partida,i,j) ] ));
+										 /*BLANCO=0, NEGRO=1, VACIO=2*/
 					else 
 						printf("%-4c", idColor[ consultarOcupante(partida, i, j) ]);
 				}
@@ -513,7 +523,8 @@ void imprimirTablero ( tPartida partida ){
 }	
 
 void imprimirMov (tMovimiento * mov) {
-	printf("\n %d,%d -> %d,%d", mov->coordOrig.fil+1, mov->coordOrig.col+1, mov->coordDest.fil+1, mov->coordDest.col+1);
+	printf("\n %d,%d -> %d,%d", mov->coordOrig.fil+1, mov->coordOrig.col+1, 
+				    mov->coordDest.fil+1, mov->coordDest.col+1);
 	return;
 }
 
@@ -529,14 +540,16 @@ tMovimiento pedirCadena (tPartida partida) {
 	origenCadena = consultarOrigenCadena(partida);
 	fo = origenCadena.fil+1;
 	co = origenCadena.col+1;
-	/* sumamos 1 a las coordenadas, pues origenCadena va de 0 fil/col-1, pero la función de validar formato lee de 1 a fil */ 
+	/* sumamos 1 a las coordenadas, pues origenCadena va de 0 fil/col-1, 
+	** pero la función de validar formato lee de 1 a fil */ 
 	
 	printf("\n¡Puede encadenar una movimiento!\n");
 	printf("Ingrese solo la coordenada de la casilla a la que desea moverse y el tipo de captura si es necesario.\n");
 	printf("Se imprimirá su actual casilla de origen.\n");
 
 	do {
-		imprimirErrorFmt(esValido); /* en una primer instancia no imprimirá nada, pues esValido es mayor a 0 */
+		imprimirErrorFmt(esValido); 
+		/* en una primer instancia no imprimirá nada, pues esValido es mayor a 0 */
 
 		printf(" > M [%d,%d]", fo, co);
 
