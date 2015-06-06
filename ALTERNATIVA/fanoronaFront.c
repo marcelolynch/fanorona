@@ -189,7 +189,7 @@ int main(void){
 		case EMPATE: printf("\a\n\n\t===========EMPATE===========\n\n"); break;
 		case GANADOR_NEGRO: printf("\a\n\n\t==========GANADOR: NEGRO===========\n\n"); break;
 	}
-
+	eliminarPartida(partida);
 	return 0;
 
 }
@@ -281,7 +281,6 @@ int jugar(tPartida partida){
 		}
 	}
 
-	eliminarPartida(partida);
 	return hayGanador; /* si se salió por QUIT, hayGanador vale 0 */
 }
 
