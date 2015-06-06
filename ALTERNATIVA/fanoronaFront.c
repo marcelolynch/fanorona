@@ -28,19 +28,20 @@ enum tErrorFmt {ERR_FMT=-120, /*Error de formato*/
         	ERR_FMT_MOV2}; /* Error en el formato al especificar captura */
 
 
+/* jugar controla el flujo del juego y devuelve
+** el ganador o 0 en caso de QUIT */
 int jugar(tPartida partida);
 
 /* FUNCIONES QUE LEEN ENTRADA */
 
-void pedirNombre (char nombre[]);
 void pedirDimensiones(int * filas, int * columnas);
 
 /* leerLinea guarda los dim-1 primeros caracteres 
 ** ingresados por el usuario o hasta \n en str[]. Coloca '\0' al final.
 ** Borra el buffer y devuelve lo mismo que devolvería strlen.
 ** Es por esto que se usan vectores de tamaño mayor de lo 
-** necesario, a la hora de validar para así poder 
-** evaluar si el usuario ingresó más información de la requerida */
+** necesario a la hora de validar formatos para así poder 
+** evaluar si el usuario ingresó más información de la requerida. */
 int leerLinea(char str[], int dim);
 
 /* pedirJugada llama a leerLinea y validarFmtLinea.
@@ -50,7 +51,7 @@ int leerLinea(char str[], int dim);
 enum tJugada pedirJugada(tMovimiento *mov, char *nombre);
 
 /* pedirCaptura pide al usuario ingresar [w] o [a].
-** Utilizada en casos donde el movimiento sea ambiguo */
+** Utilizada en casos donde el movimiento sea ambiguo. */
 tCaptura pedirCaptura (void);
 
 /* pedirCadena pide al usuario las coordenadas de destino,
@@ -58,12 +59,20 @@ tCaptura pedirCaptura (void);
 ** éste se encuentre en medio de un encadenamiento. 
 ** Llama a sprintf para así poder llamar a validarFmtMov 
 ** pasandole string con formato adecuado al de un 
-** movimiento regular */
+** movimiento regular. */
 tMovimiento pedirCadena (tPartida partida);
+
+/* pedirNombre llama a leerLinea y validarFmtNombre.
+** Sigue pidiendo un nombre mientras este sea inválido e 
+** imprime el correspondiente mensaje de error.*/
+void pedirNombre (char nombre[]);
 
 /* leerSN pide al usuario ingresar S (si) o N (no).
 ** Devuelve 1 o 0 respectivamente. */
 tFlag leerSN(void);
+
+
+/* FUNCIONES QUE VALIDAN FORMATO */
 
 /* validarFmtLinea valida si se ingresó una jugada 
 ** con formato valido. Llama a validarFmtMov en caso de que
@@ -71,42 +80,47 @@ tFlag leerSN(void);
 ** en caso de que pueda ser un nombre. Undo y quit se validan
 ** en validarFmtLinea directamente.
 ** Devuelve el tipo de jugada o el error correspondiente.
-** mov y nombre se usan únicamente como parámetros de salida */
+** mov y nombre se usan únicamente como parámetros de salida. */
 int validarFmtLinea (char str[], int dim, tMovimiento *mov, char *nombre);
+
+/* validarFmtMov valida que str[] tenga un formato de movimiento válido
+** y guarda en mov dichos valores. Devuelve MOV o el error correspondiente. */
+int validarFmtMov (const char str[], tMovimiento *mov);
+
+/* validarFmtCoord valida que str[] sea de la forma [f,c] siendo f y c 
+** números que representan una fila y una columna del tablero respectivamente.
+** Devuelve la dirección al caracter siguiente al corchete que cierra 
+** o NULL en caso de un error de formato o que las coordenadas no se encuentren 
+** entre MIN_DIM y MAX_DIM. */
+const char *validarFmtCoord (const char str[], tCoordenada *coord);
 
 /* validarFmtCaptura valida que el string sea de la forma 
 ** [c] siendo c = 'w', 'W', 'a' o 'A' y que además haya un '\0'
 ** inmediatamente luego del ']' */
 tCaptura validarFmtCaptura (const char str[]);
 
-/* validarFmtMov valida que str[] tenga un formato de movimiento válido
-** y guarda en mov dichos valores. Devuelve MOV o el error correspondiente. */
-int validarFmtMov (const char str[], tMovimiento *mov);
-
 /* validarFmtNombre guarda en destino[] el nombre recibido en origen[] 
 ** y devuelve SAVE si es válido o el error correspondiente. 
 ** Se considera válido a todo nombre que no esté compuesto únicamente
-** por espacios y que no exceda el límite de longitud de nombre permitido MAX_NOM
+** por espacios y que no exceda el límite de longitud de nombre permitido MAX_NOM.
 ** longOrigen es la longitud del str origen[] (strlen de origen). */
 int validarFmtNombre(char destino[], const char origen[], int longOrigen); 
 
-/* validarFmtCoord valida que str[] sea de la forma [f,c] siendo f y c 
-** números que representan una fila y una columna del tablero respectivamente.
-** Devuelve la dirección al caracter siguiente al corchete que cierra 
-** o NULL en caso de un error de formato o que las coordenadas no se encuentren 
-** entre MIN_DIM y MAX_DIM */
-const char *validarFmtCoord (const char str[], tCoordenada *coord);
-
 /* salteaEspacios devuelve la dirección del primer caracter distinto de espacio
-** en str[] y la cantidad de espacios salteados en cantEspacios */
+** en str[] y la cantidad de espacios salteados en cantEspacios. */
 const char *salteaEspacios (const char str[], int *cantEspacios);
 
-void imprimirTablero ( tPartida partida );
-void imprimirError(int error);
+
+/* FUNCIONES QUE IMPRIMEN A PANTALLA */
+
+void imprimirTablero (const tPartida partida );
+void imprimirMov (const tMovimiento * mov);
 void imprimirErrorFmt(enum tErrorFmt error);
-void imprimirMov (tMovimiento * mov);
+void imprimirError(int error);
 
 
+/* main crea la partida según las especificaciones del usuario 
+** y llama a jugar con dicha partida. */
 int main(void){
 	
 	int opcion;
@@ -328,204 +342,19 @@ enum tJugada pedirJugada(tMovimiento *mov, char *nombre) {
 	return jugada;
 }
 
-int validarFmtLinea (char str[], int dim, tMovimiento *mov, char *nombre) {
-	tFlag jugada = ERR_FMT;
+tCaptura pedirCaptura (void) {
+	char str[5];
+	int tipoCaptura;
 
-	if (str[0] != 'M') /* ignora si la primer letra es mayúscula o minúscula excepto si es M, pues el movimiento se llama con M */
-		str[0] = tolower(str[0]);
-
-	if (dim == MIN_STR && str[0] != 'M') {
-		if (strcmp(str, "quit") == 0)
-			jugada = QUIT;
-		else if (strcmp(str, "undo") == 0)
-			jugada = UNDO;
-	}
-
-	else if (dim > LONG_SAVE && strncmp(str, "save ", LONG_SAVE) == 0)
-		jugada = validarFmtNombre (nombre, str+LONG_SAVE, dim-LONG_SAVE); /*str+LONG_SAVE es la dirección en donde comienza el nombre
-										  ** y dim-LONG_SAVE es la longitud de dicho nombre */
-
-	else if (dim <= MAX_DIM) /* es un posible movimiento */
-		jugada = validarFmtMov (str, mov);
-
-	return jugada;
-}
-
-const char *salteaEspacios (const char str[], int *cantEspacios) {
-	*cantEspacios = 0;
-	while (isspace(*str)) {
-		str++;
-		(*cantEspacios)++;
-	}
-	return str;
-}
-
-int validarFmtMov (const char str[], tMovimiento *mov) {
-	const char *p;
-	tCaptura captura;
-
-	if (str[0] != 'M' || str[1] != ' ')
-		return ERR_FMT;
-
-	p = &str[2]; /* direccion del supuesto primer corchete '[' */
-
-	p = validarFmtCoord(p, &(mov->coordOrig));
-	p = validarFmtCoord(p, &(mov->coordDest));
-
-	if (p == NULL)
-		return ERR_FMT_MOV1;
-
-	if (*p == '\0') { /* se ingresó un movimiento sin aclaración de captura */
-		captura = NINGUNO;
-		mov->tipoMov = captura;
-	}
-
-	else if ( (captura = validarFmtCaptura(p)) != ERROR )
-		 /* en captura se guarda APPROACH WITHDRAWAL o ERROR */
-		mov->tipoMov = captura;
-
-	if (captura != ERROR)
-		return MOV;
-
-	return ERR_FMT_MOV2; /* se introdujo mal el tipo de captura unicamente */
-}
-
-tCaptura validarFmtCaptura (const char str[]) {
-	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' )
-	    || str[2] != ']' || str[3] != '\0')
-		return ERROR;
-	return tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;
-}
-
-const char *validarFmtCoord (const char str[], tCoordenada *coord) {
-	/* devuelve la dirección siguiente al último carácter leído o NULL en caso de error. Modifica coord */
-	int num=0;
-	int i, c, filAux;
-	const char *p = str;
-	tFlag estado=OK, esPrimerComa=1, seEscribioNum=0;
-
-	if (p == NULL || p[0] != '[')
-		return NULL;
-
-	for (i=1; estado != ERROR && (c=p[i])!=']' && c!='\0'; i++) {
-		if (isdigit(c)) {
-			num = num * 10 + c - '0';
-			seEscribioNum = 1;
-			if (num > MAX_DIM) /* si num es mayor a la máxima dimensión de tablero permitida */
-				estado = ERROR;
-		}
-		else if (c == ',' && esPrimerComa) {
-			filAux = num;
-			num = 0;
-			esPrimerComa = 0;
-			seEscribioNum = 0;
-		}
-		else
-			estado = ERROR;
-
-	}
-	if (estado == ERROR || c == '\0' || esPrimerComa || !seEscribioNum)
-		return NULL;
-
-	coord->fil = filAux-1; /* se resta 1 porque en las funciones del back se a cuenta desde 0 a fil-1*/
-	coord->col = num-1;
-
-	p = &p[++i]; /* direccion del carácter siguiente al ']' */
-	return p;
-}
-
-int validarFmtNombre(char destino[], const char origen[], int longOrigen) {
-	const char *nuevoNombre;
-	int cantEspacios;
-	int longNombre;
-
-	nuevoNombre = salteaEspacios(origen, &cantEspacios); 
-	/* nuevoNombre apunta el primer caracter distinto de espacio */
-
-	longNombre = longOrigen - cantEspacios; 
-	/* longitud del nombre; los espacios iniciales se desestiman */
-
-	if (longNombre >= 1 && longNombre <= MAX_NOM) {
-		strcpy(destino, nuevoNombre);
-		return SAVE;
-	}
-
-	if (longNombre == 0)
-		return ERR_FMT_SAVE1; /* se ingresaron solo espacios como nombre */
-	return ERR_FMT_SAVE2; /* la longitud del nombre es mayor de lo permitida */
-}
-
-tFlag leerSN(void) {
-	char c;
-	char str[3];
+	printf("Especifique algún tipo de captura, pues el movimiento que quiere realizar admite tanto captura por acercamiento como por alejamiento.\n");
 
 	do {
-		printf("Ingrese S o N > ");
-
-		leerLinea(str, 3); 
-		/* dimensión 3, pues si se ingresa más de S o N str[1] sería distinto de '\0' */
-		
-		c = toupper(str[0]);
-	} while( (c != 'S' && c!= 'N') || str[1] != '\0');
+		printf("Ingrese [w] o [a] > ");
+		leerLinea(str, 5);
+		tipoCaptura = validarFmtCaptura (str);
+	} while (tipoCaptura == ERROR);
 	
-	return c == 'S';
-}
-
-void pedirNombre (char nombre[]) {
-	char str[STR_DIM];
-	int n;
-	tFlag esValido = 1;
-
-	printf("Escriba el nombre con el que quiere guardar su juego. (Max %d caracteres)\n", MAX_NOM);
-
-	do {
-		printf(" > ");
-		imprimirErrorFmt(esValido);
-		 /* en una primera instancia no imprime nada, pues esValido es mayor o igual a 0*/
-		
-		n = leerLinea(str, STR_DIM);
-		esValido = validarFmtNombre (nombre, str, n);
-	} while (esValido < 0);
-
-	return;
-}
-
-void imprimirTablero ( tPartida partida ){
-	int i, j;
-	static char idColor[]={'B', 'N', 'O'}; /*BLANCO, NEGRO, VACIO*/
-
-	for(i=-1; i< numFilas(partida) ; i++)
-		{	putchar('\n');
-			if(i<0)
-				printf("\t\t\t");
-			else
-				printf("\t\t\t%d\t",i<0?' ':i+1);
-			for(j=0; j< numCols(partida) ; j++)
-			{	if(i==-1)
-				{	if(j==0)
-						putchar('\t');
-					printf("%-4d",j+1);
-
-					if( j== numCols(partida) -1)
-						putchar('\n');
-				}
-				else
-				{	if ( consultarTipo(partida, i, j)==DEBIL)
-					   printf("%-4c", tolower( idColor[ consultarOcupante(partida,i,j) ] ));
-										 /*BLANCO=0, NEGRO=1, VACIO=2*/
-					else 
-						printf("%-4c", idColor[ consultarOcupante(partida, i, j) ]);
-				}
-			}
-		}
-		putchar('\n');
-	return;		
-}	
-
-void imprimirMov (tMovimiento * mov) {
-	printf("\n %d,%d -> %d,%d", mov->coordOrig.fil+1, mov->coordOrig.col+1, 
-				    mov->coordDest.fil+1, mov->coordDest.col+1);
-	return;
+	return tipoCaptura;
 }
 
 tMovimiento pedirCadena (tPartida partida) {
@@ -565,6 +394,235 @@ tMovimiento pedirCadena (tPartida partida) {
 	} while (esValido < 0); /* si es menor a cero es error */
 
 	return nuevoMov;
+}
+
+void pedirNombre (char nombre[]) {
+	char str[STR_DIM];
+	int n;
+	tFlag esValido = 1;
+
+	printf("Escriba el nombre con el que quiere guardar su juego. (Max %d caracteres)\n", MAX_NOM);
+
+	do {
+		printf(" > ");
+		imprimirErrorFmt(esValido);
+		 /* en una primera instancia no imprime nada, pues esValido es mayor o igual a 0*/
+		
+		n = leerLinea(str, STR_DIM);
+		esValido = validarFmtNombre (nombre, str, n);
+	} while (esValido < 0);
+
+	return;
+}
+
+tFlag leerSN(void) {
+	char c;
+	char str[3];
+
+	do {
+		printf("Ingrese S o N > ");
+
+		leerLinea(str, 3); 
+		/* dimensión 3, pues si se ingresa más de S o N str[1] sería distinto de '\0' */
+		
+		c = toupper(str[0]);
+	} while( (c != 'S' && c!= 'N') || str[1] != '\0');
+	
+	return c == 'S';
+}
+
+int validarFmtLinea (char str[], int dim, tMovimiento *mov, char *nombre) {
+	tFlag jugada = ERR_FMT;
+
+	if (str[0] != 'M') /* ignora si la primer letra es mayúscula o minúscula excepto si es M, pues el movimiento se llama con M */
+		str[0] = tolower(str[0]);
+
+	if (dim == MIN_STR && str[0] != 'M') {
+		if (strcmp(str, "quit") == 0)
+			jugada = QUIT;
+		else if (strcmp(str, "undo") == 0)
+			jugada = UNDO;
+	}
+
+	else if (dim > LONG_SAVE && strncmp(str, "save ", LONG_SAVE) == 0)
+		jugada = validarFmtNombre (nombre, str+LONG_SAVE, dim-LONG_SAVE); /*str+LONG_SAVE es la dirección en donde comienza el nombre
+										  ** y dim-LONG_SAVE es la longitud de dicho nombre */
+
+	else if (dim <= MAX_DIM) /* es un posible movimiento */
+		jugada = validarFmtMov (str, mov);
+
+	return jugada;
+}
+
+int validarFmtMov (const char str[], tMovimiento *mov) {
+	const char *p;
+	tCaptura captura;
+
+	if (str[0] != 'M' || str[1] != ' ')
+		return ERR_FMT;
+
+	p = &str[2]; /* direccion del supuesto primer corchete '[' */
+
+	p = validarFmtCoord(p, &(mov->coordOrig));
+	p = validarFmtCoord(p, &(mov->coordDest));
+
+	if (p == NULL)
+		return ERR_FMT_MOV1;
+
+	if (*p == '\0') { /* se ingresó un movimiento sin aclaración de captura */
+		captura = NINGUNO;
+		mov->tipoMov = captura;
+	}
+
+	else if ( (captura = validarFmtCaptura(p)) != ERROR ) /* en captura se guarda APPROACH, WITHDRAWAL o ERROR */
+		mov->tipoMov = captura;
+
+	if (captura != ERROR)
+		return MOV;
+
+	return ERR_FMT_MOV2; /* se introdujo mal el tipo de captura unicamente */
+}
+
+const char *validarFmtCoord (const char str[], tCoordenada *coord) {
+	/* devuelve la dirección siguiente al último carácter leído o NULL en caso de error. Modifica coord */
+	int num=0;
+	int i, c, filAux;
+	const char *p = str;
+	tFlag estado=OK, esPrimerComa=1, seEscribioNum=0;
+
+	if (p == NULL || p[0] != '[')
+		return NULL;
+
+	for (i=1; estado != ERROR && (c=p[i])!=']' && c!='\0'; i++) {
+		if (isdigit(c)) {
+			num = num * 10 + c - '0';
+			seEscribioNum = 1;
+			if (num > MAX_DIM)
+				estado = ERROR;
+		}
+		else if (c == ',' && esPrimerComa) {
+			filAux = num;
+			num = 0;
+			esPrimerComa = 0;
+			seEscribioNum = 0;
+		}
+		else
+			estado = ERROR;
+
+	}
+	if (estado == ERROR || c == '\0' || esPrimerComa || !seEscribioNum)
+		return NULL;
+
+	coord->fil = filAux-1; /* se resta 1 porque en las funciones del back se cuenta desde 0 a fil-1*/
+	coord->col = num-1;
+
+	p = &p[++i]; /* direccion del carácter siguiente al ']' */
+	return p;
+}
+
+tCaptura validarFmtCaptura (const char str[]) {
+	if (str[0] != '[' || ( tolower(str[1]) != 'w' && tolower(str[1]) != 'a' )
+	    || str[2] != ']' || str[3] != '\0')
+		return ERROR;
+	return tolower(str[1]) == 'w' ? WITHDRAWAL : APPROACH;
+}
+
+int validarFmtNombre(char destino[], const char origen[], int longOrigen) {
+	const char *nuevoNombre;
+	int cantEspacios;
+	int longNombre;
+
+	nuevoNombre = salteaEspacios(origen, &cantEspacios); 
+	/* nuevoNombre apunta el primer caracter distinto de espacio */
+
+	longNombre = longOrigen - cantEspacios; 
+	/* longitud del nombre; los espacios iniciales se desestiman */
+
+	if (longNombre >= 1 && longNombre <= MAX_NOM) {
+		strcpy(destino, nuevoNombre);
+		return SAVE;
+	}
+
+	if (longNombre == 0)
+		return ERR_FMT_SAVE1; /* se ingresaron solo espacios como nombre */
+	return ERR_FMT_SAVE2; /* la longitud del nombre es mayor de lo permitida */
+}
+
+const char *salteaEspacios (const char str[], int *cantEspacios) {
+	*cantEspacios = 0;
+	while (isspace(*str)) {
+		str++;
+		(*cantEspacios)++;
+	}
+	return str;
+}
+
+void imprimirTablero (const tPartida partida){
+	int i, j;
+	static char idColor[]={'B', 'N', 'O'}; /*BLANCO, NEGRO, VACIO*/
+
+	for(i=-1; i< numFilas(partida) ; i++)
+		{	putchar('\n');
+			if(i<0)
+				printf("\t\t\t");
+			else
+				printf("\t\t\t%d\t",i<0?' ':i+1);
+			for(j=0; j< numCols(partida) ; j++)
+			{	if(i==-1)
+				{	if(j==0)
+						putchar('\t');
+					printf("%-4d",j+1);
+
+					if( j== numCols(partida) -1)
+						putchar('\n');
+				}
+				else
+				{	if ( consultarTipo(partida, i, j)==DEBIL)
+					   printf("%-4c", tolower( idColor[ consultarOcupante(partida,i,j) ] ));
+										 /*BLANCO=0, NEGRO=1, VACIO=2*/
+					else 
+						printf("%-4c", idColor[ consultarOcupante(partida, i, j) ]);
+				}
+			}
+		}
+		putchar('\n');
+	return;		
+}	
+
+void imprimirMov (const tMovimiento * mov) {
+	printf("\n %d,%d -> %d,%d", mov->coordOrig.fil+1, mov->coordOrig.col+1, 
+				    mov->coordDest.fil+1, mov->coordDest.col+1);
+	return;
+}
+
+void imprimirErrorFmt(enum tErrorFmt error){
+	
+	if (error >= 0) /* no hay error */
+		return;
+
+	switch(error) {
+	case ERR_FMT: 
+		printf("\aError: no se introdujo un tipo de jugada válido.\n"); 
+		break;
+	case ERR_FMT_SAVE1: 
+		printf("\aError: no se introdujo un nombre válido; debe contener al menos un carácter distinto de espacio.\n"); 
+		break;
+	case ERR_FMT_SAVE2:
+		printf("\aError: se introdujo un nombre más largo de lo permitido.\n");
+		break;
+	case ERR_FMT_MOV1: 
+		printf("\aError: no se introdujo un movimiento con el formato adecuado o algúna coordenada es mayor de lo permitido.\n");
+		printf("El formato debe ser: M [Fo,Co][Fd,Cd][a/w] siendo la especificación de captura opcional en casos donde ésta no sea ambigua.\n");
+		break;
+	case ERR_FMT_MOV2: 
+		printf("\aError: no se especificó la captura correctamente.\n");
+		printf("La misma debe añadirse como [a] para approach o [w] para withdrawal inmediatamente seguido de la coordenada destino.\n");
+		break;
+	default: 
+		printf("\aError desconocido\n");
+		break;	
+
+	}
 }
 
 void imprimirError(int error) {
@@ -616,50 +674,4 @@ void imprimirError(int error) {
 		printf("\a\n\nError desconocido\n");
 		break;
 	}
-}
-
-
-void imprimirErrorFmt(enum tErrorFmt error){
-	
-	if (error >= 0) /* no hay error */
-		return;
-
-	switch(error) {
-	case ERR_FMT: 
-		printf("\aError: no se introdujo un tipo de jugada válido.\n"); 
-		break;
-	case ERR_FMT_SAVE1: 
-		printf("\aError: no se introdujo un nombre válido; debe contener al menos un carácter distinto de espacio.\n"); 
-		break;
-	case ERR_FMT_SAVE2:
-		printf("\aError: se introdujo un nombre más largo de lo permitido.\n");
-		break;
-	case ERR_FMT_MOV1: 
-		printf("\aError: no se introdujo un movimiento con el formato adecuado o algúna coordenada es mayor de lo permitido.\n");
-		printf("El formato debe ser: M [Fo,Co][Fd,Cd][a/w] siendo la especificación de captura opcional en casos donde ésta no sea ambigua.\n");
-		break;
-	case ERR_FMT_MOV2: 
-		printf("\aError: no se especificó la captura correctamente.\n");
-		printf("La misma debe añadirse como [a] para approach o [w] para withdrawal inmediatamente seguido de la coordenada destino.\n");
-		break;
-	default: 
-		printf("\aError desconocido\n");
-		break;	
-
-	}
-}
-
-tCaptura pedirCaptura (void) {
-	char str[5];
-	int tipoCaptura;
-
-	printf("Especifique algún tipo de captura, pues el movimiento que quiere realizar admite tanto captura por acercamiento como por alejamiento.\n");
-
-	do {
-		printf("Ingrese [w] o [a] > ");
-		leerLinea(str, 5);
-		tipoCaptura = validarFmtCaptura (str);
-	} while (tipoCaptura == ERROR);
-	
-	return tipoCaptura;
 }

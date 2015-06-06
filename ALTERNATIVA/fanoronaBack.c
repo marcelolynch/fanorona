@@ -132,7 +132,7 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 		partida->tablero.matriz[movimiento->coordOrig.fil][movimiento->coordOrig.col].estado=TOCADA;
 		partida->direccionPrevia = direccionDestino(movimiento->coordOrig, movimiento->coordDest); 
 
-		movimiento->tipoMov = captura; /* captura vale WITHDRAWAL o APPROACH */
+		movimiento->tipoMov = captura; /* captura vale WITHDRAWAL, APPROACH o NINGUNO (paika) */
 
 		actualizarTablero(partida, movimiento);
 
