@@ -924,7 +924,7 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 		return ERR_MOV_DEST; /* No puede mover porque la casilla no esta vacia */
 
 	if(tablero->matriz[fd][cd].estado==TOCADA)
-		return ERR_MOV_TOC;
+		return ERR_MOV_TOC; /* No puede mover a una casilla ya visitada en el turno */
 
 	if (partida->hayCadena && (fo != partida->origenCadena.fil || co != partida->origenCadena.col) )
 		/* Estamos en medio de un encadenamiento y pide mover una ficha que no debe */
