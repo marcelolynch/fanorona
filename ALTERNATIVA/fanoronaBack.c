@@ -127,7 +127,8 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 		/* si la jugada es ambigua, retorna hasta que se pase el movimiento completo */
 		return captura;
 	}
-	else if (captura == WITHDRAWAL || captura == APPROACH || captura == NINGUNO) { /* si no fue error */
+	else if (captura == WITHDRAWAL || captura == APPROACH || captura == NINGUNO) { 
+		/* Si no fue error */
 		/* Copia el tablero al auxiliar antes en el comienzo 
 		** del turno  del usuario y si juega vs Computadora*/
 		if (!(partida->hayCadena) && partida->modo == PVE && partida->jugador == BLANCO)
@@ -136,13 +137,15 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 		partida->tablero.matriz[movimiento->coordOrig.fil][movimiento->coordOrig.col].estado=TOCADA;
 		partida->direccionPrevia = direccionDestino(movimiento->coordOrig, movimiento->coordDest); 
 
-		movimiento->tipoMov = captura; /* captura vale WITHDRAWAL, APPROACH o NINGUNO (paika) */
+		movimiento->tipoMov = captura; 
+		/* captura vale WITHDRAWAL, APPROACH o NINGUNO (paika) */
 
 		actualizarTablero(partida, movimiento);
 
 		partida->hayCadena = 0; /* En principio se asume que no hay */
 
-		if (captura != NINGUNO) /* si no fue una movida PAIKA, busca una posible cadena */
+		if (captura != NINGUNO) 
+			/* si no fue una movida PAIKA, busca una posible cadena */
 			partida->hayCadena = jugadaObligada(partida, jugador, movimiento->coordDest);
 
 		if (partida->hayCadena) {
@@ -314,7 +317,7 @@ int calcularMovCompu(tMovimiento * mov, const tPartida  partida){
 
 static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCoordenada casillaOrig){
        	/* Rellena el vector movsPosibles con los posibles movimientos que puede
-	** realizar la computadora desde la casillaOrig  */
+		** realizar la computadora desde la casillaOrig  */
  
 	tTablero * tablero = &partida->tablero;
 	enum tDireccion direcciones[]={N,S,E,O,SE,SO,NE,NO};
@@ -324,7 +327,8 @@ static int aumentarPosibles(const tPartida partida, tVecMovs * movsPosibles, tCo
 	int tipoComida;
 	enum tDireccion dir;
 	
-	dirsPosibles = tablero->matriz[casillaOrig.fil][casillaOrig.col].tipo==FUERTE ? 8 : 4;
+	dirsPosibles = tablero->matriz[casillaOrig.fil][casillaOrig.col].tipo==FUERTE ?8:4;
+	/*Hasta donde recorrera el vector de direcciones: si es debil, solo N S E O */
 	
 	for(n=0; n<dirsPosibles ; n++){
 		dir = direcciones[n];
@@ -617,9 +621,9 @@ static void rellenarTablero(tTablero * tablero){
 		else if (i > tablero->filas/2)
 			tablero->matriz[i][j].ocupante= BLANCO;
 	
-		else if (i == tablero->filas/2 && j != tablero->cols/2) /*Fila central (menos casilla central) */
-		{	
-			if (j%2==0)
+		else if (i == tablero->filas/2 && j != tablero->cols/2){
+		/*Fila central (menos casilla central) */
+		if (j%2==0)
 				/*No hay simetria con respecto a la central; se invierte
 				**  la paridad del blanco/negro luego de la misma (postCentral) */
 				tablero->matriz[i][j].ocupante = postCentral ? BLANCO:NEGRO; 
@@ -627,7 +631,8 @@ static void rellenarTablero(tTablero * tablero){
 				tablero->matriz[i][j].ocupante = postCentral ? NEGRO:BLANCO;
 			
 		}
-		else{	/*Casilla central*/
+		else{
+			/*Casilla central*/
 			tablero->matriz[i][j].ocupante= VACIO;
 			postCentral=1; /*Relevante para colocar las otras piezas*/
 		}	
@@ -694,12 +699,15 @@ static void actualizarTablero(tPartida partida, tMovimiento * mov){
 		cini=mov->coordDest.col + dirCol;
 		}
 	tablero->matriz[mov->coordDest.fil][mov->coordDest.col].ocupante = jugador;
-	tablero->matriz[mov->coordOrig.fil][mov->coordOrig.col].ocupante = VACIO;  /*Movi la ficha*/
+	tablero->matriz[mov->coordOrig.fil][mov->coordOrig.col].ocupante = VACIO;  
+	/*Movi la ficha*/
 
 	i=fini;
 	j=cini;
-	while((i<(tablero->filas) && i>=0 && j<(tablero->cols) && j>=0) && tablero->matriz[i][j].ocupante==enemigo){
-		/*Mientras no me vaya del tablero y siga habiendo enemigos en la linea de captura*/
+	while((i<(tablero->filas) && i>=0 && j<(tablero->cols) && j>=0) 
+		  && tablero->matriz[i][j].ocupante==enemigo){
+		/* Mientras no me vaya del tablero y siga habiendo 
+		** enemigos en la linea de captura*/
 		tablero->matriz[i][j].ocupante = VACIO;
 		
 		i+=dirFil;
@@ -794,19 +802,20 @@ static int meCapturan(const tTablero *tablero, tCoordenada posicion, int jugador
 		dir = direcciones[i];
 		incrementoSegunDir(&dirFil, &dirCol, dir);
 		
-		/*Las casillas que pueden comerme por approach o widthrawal en el proximo turno,
-		** en la direccion dir */
+		/*Las casillas que pueden comerme por approach o widthrawal 
+		** en el proximo turno, en la direccion dir */
 		adyacente.fil = posicion.fil + dirFil; /* Amenaza por widthdrawal */
 		adyacente.col= posicion.col + dirCol; 
 
 		siguienteAdy.fil = adyacente.fil + dirFil; /* Amenaza por approach */
 		siguienteAdy.col = adyacente.col + dirCol;
 
-		 /* Se chequean adyacente y siguienteAdy para comprobar  que esten dentro del tablero.
-		 ** La captura por withdrawal moveria de adyacente a siguienteAdy, por lo
-		 ** tanto para el widthdrawal ambos deben estar en el tablero.
-		 ** Para el approach, siguienteAdy debe ser una casilla valida, y por lo tanto
-		 ** adyacente tambien.
+		 /* Se chequean adyacente y siguienteAdy para comprobar
+		 ** que esten dentro del tablero. La captura por withdrawal 
+		 ** moveria de adyacente a siguienteAdy, por lo tanto para el
+		 ** widthdrawal ambos deben estar en el tablero.
+		 ** Para el approach, siguienteAdy debe ser una casilla valida, 
+		 ** y por lo tanto adyacente tambien.
 		 */
 		if(!fueraDeRango(tablero, adyacente.fil, adyacente.col) 
 			&& !fueraDeRango(tablero, siguienteAdy.fil, siguienteAdy.col)){
@@ -830,10 +839,11 @@ static int meCapturan(const tTablero *tablero, tCoordenada posicion, int jugador
 
 static int hayComida (int jugador, const tTablero *tablero, tCoordenada origen, enum tDireccion direccion) { 
 
-	/* Devuelve el tipo de captura posible segun el movimiento que quiera realizar el usuario
-	** (direccion del movimiento desde de casilla origen). Si no encuentra, devuelve NINGUNO. 
-	** Si la casilla a la que se quiere mover esta ocupada, devuelve NINGUNO (no devuelve error);
-	** en definitiva no puede comer moviendose alli, y eso ya viene validado desde validarMovimiento
+	/* Devuelve el tipo de captura posible segun el movimiento que quiera 
+	** realizar el usuario(direccion del movimiento desde de casilla origen).
+	** Si no encuentra, devuelve NINGUNO. Si la casilla a la que se quiere mover 
+	** esta ocupada, devuelve NINGUNO (no devuelve error); en definitiva no puede comer moviendose alli, 
+	** (y ademas ya viene validado desde validarMovimiento).
 	*/	
 
 	int fdA, fdW, cdA, cdW;
@@ -861,27 +871,30 @@ static int hayComida (int jugador, const tTablero *tablero, tCoordenada origen, 
 	fueraDeRangoA = ( fueraDeRango(tablero, fdA,cdA) || fueraDeRango(tablero, fo+dirFil, co+dirCol)
 			|| tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO);
 	
-	fueraDeRangoW = ((fueraDeRango(tablero, fdW,cdW) || fueraDeRango(tablero, fo+dirFil, co+dirCol))
-			 || tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO);
+	fueraDeRangoW = ((fueraDeRango(tablero, fdW,cdW) 
+			  || fueraDeRango(tablero, fo+dirFil, co+dirCol))
+			  || tablero->matriz[fo+dirFil][co+dirCol].ocupante != VACIO);
 
-	if (!fueraDeRangoA && tablero->matriz[fdA][cdA].ocupante== enemigo)
-                /*El elemento de la matriz corresponde a la casilla a capturar por approach*/
-	       {hayAppr = 1;
-		}
-        if (!fueraDeRangoW && tablero->matriz[fdW][cdW].ocupante == enemigo)
-                /*El elemento de la matriz corresponde a la casilla a capturar por withdrawal*/
-                {hayWithdr = 1;
-		 
-		}
+	if (!fueraDeRangoA && tablero->matriz[fdA][cdA].ocupante == enemigo){
+    	/*El elemento de la matriz corresponde a la casilla a capturar por approach*/
+	       hayAppr = 1;
+	}
+    
+	if (!fueraDeRangoW && tablero->matriz[fdW][cdW].ocupante == enemigo){
+      /*El elemento de la matriz corresponde a la casilla a capturar por withdrawal*/
+        hayWithdr = 1;
+	}
 
-        if (hayAppr && hayWithdr)
-                captura=AMBIGUO; /* Podrian ser las dos */
-        else if (hayAppr)
-                captura=APPROACH;
-        else if (hayWithdr)
-                captura=WITHDRAWAL;
-        else
-                captura=NINGUNO;
+
+   	 if (hayAppr && hayWithdr)
+     	   captura=AMBIGUO; /* Podrian ser las dos */
+    	else if (hayAppr)
+		captura=APPROACH;
+    	else if (hayWithdr)
+		captura=WITHDRAWAL;
+	else
+		captura=NINGUNO;
+
 
 	return captura;
 }
@@ -909,8 +922,7 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 		/* No es valido el dato */
 		return ERR_PARAMS;
 	
-	if(fd < 0 || fo < 0 || co < 0 || cd < 0 || fo >= tablero->filas || fd >= tablero->filas 
-	   || co >= tablero->cols || cd >= tablero->cols)
+	if(fueraDeRango(tablero, fo, co) || fueraDeRango(tablero, fd, cd))
 		return ERR_MOV_RANGO; /*Fuera de limites del tablero*/
 
 	if(jugador != tablero->matriz[fo][co].ocupante)
@@ -922,7 +934,8 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 	if(tablero->matriz[fd][cd].estado==TOCADA)
 		return ERR_MOV_TOC; /* No puede mover a una casilla ya visitada en el turno */
 
-	if (partida->hayCadena && (fo != partida->origenCadena.fil || co != partida->origenCadena.col) )
+	if (partida->hayCadena 
+		&& (fo != partida->origenCadena.fil || co != partida->origenCadena.col) )
 		/* Estamos en medio de un encadenamiento y pide mover una ficha que no debe */
 		return ERR_MOV_CAD;
 
@@ -931,15 +944,18 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 	if(direccionMov == ERROR)
 		return ERR_MOV_NO_ADY; /*No es una direccion valida*/
 
-	if(tablero->matriz[fd][cd].tipo == DEBIL && (direccionMov > O)) /* NE, NO, SE, SO */  
+	if(tablero->matriz[fd][cd].tipo == DEBIL && (direccionMov > O)) 
+		/*Mayor que O (oeste) en el vector; NE, NO, SE, SO */
 		return ERR_MOV_DEBIL;
 
 	if(direccionMov == partida->direccionPrevia)
-		return ERR_MOV_DIR; /*No puede moverse en la misma direccion en la que venia moviendose */	
+		/*No puede moverse en la misma direccion en la que venia moviendose */
+		return ERR_MOV_DIR; 
 
 	if( (aux=hayComida(jugador, tablero, movimiento->coordOrig, direccionMov)) != NINGUNO
 	    || partida->hayPaika )
-		/*Solamente chequeo la situacion de Paika si no selecciono un movimiento donde pueda comer */
+		/*Solamente chequeo la situacion de Paika si no 
+		** selecciono un movimiento donde pueda comer */
 		jugada=aux;
 	else
 		return ERR_MOV_PAIKA;
@@ -949,7 +965,8 @@ static int validarMovimiento(tPartida partida, tMovimiento * movimiento) {
 		/*Si el jugador puede hacer ambas cosas pero ya eligio*/
 		jugada=movimiento->tipoMov;
 	
-	return jugada; /* Devuelve WITHDRAWAL, APPROACH o AMBIGUO si no se entra al ultimo if*/
+	return jugada; 
+	/* Devuelve WITHDRAWAL, APPROACH o AMBIGUO si no se entra al ultimo if*/
 }
 
 
@@ -969,7 +986,8 @@ static int jugadaObligada(const tPartida partida, int jugador, tCoordenada orige
 		destino.fil = origen.fil + dirFil;
 		destino.col = origen.col + dirCol;
 		
-		if(destino.fil<(tablero->filas) && destino.fil>=0 && destino.col<(tablero->cols) && destino.col>=0){
+		if(destino.fil<(tablero->filas) && destino.fil>=0 
+		  && destino.col<(tablero->cols) && destino.col>=0){
 
 		if(tablero->matriz[destino.fil][destino.col].estado != TOCADA 
 		   && direcciones[dir] != partida->direccionPrevia)
