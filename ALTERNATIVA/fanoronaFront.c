@@ -20,7 +20,6 @@
 /* Tipos posibles de jugada ingresadas por el usuario. START es para inicializar */
 enum tJugada {START=-1, QUIT, SAVE, UNDO, MOV};
  
-/* Se distinguen de los errores arrojados por el back-end, pero se usan de la misma manera */
 enum tErrorFmt {ERR_FMT=-120, /*Error de formato*/
 		ERR_FMT_SAVE1, /* Error sobre el nombre de savefile */
 		ERR_FMT_SAVE2, /* Error sobre longitud de nombre de savefile */

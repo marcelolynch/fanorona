@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/*============================================================================*/
 /* 
 ** MODOS DE JUEGO 
 ** Debe especificarse un modo de juego al comenzar la partida
@@ -13,7 +14,7 @@
 #define PVE 0 /* JUGADOR vs COMPUTADORA */
 #define PVP 1 /* DOS JUGADORES */
 
-
+/*============================================================================*/
 /*
 ** CODIGOS DE ERROR
 ** Los codigos de error empiezan desde -100 y <<siempre>> seran negativos.
@@ -41,8 +42,9 @@
 /* Fin codigos de error */
 #define OK 1
 
-/*
-** TIPOS DE CAPTURA
+/*=============================================================================*/
+
+/* TIPOS DE CAPTURA
 ** Para especificar en la estructura tMovimiento
 ** se utiliza APPROACH, WITHDRAWAL, o NINGUNO si
 ** no esta especificado. 
@@ -58,8 +60,9 @@
 typedef int tCaptura;
 
 
-/* 
-** ESTRUCTURAS PARA MOVIMIENTO
+/*=============================================================================*/
+
+/* ESTRUCTURAS PARA MOVIMIENTO
 **
 ** La funcion mover recibira 
 ** las coordenadas de movimiento 
@@ -80,6 +83,7 @@ typedef struct {
 /* tFlag para flags puntuales */
 typedef signed char tFlag;
 
+/*============================================================================*/
 
 /* Constantes que determinan el ocupante (ficha) de una casilla */
 #define BLANCO 0
@@ -102,9 +106,9 @@ typedef signed char tFlag;
 #define MIN_DIM 3 /* minima dimensión de tablero (fila o columna) permitida */
 #define MAX_DIM 19 /* máxima dimensión de tablero (fila o columna) permitida */
 
+/*============================================================================*/
 
-
-/* Tipo Abstracto de Datos: tPartida */
+/* TIPO ABSTRACTO DE DATOS: tPartida */
 typedef struct tJuego * tPartida;
 
 /* FUNCIONES PARA EL TAD: */
@@ -128,6 +132,13 @@ tPartida cargarPartida(const char * nombre);
 /* Funcion eliminarPartida: 
 ** libera toda la memoria reservada para la partida recibida */
 void eliminarPartida(tPartida partida);
+
+/*============================================================================*/
+
+/* Las funciones que siguen exigen que la partida que se recibe 
+** ya este inicialiada, sea por generarPartida o bien por cargarPartida */
+
+/* 1. FUNCIONES DE CONSULTA DE ESTADOS DE LA PARTIDA */
 
 /* hayCadena: devuelve un booleano,
 ** verdadero si la jugada debe continuar
@@ -167,7 +178,7 @@ int numCols(tPartida partida);
 
 
 
-/* FUNCIONES PARA EL DESARROLLOS DEL JUEGO */
+/* 2. FUNCIONES PARA EL DESARROLLOS DEL JUEGO */
 
 /*
 ** Funcion mover: recibe un puntero a tMovimiento con las coordenadas (indices de 0 a N-1)

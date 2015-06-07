@@ -57,7 +57,7 @@ static tCasilla ** generarMatrizTablero(int fils, int cols);
 static int fueraDeRango(const tTablero * tablero, int f, int c);
 static tTablero generarTablero(int fils, int cols, int modo);
 
-
+/* Para llamar a srand() una sola vez */
 static int haySeed=0;
 
 /* Funciones que devuelven informacion
