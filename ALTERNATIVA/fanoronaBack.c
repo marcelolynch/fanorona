@@ -72,14 +72,21 @@ int jugadorActual(tPartida partida){
 }
 
 int modoJuego(tPartida partida){
+	
 	return partida->modo;
 }
 
 int consultarOcupante(tPartida partida, int f, int c){
+	if(fueraDeRango(&partida->tablero, f,c))
+		return ERR_PARAMS;
+
 	return partida->tablero.matriz[f][c].ocupante; 
 }
 
 int consultarTipo(tPartida partida, int f, int c){
+	if(fueraDeRango(&partida->tablero, f,c))
+		return ERR_PARAMS;
+
 	return partida->tablero.matriz[f][c].tipo; 
 }
 
@@ -113,9 +120,6 @@ int mover (tPartida partida, tMovimiento * movimiento) {
 	*/
 	int captura;
 	int jugador = partida->jugador;
-
-	if(partida == NULL)
-		return ERROR;
 
 	captura = validarMovimiento(partida, movimiento);
 
@@ -168,9 +172,6 @@ int estadoJuego(const tPartida partida){
 	enum tDireccion direcciones[]={N, S, E, O, NE, NO, SE, SO};
 	int dir, dirsPosibles, dirFil, dirCol;
 	int estado;
-
-	if(partida == NULL)
-		return ERR_PARAMS; /* Antes que segfault... */		
 
 	jugador = partida->jugador;
 	partida->hayPaika = 1; /* Asumo que hay */
@@ -374,8 +375,6 @@ int guardarPartida(tPartida partida, const char * nombre){
 	int nfilas, ncols, jugador, modo;
 	int i, j;
 
-	if(partida == NULL)
-		return ERR_PARAMS;
 
 	nfilas=partida->tablero.filas;
 	ncols=partida->tablero.cols;
